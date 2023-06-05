@@ -100,7 +100,7 @@ class MenuViewState extends State<MenuView> {
         //     iconData: CupertinoIcons.money_dollar_circle_fill,
         //     destination: AssemblyItemManagement()) // New menu item added.
       ],
-      destination: Text('Placeholder'), //TODO:FIX
+      destination: Text('Recipies'), //TODO:FIX
     ),
     // Add more menu items/categories here if needed.
   ];
