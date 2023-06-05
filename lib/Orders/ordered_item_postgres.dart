@@ -25,9 +25,9 @@ class OrderedItemPostgres {
       'orderedItemId': orderedItemId
     };
 
-    await connection.close();
-
-
     final result = await connection.query(query, substitutionValues: values);
+
+
+    await connection.close();
   }
 }
