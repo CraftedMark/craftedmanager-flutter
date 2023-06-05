@@ -91,12 +91,11 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         print('Updating order with values: ${order.toMap()}');
         // Update order in orders table
         await ctx.query('''
-          UPDATE orders
-          SET people_id = @people_id, order_date = @orderDate, shipping_address = @shippingAddress, billing_address = @billingAddress, total_amount = @totalAmount, order_status = @orderStatus
-          WHERE order_id = @order_id
-        ''', substitutionValues: {
+        UPDATE orders
+        SET people_id = @people_id, order_date = @orderDate, shipping_address = @shippingAddress, billing_address = @billingAddress, total_amount = @totalAmount, order_status = @orderStatus
+        WHERE order_id = @order_id
+      ''', substitutionValues: {
           ...order.toMap(),
-          // Make sure that order.toMap() returns a map with the key 'people_id'
           'people_id': order.customerId,
         });
         print('Order updated');
@@ -104,8 +103,8 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         print('Deleting existing ordered items with orderId: ${order.id}');
         // Delete existing ordered items for this order
         await ctx.query('''
-          DELETE FROM ordered_items WHERE order_id = @orderId
-        ''', substitutionValues: {
+        DELETE FROM ordered_items WHERE order_id = @orderId
+      ''', substitutionValues: {
           'orderId': order.id,
         });
         print('Existing ordered items deleted');
@@ -117,14 +116,15 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
             'orderId': order.id,
           }}');
           await ctx.query('''
-  INSERT INTO ordered_items 
-    (order_id, product_id, product_name, quantity, price, discount, description)
-  VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description)
+INSERT INTO ordered_items 
+  (order_id, product_id, product_name, quantity, price, discount, description, item_source)
+VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
 ''', substitutionValues: {
             ...item.toMap(),
             'orderId': order.id,
             'productId': item.productId,
             'productName': item.productName,
+            'itemSource': item.itemSource, // Include the item_source
           });
           print('Updated ordered item inserted');
         }
@@ -263,14 +263,15 @@ VALUES (@order_id, @customerId, @orderDate, @shippingAddress, @billingAddress, @
             'orderId': order.id,
           }}');
           await ctx.query('''
-  INSERT INTO ordered_items
-    (order_id, product_id, product_name, quantity, price, discount, description, status)
-  VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @status )
+INSERT INTO ordered_items
+  (order_id, product_id, product_name, quantity, price, discount, description, item_source)
+VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
 ''', substitutionValues: {
             ...item.toMap(),
             'orderId': order.id,
             'productId': item.productId,
             'productName': item.productName,
+            'itemSource': item.itemSource, // Include the item_source
           });
           print('Ordered item inserted');
         }

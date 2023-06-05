@@ -7,6 +7,7 @@ import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../Orders/orders_db_manager.dart';
+import '../CBP/cbp_db_manager.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
@@ -21,8 +22,39 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
   double shippingCost = 10.0; // Default shipping cost
 
-  void addOrderedItem(Product product, int quantity) {
-    //TODO: replace by variable
+  Future<double?> getCustomProductPrice(int productId, int customerId) async {
+    double? customPrice;
+    // Fetch the customer's assigned pricing list id
+    int? pricingListId = await CustomerBasedPricingDbManager.instance
+        .getPricingListByCustomerId(customerId);
+
+    print(
+        'Fetched pricingListId: $pricingListId'); // Print the fetched pricingListId
+
+    if (pricingListId != null) {
+      // Fetch the custom pricing for the product based on the pricing list id
+      Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
+          .instance
+          .getCustomerProductPricing(productId, pricingListId);
+
+      print(
+          'Fetched pricingData: $pricingData'); // Print the fetched pricingData
+
+      if (pricingData != null) {
+        customPrice = pricingData['price'];
+      }
+    }
+
+    print('Custom Price: $customPrice'); // Print the custom price
+    return customPrice;
+  }
+
+  Future<void> addOrderedItem(
+      Product product, int quantity, String item_source) async {
+    // Fetch custom price for the product if it exists
+    double? customPrice =
+        await getCustomProductPrice(product.id!, widget.client.id);
+
     var newOrderItemStatus = 'Processing - Pending Payment';
 
     setState(() {
@@ -33,11 +65,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         productId: product.id!,
         name: product.name,
         quantity: quantity,
-        price: product.retailPrice,
+        price: customPrice ?? product.retailPrice,
+        // check this line
         discount: 0,
         productDescription: product.description,
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
+        itemSource: item_source,
       ));
     });
   }
@@ -230,7 +264,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     );
 
                     if (quantity != null) {
-                      addOrderedItem(selectedProduct, quantity);
+                      await addOrderedItem(
+                          selectedProduct, quantity, 'created');
                     }
                   }
                 },

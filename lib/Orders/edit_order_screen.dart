@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 
 import '../../Orders/orders_db_manager.dart';
@@ -29,6 +30,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   late List<OrderedItem> _orderedItems;
   double _subTotal = 0.0;
   String _status = '';
+  EasyRefreshController _controller = EasyRefreshController();
 
   @override
   void initState() {
@@ -65,7 +67,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     }
   }
 
-  void addOrderedItem(Product product, int quantity) {
+  void addOrderedItem(Product product, int quantity, String itemSource) {
     //TODO: replace by variable
     var newOrderItemStatus = 'Processing - Pending Payment';
 
@@ -92,7 +94,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           discount: 0,
           productDescription: product.description,
           productRetailPrice: product.retailPrice,
-          status: widget.order.orderStatus,
+          status: newOrderItemStatus,
+          itemSource: itemSource, // Add the item_source field here
         ));
         _subTotal = calculateSubtotal();
       });
@@ -203,7 +206,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     );
 
                     if (result != null) {
-                      addOrderedItem(result['product'], result['quantity']);
+                      addOrderedItem(result['product'], result['quantity'],
+                          'Your item source here');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -274,6 +278,26 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                                     price: newPrice,
                                   );
                                   _subTotal = calculateSubtotal();
+                                });
+                              },
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: 'Item Source',
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(),
+                              ),
+                              initialValue: _orderedItems[index].itemSource,
+                              onChanged: (value) {
+                                setState(() {
+                                  _orderedItems[index] =
+                                      _orderedItems[index].copyWith(
+                                    itemSource: value,
+                                  );
                                 });
                               },
                               style: const TextStyle(color: Colors.white),

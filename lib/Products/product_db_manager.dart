@@ -48,12 +48,14 @@ class ProductPostgres {
     return createdAssemblyProduct;
   }
 
+  // Add is_assembly field to the addProduct function
+
   static Future<void> addProduct(Product product) async {
     print('Adding product: ${product.name}');
     final connection = await _createConnection();
     try {
       await connection.execute(
-        'INSERT INTO products (product_name, category, sub_category, subcat2, flavor, description, cost_of_good, manufacturing_price, wholesale_price, retail_price, stock_quantity, backordered, supplier, manufacturer_id, manufacturer_name, item_source, quantity_sold, quantity_in_stock, image_url, per_gram_cost, bulk_pricing, weight_in_grams, package_weight_measure, package_weight, type) VALUES (@product_name, @category, @sub_category, @subcat2, @flavor, @description, @cost_of_good, @manufacturing_price, @wholesale_price, @retail_price, @stock_quantity, @backordered, @supplier, @manufacturer_id, @manufacturer_name, @item_source, @quantity_sold, @quantity_in_stock, @image_url, @per_gram_cost, @bulk_pricing, @weight_in_grams, @package_weight_measure, @package_weight, @type)',
+        'INSERT INTO products (product_name, category, sub_category, subcat2, flavor, description, cost_of_good, manufacturing_price, wholesale_price, retail_price, stock_quantity, backordered, supplier, manufacturer_id, manufacturer_name, item_source, quantity_sold, quantity_in_stock, image_url, per_gram_cost, bulk_pricing, weight_in_grams, package_weight_measure, package_weight, type, is_assembly) VALUES (@product_name, @category, @sub_category, @subcat2, @flavor, @description, @cost_of_good, @manufacturing_price, @wholesale_price, @retail_price, @stock_quantity, @backordered, @supplier, @manufacturer_id, @manufacturer_name, @item_source, @quantity_sold, @quantity_in_stock, @image_url, @per_gram_cost, @bulk_pricing, @weight_in_grams, @package_weight_measure, @package_weight, @type, @is_assembly)',
         substitutionValues: {
           'product_name': product.name,
           'category': product.category,
@@ -80,6 +82,7 @@ class ProductPostgres {
           'package_weight_measure': product.packageWeightMeasure,
           'package_weight': product.packageWeight,
           'type': product.type,
+          'is_assembly': product.isAssemblyItem,
         },
       );
       print('Product added successfully');
@@ -116,10 +119,12 @@ class ProductPostgres {
     return results.map((row) => Product.fromMap(row.toColumnMap())).toList();
   }
 
+  // Add is_assembly field to the updateProduct function
+
   static Future<void> updateProduct(Product product) async {
     final connection = await _createConnection();
     await connection.execute(
-      'UPDATE products SET product_name = @product_name, category = @category, sub_category = @sub_category, subcat2 = @subcat2, flavor = @flavor, description = @description, cost_of_good = @cost_of_good, manufacturing_price = @manufacturing_price, wholesale_price = @wholesale_price, retail_price = @retail_price, stock_quantity = @stock_quantity, backordered = @backordered, manufacturer_name = @manufacturer_name, supplier_name = @supplier_name, item_source = @item_source, quantity_sold = @quantity_sold, quantity_in_stock = @quantity_in_stock, image_url = @image_url, per_gram_cost = @per_gram_cost, bulk_pricing = @bulk_pricing, weight_in_grams = @weight_in_grams, package_weight_measure = @package_weight_measure, package_weight = @package_weight,  type = @type WHERE product_id = @product_id',
+      'UPDATE products SET product_name = @product_name, category = @category, sub_category = @sub_category, subcat2 = @subcat2, flavor = @flavor, description = @description, cost_of_good = @cost_of_good, manufacturing_price = @manufacturing_price, wholesale_price = @wholesale_price, retail_price = @retail_price, stock_quantity = @stock_quantity, backordered = @backordered, manufacturer_name = @manufacturer_name, supplier_name = @supplier_name, item_source = @item_source, quantity_sold = @quantity_sold, quantity_in_stock = @quantity_in_stock, image_url = @image_url, per_gram_cost = @per_gram_cost, bulk_pricing = @bulk_pricing, weight_in_grams = @weight_in_grams, package_weight_measure = @package_weight_measure, package_weight = @package_weight,  type = @type, is_assembly = @is_assembly WHERE product_id = @product_id',
       substitutionValues: {
         'product_id': product.id,
         'product_name': product.name,
@@ -146,6 +151,7 @@ class ProductPostgres {
         'package_weight_measure': product.packageWeightMeasure,
         'package_weight': product.packageWeight,
         'type': product.type,
+        'is_assembly': product.isAssemblyItem,
       },
     );
     await closeConnection(connection);

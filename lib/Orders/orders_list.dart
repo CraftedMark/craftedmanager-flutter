@@ -3,7 +3,7 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/order_postgres.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
-import 'package:crafted_manager/refreshable_list_view.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -12,8 +12,7 @@ import '../Models/product_model.dart';
 import 'order_detail_screen.dart';
 import 'ordered_item_postgres.dart';
 
-
-enum OrderListType{
+enum OrderListType {
   productionAndCancelled,
   archived,
 }
@@ -74,22 +73,26 @@ class _OrdersListState extends State<OrdersList> {
               final rawOrders = snapshot.data;
 
               if (rawOrders != null && rawOrders.isNotEmpty) {
-                final orders = rawOrders.map((rawOrder) => Order.fromMap(rawOrder)).toList();
+                final orders = rawOrders
+                    .map((rawOrder) => Order.fromMap(rawOrder))
+                    .toList();
 
                 var sortedOrders = <Order>[];
-                if(widget.listType == OrderListType.archived){
+                if (widget.listType == OrderListType.archived) {
                   var archivedOrders = _getArchivedOrders(orders);
                   _sortOrderByDate(archivedOrders);
                   sortedOrders = archivedOrders;
-                }else{
-                  sortedOrders =  _sortOrder(orders);
+                } else {
+                  sortedOrders = _sortOrder(orders);
                 }
 
-                return RefreshableListView(
-                  itemCount: sortedOrders.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _orderWidget(sortedOrders[index]);
-                  },
+                return EasyRefresh(
+                  child: ListView.builder(
+                    itemCount: sortedOrders.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _orderWidget(sortedOrders[index]);
+                    },
+                  ),
                   onRefresh: _refreshOrdersList,
                 );
               } else {
@@ -101,8 +104,7 @@ class _OrdersListState extends State<OrdersList> {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
               );
-            }
-            else {
+            } else {
               return const Center(
                 child: CircularProgressIndicator(),
               );
@@ -113,13 +115,17 @@ class _OrdersListState extends State<OrdersList> {
     );
   }
 
-  List<Order> _getArchivedOrders(List<Order> orders){
+  List<Order> _getArchivedOrders(List<Order> orders) {
     return orders.where((o) => o.orderStatus == "Archived").toList();
   }
 
-  List<Order> _sortOrder(List<Order> orders){
-    var otherOrders = orders.where((o) =>o.orderStatus !="Cancelled" && o.orderStatus != "Archived").toList();
-    var cancelledOrders = orders.where((o) => o.orderStatus == "Cancelled").toList();
+  List<Order> _sortOrder(List<Order> orders) {
+    var otherOrders = orders
+        .where(
+            (o) => o.orderStatus != "Cancelled" && o.orderStatus != "Archived")
+        .toList();
+    var cancelledOrders =
+        orders.where((o) => o.orderStatus == "Cancelled").toList();
 
     _sortOrderByDate(otherOrders);
     _sortOrderByDate(cancelledOrders);
@@ -127,10 +133,9 @@ class _OrdersListState extends State<OrdersList> {
     return [...otherOrders, ...cancelledOrders];
   }
 
-  void _sortOrderByDate(List<Order> orders){
-    orders.sort((o1, o2)=>o2.orderDate.compareTo(o1.orderDate));
+  void _sortOrderByDate(List<Order> orders) {
+    orders.sort((o1, o2) => o2.orderDate.compareTo(o1.orderDate));
   }
-
 
   Future<People> _getCustomerById(int customerId) async {
     //TODO: find out why the customer can be null

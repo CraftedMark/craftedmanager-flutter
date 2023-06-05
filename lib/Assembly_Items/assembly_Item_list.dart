@@ -1,6 +1,5 @@
 import 'package:crafted_manager/Models/assembly_item_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'add_assembly_item.dart';
@@ -16,22 +15,27 @@ class _AssemblyItemManagementState extends State<AssemblyItemManagement> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: const Text("Assembly Item Management"),
-          trailing: GestureDetector(
-            child: const Icon(CupertinoIcons.add),
-            onTap: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (context) => AddAssemblyItem()),
-              );
-            },
-          ),
+    return MaterialApp(
+      theme: ThemeData.dark().copyWith(
+        appBarTheme: AppBarTheme(color: Colors.black),
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Assembly Item Management"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddAssemblyItem()),
+                );
+              },
+            ),
+          ],
         ),
-        child: Container(
-          color: CupertinoColors.darkBackgroundGray,
+        body: Container(
           child: Column(
             children: [
               const Padding(
@@ -41,7 +45,7 @@ class _AssemblyItemManagementState extends State<AssemblyItemManagement> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: CupertinoColors.white,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -71,20 +75,19 @@ class _AssemblyItemManagementState extends State<AssemblyItemManagement> {
       margin: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: CupertinoColors.black,
+        color: Colors.grey[900],
       ),
-      child: CupertinoListTile(
+      child: ListTile(
         title: Text(
           '$productName - $ingredientName',
-          style: const TextStyle(color: CupertinoColors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         subtitle: Text(
           'Quantity: ${item.quantity.toString()}, Unit: ${item.unit}',
-          style: const TextStyle(color: CupertinoColors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         trailing: IconButton(
-          icon: const Icon(CupertinoIcons.delete,
-              color: CupertinoColors.destructiveRed),
+          icon: const Icon(Icons.delete, color: Colors.red),
           onPressed: () {
             // Add your delete functionality here
           },

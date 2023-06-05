@@ -1,6 +1,6 @@
 import 'package:crafted_manager/Models/assembly_item_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AddAssemblyItem extends StatefulWidget {
   @override
@@ -26,14 +26,26 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      home: CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('Add Assembly Item'),
+    return MaterialApp(
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: AppBarTheme(color: Colors.black),
+        textTheme: TextTheme(
+          headline4: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+          subtitle1: TextStyle(color: Colors.white),
         ),
-        child: Container(
-          color: CupertinoColors.darkBackgroundGray,
-          padding: const EdgeInsets.only(top:45 , left: 16, right: 16),
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Add Assembly Item'),
+        ),
+        backgroundColor: Colors.black,
+        body: Container(
+          padding: const EdgeInsets.only(top: 45, left: 16, right: 16),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -42,7 +54,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
                   const Text(
                     'Add Assembly Item',
                     style: TextStyle(
-                      color: CupertinoColors.white,
+                      color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -56,9 +68,10 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
                   const SizedBox(height: 16),
                   _buildUnitInput(),
                   const SizedBox(height: 32),
-                  CupertinoButton.filled(
-                    child: const Text('Create Assembly Item'),
+                  ElevatedButton(
                     onPressed: _submitForm,
+                    child: const Text('Create Assembly Item'),
+                    style: ElevatedButton.styleFrom(primary: Colors.blue),
                   ),
                 ],
               ),
@@ -70,81 +83,69 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
   }
 
   Widget _buildProductDropdown() {
-    return CupertinoFormSection(
-      header:
-          const Text('Product', style: TextStyle(color: CupertinoColors.white)),
-      children: [
-        CupertinoFormRow(
-          child: CupertinoPicker(
-            backgroundColor: CupertinoColors.black,
-            itemExtent: 32.0,
-            onSelectedItemChanged: (int value) {
-              // Handle selected product ID here
-            },
-            children: products.map((product) {
-              return Text(product.name,
-                  style: const TextStyle(color: CupertinoColors.white));
-            }).toList(),
+    return DropdownButtonFormField(
+      decoration: InputDecoration(
+        labelText: 'Product',
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      items: products.map((Product product) {
+        return DropdownMenuItem(
+          value: product.id,
+          child: Text(
+            product.name,
+            style: TextStyle(color: Colors.white),
           ),
-        ),
-      ],
+        );
+      }).toList(),
+      onChanged: (value) {
+        // Handle selected product ID here
+      },
     );
   }
 
   Widget _buildIngredientDropdown() {
-    return CupertinoFormSection(
-      header: const Text('Ingredient',
-          style: TextStyle(color: CupertinoColors.white)),
-      children: [
-        CupertinoFormRow(
-          child: CupertinoPicker(
-            backgroundColor: CupertinoColors.black,
-            itemExtent: 32.0,
-            onSelectedItemChanged: (int value) {
-              // Handle selected ingredient ID here
-            },
-            children: products.map((product) {
-              return Text(product.name,
-                  style: const TextStyle(color: CupertinoColors.white));
-            }).toList(),
+    return DropdownButtonFormField(
+      decoration: InputDecoration(
+        labelText: 'Ingredient',
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      items: products.map((Product product) {
+        return DropdownMenuItem(
+          value: product.id,
+          child: Text(
+            product.name,
+            style: TextStyle(color: Colors.white),
           ),
-        ),
-      ],
+        );
+      }).toList(),
+      onChanged: (value) {
+        // Handle selected ingredient ID here
+      },
     );
   }
 
   Widget _buildQuantityInput() {
-    return CupertinoFormSection(
-      header: const Text('Quantity',
-          style: TextStyle(color: CupertinoColors.white)),
-      children: [
-        CupertinoFormRow(
-          child: CupertinoTextField(
-            placeholder: 'Enter quantity',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onSubmitted: (String? value) {
-              // Handle quantity input here
-            },
-          ),
-        ),
-      ],
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Quantity',
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      onSaved: (String? value) {
+        // Handle quantity input here
+      },
     );
   }
 
   Widget _buildUnitInput() {
-    return CupertinoFormSection(
-      header:
-          const Text('Unit', style: TextStyle(color: CupertinoColors.white)),
-      children: [
-        CupertinoFormRow(
-          child: CupertinoTextField(
-            placeholder: 'Enter unit',
-            onSubmitted: (String? value) {
-              // Handle unit input here
-            },
-          ),
-        ),
-      ],
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Unit',
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      onSaved: (String? value) {
+        // Handle unit input here
+      },
     );
   }
 }

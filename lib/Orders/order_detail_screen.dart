@@ -2,6 +2,7 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -25,8 +26,6 @@ class OrderDetailScreen extends StatefulWidget {
   final List<Product> products;
   final VoidCallback onStateChanged;
 
-  // final int customerId;
-
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
 }
@@ -47,6 +46,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     ),
   );
 
+  late EasyRefreshController _controller;
   List<String> orderStatuses = [
     'Processing - Pending Payment',
     'Processing - Paid',
@@ -241,7 +241,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     "Delivered",
   ];
 
-
   void _applyUpdateTo(OrderedItem item) {
     final index = widget.orderedItems.indexOf(item);
     widget.orderedItems[index].status = selection;
@@ -267,41 +266,42 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
         child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 150,
-                child: CupertinoPicker(
-                  magnification: 1.22,
-                  squeeze: 1.2,
-                  useMagnifier: true,
-                  itemExtent: 32,
-                  // This sets the initial item.
-                  scrollController: FixedExtentScrollController(
-                    initialItem: 0,
-                  ),
-                  // This is called when selected item is changed.
-                  onSelectedItemChanged: (int selectedItem) {
-                    selection = ORDERED_ITEMS_STATUSES[selectedItem];
-                  },
-                  children: List<Widget>.generate(
-                    ORDERED_ITEMS_STATUSES.length,
-                    (int index) {
-                      return Center(child: Text(ORDERED_ITEMS_STATUSES[index],),
-                      );
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 150,
+                  child: CupertinoPicker(
+                    magnification: 1.22,
+                    squeeze: 1.2,
+                    useMagnifier: true,
+                    itemExtent: 32,
+                    // This sets the initial item.
+                    scrollController: FixedExtentScrollController(
+                      initialItem: 0,
+                    ),
+                    // This is called when selected item is changed.
+                    onSelectedItemChanged: (int selectedItem) {
+                      selection = ORDERED_ITEMS_STATUSES[selectedItem];
                     },
+                    children: List<Widget>.generate(
+                      ORDERED_ITEMS_STATUSES.length,
+                      (int index) {
+                        return Center(
+                          child: Text(
+                            ORDERED_ITEMS_STATUSES[index],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () => _applyUpdateTo(item),
-                child: const Text("Save")
-              )
-            ],
-          )
-        ),
+                TextButton(
+                    onPressed: () => _applyUpdateTo(item),
+                    child: const Text("Save"))
+              ],
+            )),
       ),
     );
   }

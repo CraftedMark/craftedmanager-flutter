@@ -1,85 +1,107 @@
-// import 'package:crafted_manager/Models/invoice_model.dart';
-// import 'package:flutter/cupertino.dart';
-//
-// class InvoiceUI extends StatefulWidget {
-//   @override
-//   _InvoiceUIState createState() => _InvoiceUIState();
-// }
-//
-// class _InvoiceUIState extends State<InvoiceUI> {
-//   List<Invoice> invoices = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     // Fetch invoices and update the 'invoices' list
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return CupertinoApp(
-//       theme: CupertinoThemeData(
-//         brightness: Brightness.dark,
-//       ),
-//       home: CupertinoPageScaffold(
-//         navigationBar: CupertinoNavigationBar(
-//           middle: Text('Invoices'),
-//           trailing: CupertinoButton(
-//             padding: EdgeInsets.all(0),
-//             child: Icon(
-//               CupertinoIcons.add,
-//               color: CupertinoColors.activeBlue,
-//             ),
-//             onPressed: () {
-//               // Navigate to create invoice page
-//             },
-//           ),
-//         ),
-//         child: SafeArea(
-//           child: ListView.builder(
-//             itemCount: invoices.length,
-//             itemBuilder: (context, index) {
-//               final invoice = invoices[index];
-//
-//               return GestureDetector(
-//                 onTap: () {
-//                   // Navigate to manage invoice page
-//                 },
-//                 child: Container(
-//                   padding: EdgeInsets.all(16),
-//                   decoration: BoxDecoration(
-//                     border: Border(
-//                       bottom: BorderSide(
-//                         color: CupertinoColors.extraLightBackgroundGray,
-//                       ),
-//                     ),
-//                   ),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'Invoice #${invoice.id}',
-//                         style: TextStyle(
-//                           color: CupertinoColors.white,
-//                           fontSize: 18,
-//                         ),
-//                       ),
-//                       SizedBox(height: 8),
-//                       Text(
-//                         'Status: ${invoice.status}',
-//                         style: TextStyle(
-//                           color: CupertinoColors.systemGrey,
-//                           fontSize: 14,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               );
-//             },
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:flutter/material.dart';
+
+class InvoicingWidget extends StatefulWidget {
+  final String title;
+
+  InvoicingWidget({required this.title});
+
+  @override
+  _InvoicingWidgetState createState() => _InvoicingWidgetState();
+}
+
+class _InvoicingWidgetState extends State<InvoicingWidget> {
+  bool _isEditing = false;
+  TextEditingController _invoiceNumberController = TextEditingController();
+  TextEditingController _invoiceDateController = TextEditingController();
+  TextEditingController _invoiceAmountController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Invoice Details',
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16.0),
+          Text(
+            'Invoice Number',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          SizedBox(height: 8.0),
+          _isEditing
+              ? TextField(
+                  controller: _invoiceNumberController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Invoice Number',
+                  ),
+                )
+              : Text(
+                  'INV-1234',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+          SizedBox(height: 16.0),
+          Text(
+            'Invoice Date',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          SizedBox(height: 8.0),
+          _isEditing
+              ? TextField(
+                  controller: _invoiceDateController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Invoice Date',
+                  ),
+                )
+              : Text(
+                  '01/01/2022',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+          SizedBox(height: 16.0),
+          Text(
+            'Invoice Amount',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          SizedBox(height: 8.0),
+          _isEditing
+              ? TextField(
+                  controller: _invoiceAmountController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Invoice Amount',
+                  ),
+                )
+              : Text(
+                  '\$500.00',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+          SizedBox(height: 32.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _isEditing
+                  ? ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isEditing = false;
+                        });
+                      },
+                      child: Text('Save'),
+                    )
+                  : ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isEditing = true;
+                        });
+                      },
+                      child: Text('Edit'),
+                    ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

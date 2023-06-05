@@ -10,34 +10,7 @@ class OrderedItem {
   String productDescription;
   double productRetailPrice;
   String status;
-
-  OrderedItem copyWith({
-    int? id,
-    int? orderId,
-    String? productName,
-    int? productId,
-    String? name,
-    int? quantity,
-    double? price,
-    double? discount,
-    String? productDescription,
-    double? productRetailPrice,
-    String? status,
-  }) {
-    return OrderedItem(
-      id: id ?? this.id,
-      orderId: orderId ?? this.orderId,
-      productName: productName ?? this.productName,
-      productId: productId ?? this.productId,
-      name: name ?? this.name,
-      quantity: quantity ?? this.quantity,
-      price: price ?? this.price,
-      discount: discount ?? this.discount,
-      productDescription: productDescription ?? this.productDescription,
-      productRetailPrice: productRetailPrice ?? this.productRetailPrice,
-      status: status ?? this.status,
-    );
-  }
+  String itemSource;
 
   OrderedItem({
     required this.id,
@@ -51,12 +24,38 @@ class OrderedItem {
     required this.productDescription,
     required this.productRetailPrice,
     required this.status,
+    required this.itemSource,
   });
 
-  // // Add the setter for quantity
-  // set quantity(int newQuantity) {
-  //   this.quantity = newQuantity;
-  // }
+  OrderedItem copyWith({
+    int? id,
+    int? orderId,
+    String? productName,
+    int? productId,
+    String? name,
+    int? quantity,
+    double? price,
+    double? discount,
+    String? productDescription,
+    double? productRetailPrice,
+    String? status,
+    String? itemSource,
+  }) {
+    return OrderedItem(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      productName: productName ?? this.productName,
+      productId: productId ?? this.productId,
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
+      price: price ?? this.price,
+      discount: discount ?? this.discount,
+      productDescription: productDescription ?? this.productDescription,
+      productRetailPrice: productRetailPrice ?? this.productRetailPrice,
+      status: status ?? this.status,
+      itemSource: itemSource ?? this.itemSource,
+    );
+  }
 
   factory OrderedItem.fromMap(Map<String, dynamic> map) {
     num parseNum(dynamic value) {
@@ -81,9 +80,9 @@ class OrderedItem {
       price: parseNum(map['price']).toDouble(),
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
-      // Add the null check and default value here
       productRetailPrice: parseNum(map['retail_price']).toDouble(),
       status: map['status'] ?? "Unknown",
+      itemSource: map['item_source'] ?? "Unknown",
     );
   }
 
@@ -99,11 +98,7 @@ class OrderedItem {
       'description': productDescription,
       'retail_price': productRetailPrice,
       'status': status,
+      'item_source': itemSource,
     };
   }
-
-// // Add a setter for the 'price' field
-//   set price(double newPrice) {
-//     this.price = newPrice;
-//   }
 }

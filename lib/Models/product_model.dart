@@ -28,6 +28,7 @@ class Product {
   final int weightInGrams;
   final int bulkPricing;
   final int perGramCost;
+  final bool isAssemblyItem;
 
   Product({
     this.id,
@@ -57,6 +58,7 @@ class Product {
     this.weightInGrams = 0,
     this.bulkPricing = 0,
     this.perGramCost = 0,
+    this.isAssemblyItem = false,
   });
 
   static Product empty = Product(
@@ -105,6 +107,7 @@ class Product {
       weightInGrams: map['weight_in_grams'] ?? 0,
       bulkPricing: map['bulk_pricing'] ?? 0,
       perGramCost: map['per_gram_cost'] ?? 0,
+      isAssemblyItem: map['isAssemblyItem'] ?? false,
       assemblyItems: map['assembly_items'] != null
           ? List<AssemblyItem>.from(
               map['assembly_items'].map((x) => AssemblyItem.fromMap(x)))
@@ -124,6 +127,7 @@ class Product {
       'weightInGrams': weightInGrams,
       'bulkPricing': bulkPricing,
       'perGramCost': perGramCost,
+      'isassembly': isAssemblyItem,
       'assemblyItems': assemblyItems.map((x) => x.toMap()).toList(),
       'type': type
     };

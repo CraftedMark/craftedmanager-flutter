@@ -79,9 +79,9 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     bool darkModeOn = brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: darkModeOn ? Colors.black : Colors.white,
+      backgroundColor: darkModeOn ? Colors.black : Colors.black,
       appBar: AppBar(
-        backgroundColor: darkModeOn ? Colors.black : Colors.white,
+        backgroundColor: darkModeOn ? Colors.black : Colors.black,
         title: const Text(
           'Customer Search',
           style: TextStyle(color: Colors.green),
@@ -102,8 +102,8 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                 hintText: 'Search Customer',
                 hintStyle: TextStyle(
                   color: darkModeOn
-                      ? CupertinoColors.systemGrey
-                      : CupertinoColors.systemGrey3,
+                      ? CupertinoColors.white
+                      : CupertinoColors.white,
                 ),
                 prefixIcon: const Icon(
                   Icons.search,
@@ -113,8 +113,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 filled: true,
-                fillColor:
-                    darkModeOn ? Colors.black : CupertinoColors.systemGrey6,
+                fillColor: darkModeOn ? Colors.black : CupertinoColors.black,
               ),
               style: TextStyle(
                   color: darkModeOn
@@ -126,7 +125,8 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
             child: ListView.builder(
               itemCount: _searchResults.length,
               itemBuilder: (BuildContext context, int index) {
-                final people = _searchResults[index]['people'] as Map<String, dynamic>;
+                final people =
+                    _searchResults[index]['people'] as Map<String, dynamic>;
                 return Container(
                   decoration: BoxDecoration(
                     border: darkModeOn
@@ -143,7 +143,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                       style: TextStyle(
                           color: darkModeOn
                               ? CupertinoColors.white
-                              : CupertinoColors.black),
+                              : CupertinoColors.white),
                     ),
                     subtitle: Text(
                       people['email'] ?? '',
@@ -167,7 +167,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     );
   }
 
-  Future <void> onTileTap(Map<String,dynamic> peopleData) async {
+  Future<void> onTileTap(Map<String, dynamic> peopleData) async {
     int customerId = peopleData['id'];
     print('Selected customer: $customerId');
     await CustomerBasedPricingDbManager.instance
@@ -176,17 +176,15 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     int? existingPricingListId = peopleData['assigned_pricing_list_id'];
 
     if (existingPricingListId != null) {
-      print(
-          "Existing pricing list found with id: $existingPricingListId");
+      print("Existing pricing list found with id: $existingPricingListId");
 
       _navigateToCPListScreen(customerId);
     } else {
       Map<String, String>? pricingListData =
-      await _showAddPricingListDialog(context);
+          await _showAddPricingListDialog(context);
       if (pricingListData != null) {
         int? pricingListId =
-        await CustomerBasedPricingDbManager.instance
-            .addPricingList(
+            await CustomerBasedPricingDbManager.instance.addPricingList(
           customerId: customerId,
           name: pricingListData['name']!,
           description: pricingListData['description']!,
@@ -195,8 +193,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
         if (pricingListId != null) {
           // Update the assigned_pricing_list_id after creating the pricing list
           await CustomerBasedPricingDbManager.instance
-              .updateCustomerPricingListId(
-              customerId, pricingListId);
+              .updateCustomerPricingListId(customerId, pricingListId);
 
           _navigateToCPListScreen(customerId);
         } else {
@@ -207,7 +204,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     }
   }
 
-  void _navigateToCPListScreen(int customerId){
+  void _navigateToCPListScreen(int customerId) {
     Navigator.push(
       context,
       MaterialPageRoute(
