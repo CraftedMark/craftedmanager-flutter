@@ -1,7 +1,6 @@
+import 'package:crafted_manager/Ingredients/ingredient_db_manager.dart';
 import 'package:crafted_manager/Models/ingredients_model.dart';
 import 'package:flutter/material.dart';
-
-import 'ingredient_db_manager.dart';
 
 class IngredientDetail extends StatefulWidget {
   final Ingredient? ingredient;
@@ -119,61 +118,171 @@ class _IngredientDetailState extends State<IngredientDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.ingredient?.name ?? 'New Ingredient'),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.check : Icons.edit),
-            onPressed: _isEditing ? _saveChanges : _toggleEditMode,
-          ),
-        ],
+    return MaterialApp(
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        cardColor: Colors.grey[900],
+        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: _isEditing
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTextField(_nameController, 'Name'),
-                  _buildTextField(_brandController, 'Brand'),
-                  _buildTextField(_categoryController, 'Category'),
-                  _buildTextField(_bulkPricingController, 'Bulk Pricing'),
-                  _buildTextField(_perGramCostController, 'Per Gram Cost'),
-                  _buildTextField(_pkgWeightController, 'Package Weight'),
-                  _buildTextField(_qtyInStockController, 'Quantity in Stock'),
-                  _buildTextField(_reorderLevelController, 'Reorder Level'),
-                  _buildTextField(_reorderQtyController, 'Reorder Quantity'),
-                  _buildTextField(_suppliersController, 'Suppliers'),
-                  _buildTextField(
-                      _productDescriptionController, 'Product Description'),
-                  _buildTextField(_weightController, 'Weight'),
-                  _buildTextField(
-                      _bulkMeasurementController, 'Bulk Measurement'),
-                  _buildTextField(_manufacturerController, 'Manufacturer'),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Name: ${_editableIngredient.name}'),
-                  Text('Brand: ${_editableIngredient.brand}'),
-                  Text('Category: ${_editableIngredient.category}'),
-                  Text('Bulk Pricing: ${_editableIngredient.bulkPricing}'),
-                  Text('Per Gram Cost: ${_editableIngredient.perGramCost}'),
-                  Text('Package Weight: ${_editableIngredient.pkgWeight}'),
-                  Text('Quantity in Stock: ${_editableIngredient.qtyInStock}'),
-                  Text('Reorder Level: ${_editableIngredient.reorderLevel}'),
-                  Text('Reorder Quantity: ${_editableIngredient.reorderQty}'),
-                  Text('Suppliers: ${_editableIngredient.suppliers}'),
-                  Text(
-                      'Product Description: ${_editableIngredient.productDescription}'),
-                  Text('Weight: ${_editableIngredient.weight}'),
-                  Text(
-                      'Bulk Measurement: ${_editableIngredient.bulkMeasurement}'),
-                  Text('Manufacturer: ${_editableIngredient.manufacturer}'),
-                ],
-              ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.ingredient?.name ?? 'New Ingredient'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.chevron_left),
+              onPressed: () => Navigator.pop(context),
+            ),
+            IconButton(
+              icon: Icon(_isEditing ? Icons.check : Icons.edit),
+              onPressed: _isEditing ? _saveChanges : _toggleEditMode,
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: _isEditing
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(_nameController, 'Name'),
+                            _buildTextField(_brandController, 'Brand'),
+                            _buildTextField(_categoryController, 'Category'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(
+                                _bulkPricingController, 'Bulk Pricing'),
+                            _buildTextField(
+                                _perGramCostController, 'Per Gram Cost'),
+                            _buildTextField(
+                                _pkgWeightController, 'Package Weight'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(
+                                _qtyInStockController, 'Quantity in Stock'),
+                            _buildTextField(
+                                _reorderLevelController, 'Reorder Level'),
+                            _buildTextField(
+                                _reorderQtyController, 'Reorder Quantity'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(_suppliersController, 'Suppliers'),
+                            _buildTextField(_productDescriptionController,
+                                'Product Description'),
+                            _buildTextField(_weightController, 'Weight'),
+                            _buildTextField(
+                                _bulkMeasurementController, 'Bulk Measurement'),
+                            _buildTextField(
+                                _manufacturerController, 'Manufacturer'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Name: ${_editableIngredient.name}'),
+                            Text('Brand: ${_editableIngredient.brand}'),
+                            Text('Category: ${_editableIngredient.category}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Bulk Pricing: ${_editableIngredient.bulkPricing}'),
+                            Text(
+                                'Per Gram Cost: ${_editableIngredient.perGramCost}'),
+                            Text(
+                                'Package Weight: ${_editableIngredient.pkgWeight}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Quantity in Stock: ${_editableIngredient.qtyInStock}'),
+                            Text(
+                                'Reorder Level: ${_editableIngredient.reorderLevel}'),
+                            Text(
+                                'Reorder Quantity: ${_editableIngredient.reorderQty}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Suppliers: ${_editableIngredient.suppliers}'),
+                            Text(
+                                'Product Description: ${_editableIngredient.productDescription}'),
+                            Text('Weight: ${_editableIngredient.weight}'),
+                            Text(
+                                'Bulk Measurement: ${_editableIngredient.bulkMeasurement}'),
+                            Text(
+                                'Manufacturer: ${_editableIngredient.manufacturer}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
