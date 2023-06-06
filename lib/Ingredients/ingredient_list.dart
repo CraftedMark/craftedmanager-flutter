@@ -67,25 +67,36 @@ class _IngredientListState extends State<IngredientList> {
                 itemCount: manager.ingredients.length,
                 itemBuilder: (context, index) {
                   Ingredient ingredient = manager.ingredients[index];
-                  return ListTile(
-                    tileColor: Colors.grey[900],
-                    title: Text(ingredient.name),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(ingredient.brand),
-                        // Add any additional information you want to display here
-                      ],
+                  return Container(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey[900],
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              IngredientDetail(ingredient: ingredient),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(ingredient.name),
+                      subtitle: Container(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(ingredient.brand),
+                            // Add any additional information you want to display here
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                IngredientDetail(ingredient: ingredient),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
