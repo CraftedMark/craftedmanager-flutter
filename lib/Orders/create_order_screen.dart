@@ -172,103 +172,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: ElevatedButton(
-                onPressed: () async {
-                  List<Product> products =
-                      await ProductPostgres.getAllProductsExceptIngredients();
-
-                  final selectedProduct = await showDialog<Product>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      TextEditingController searchController =
-                          TextEditingController();
-                      List<Product> filteredProducts = products;
-
-                      return StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return SimpleDialog(
-                            title: Column(
-                              children: [
-                                TextField(
-                                  controller: searchController,
-                                  decoration: InputDecoration(
-                                    labelText: "Search",
-                                    hintText: "Search products",
-                                    prefixIcon: Icon(Icons.search),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(25.0)),
-                                    ),
-                                  ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      filteredProducts = products
-                                          .where((product) => product.name
-                                              .toLowerCase()
-                                              .contains(value.toLowerCase()))
-                                          .toList();
-                                    });
-                                  },
-                                ),
-                                SizedBox(height: 16),
-                              ],
-                            ),
-                            children: filteredProducts.map((product) {
-                              return ListTile(
-                                title: Text(product.name),
-                                onTap: () {
-                                  Navigator.pop(context, product);
-                                },
-                              );
-                            }).toList(),
-                          );
-                        },
-                      );
-                    },
-                  );
-
-                  if (selectedProduct != null) {
-                    TextEditingController quantityController =
-                        TextEditingController(text: '1');
-                    final quantity = await showDialog<int>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Enter Quantity'),
-                          content: TextFormField(
-                            controller: quantityController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Quantity',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Cancel"),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(
-                                  context,
-                                  int.parse(quantityController.text),
-                                );
-                              },
-                              child: const Text("Add"),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                    if (quantity != null) {
-                      await addOrderedItem(
-                          selectedProduct, quantity, 'created');
-                    }
-                  }
-                },
+                onPressed: () => addItemToOrder(),
                 style: ElevatedButton.styleFrom(
                   primary: Colors.blue,
                 ),
@@ -402,5 +306,101 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         ),
       ),
     );
+  }
+
+  void addItemToOrder () async {
+    final products =  await ProductPostgres.getAllProductsExceptIngredients();
+
+    final selectedProduct = await showDialog<Product>(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController searchController =
+        TextEditingController();
+        List<Product> filteredProducts = products;
+
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SimpleDialog(
+              title: Column(
+                children: [
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: "Search",
+                      hintText: "Search products",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(25.0)),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        filteredProducts = products
+                            .where((product) => product.name
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                            .toList();
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+                ],
+              ),
+              children: filteredProducts.map((product) {
+                return ListTile(
+                  title: Text(product.name),
+                  onTap: () {
+                    Navigator.pop(context, product);
+                  },
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
+
+    if (selectedProduct != null) {
+      var quantityController = TextEditingController(text: '1');
+      final quantity = await showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Enter Quantity'),
+            content: TextFormField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    int.parse(quantityController.text),
+                  );
+                },
+                child: const Text("Add"),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (quantity != null) {
+        await addOrderedItem(selectedProduct, quantity, 'created');
+      }
+
+    }
   }
 }

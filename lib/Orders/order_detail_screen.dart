@@ -241,16 +241,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     "Delivered",
   ];
 
-  void _applyUpdateTo(OrderedItem item) {
+  void _applyUpdateTo(OrderedItem item) async {
     final index = widget.orderedItems.indexOf(item);
     widget.orderedItems[index].status = selection;
     setState(() {});
 
-    OrderedItemPostgres.updateOrderedItemStatus(item.id, selection);
+    await OrderedItemPostgres.updateOrderedItemStatus(item.id, selection);
     Navigator.of(context).pop();
   }
 
-  var selection = "";
+  var selection = ORDERED_ITEMS_STATUSES.first;
 
   Future<void> _changeItemStatus(OrderedItem item) async {
     final res = await showCupertinoModalPopup<void>(
