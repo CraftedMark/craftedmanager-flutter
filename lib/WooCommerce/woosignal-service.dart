@@ -13,13 +13,13 @@ import 'package:woosignal/woosignal.dart';
 class WooSignalService {
 
   static void test() async {
-    await WooSignal.instance.init(appKey: AppConfig.WOOSIGNAL_APP_KEY, debugMode:  false);
     var app = await WooSignal.instance.getApp();
+
     print(app);
   }
 
   static Future<void> init(String appKey) async{
-    await WooSignal.instance.init(appKey: appKey);
+    return await WooSignal.instance.init(appKey: appKey, debugMode: false);
   }
 
   static Future <List<Product>> getProducts() async {

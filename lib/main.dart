@@ -29,7 +29,7 @@ Future<void> main() async {
       // TODO: open appropriate page
     });
   }
-  WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
+  await WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
   // runApp(MyApp());
 
   runApp(TestWoo());
