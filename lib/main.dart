@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
+import 'package:crafted_manager/WooCommerce/test_woo.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -29,7 +30,10 @@ Future<void> main() async {
     });
   }
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
-  runApp(MyApp());
+  // runApp(MyApp());
+
+  runApp(TestWoo());
+
 }
 
 
@@ -57,7 +61,8 @@ class MyApp extends StatelessWidget {
         Locale('es', ''),
       ],
       theme: _buildThemeData(),
-      home: MyHomePage(),
+      // home: MyHomePage(),
+      home: TestWoo(),
     );
   }
 }
