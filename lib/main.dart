@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
@@ -15,15 +13,14 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if(!Platform.isWindows){
+  if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
     OneSignal.shared.promptUserForPushNotificationPermission();
 
-    OneSignal.shared.setNotificationOpenedHandler((OSNotificationOpenedResult result) {
+    OneSignal.shared
+        .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
       print("new notification + ${result}");
       // TODO: open appropriate page
     });
@@ -31,7 +28,6 @@ Future<void> main() async {
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   ThemeData _buildThemeData() {

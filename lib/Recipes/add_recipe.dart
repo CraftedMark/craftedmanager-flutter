@@ -44,11 +44,11 @@ class _AddRecipeState extends State<AddRecipe> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Recipe'),
+        title: const Text('Add Recipe'),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -58,12 +58,12 @@ class _AddRecipeState extends State<AddRecipe> {
                     name = value;
                   });
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Recipe Name',
                 ),
               ),
-              SizedBox(height: 10),
-              Text('Ingredients'),
+              const SizedBox(height: 10),
+              const Text('Ingredients'),
               ...ingredients.map((ingredient) => ListTile(
                     title: Text(ingredient.name),
                     subtitle: Text('Weight: ${ingredient.quantity}'),
@@ -71,42 +71,44 @@ class _AddRecipeState extends State<AddRecipe> {
                   )),
               TextField(
                 controller: _ingredientNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Ingredient Name',
                 ),
               ),
               TextField(
                 controller: _ingredientCostController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Ingredient Cost',
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
                 controller: _ingredientWeightController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Ingredient Weight',
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               RaisedButton(
                 onPressed: _addIngredient,
-                child: Text('Add Ingredient'),
+                child: const Text('Add Ingredient'),
               ),
-              SizedBox(height: 10),
-              Text('Total Pieces'),
+              const SizedBox(height: 10),
+              const Text('Total Pieces'),
               TextField(
                 onChanged: (value) {
                   setState(() {
                     totalPieces = int.parse(value);
                   });
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Total Pieces',
                 ),
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text('Piece Cost: ${_calculatePieceCost()}'),
             ],
           ),
@@ -117,7 +119,7 @@ class _AddRecipeState extends State<AddRecipe> {
           widget.onAddRecipe(Recipe(name: name, ingredients: ingredients));
           Navigator.pop(context);
         },
-        child: Icon(Icons.check),
+        child: const Icon(Icons.check),
       ),
     );
   }

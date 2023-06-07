@@ -36,6 +36,8 @@ dependencies:
   onesignal_flutter: ^3.5.1
   easy_refresh: ^3.3.2+1
   provider: ^6.0.1
+  flutter_dotenv: ^5.0.0
+  logging: ^1.0.0
 
 
 dev_dependencies:
