@@ -1,3 +1,6 @@
+import 'package:woosignal/models/links.dart';
+import 'package:woosignal/models/response/customer_batch.dart';
+
 class People {
   final int id;
   final String firstName;
@@ -61,6 +64,8 @@ class People {
       notes: '',
       createdBy: '',
       updatedBy: '',
+      createdDate: DateTime.now(),
+      updatedDate: DateTime.now(),
     );
   }
 
@@ -85,6 +90,61 @@ class People {
         'updateddate': updatedDate,
         'updatedby': updatedBy,
       };
+
+  Customers toWSCustomer({
+    List<dynamic> metaData = const [],
+     String avatarUrl = 'test',
+    bool isPayingCustomer = false,
+    String role = 'Customer',
+  }){
+    String company = 'Company';
+
+    Ing billing = Ing(
+      firstName: firstName,
+      lastName: lastName,
+      company: company,
+      address1: address1,
+      address2: address2,
+      email: email,
+      state: state,
+      city: city,
+      postcode: zip,
+      phone: phone,
+      country: address1,
+    );
+    Ing shipping = Ing(
+      firstName: firstName,
+      lastName: lastName,
+      company: company,
+      address1: address1,
+      address2: address2,
+      city: city,
+      state: state,
+      postcode: zip,
+      country: city,
+      email: email,
+      phone: phone,
+    );
+
+    return Customers(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      username: firstName,
+      email: email,
+      billing: billing,
+      shipping: shipping,
+      dateCreated: createdDate ?? DateTime.now(),
+      dateCreatedGmt: createdDate ?? DateTime.now(),
+      dateModified: updatedDate ?? DateTime.now(),
+      dateModifiedGmt: updatedDate ?? DateTime.now(),
+      metaData: metaData,
+      links: Links(collection: [],self: [],up: []),
+      avatarUrl: avatarUrl,
+      isPayingCustomer: isPayingCustomer,
+      role: role
+    );
+  }
 
   factory People.fromMap(Map<String, dynamic> map) {
     return People(

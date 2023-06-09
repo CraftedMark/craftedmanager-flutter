@@ -14,7 +14,6 @@ Future<PostgreSQLConnection> connectToPostgres() async {
   );
 
   await connection.open();
-  print('Connected to PostgreSQL');
   return connection;
 }
 

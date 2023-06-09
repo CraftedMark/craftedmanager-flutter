@@ -3,6 +3,7 @@ import 'package:crafted_manager/postgres.dart';
 import 'package:flutter/material.dart';
 
 import '../Models/people_model.dart';
+import '../WooCommerce/woosignal-service.dart';
 import 'contact_detail_widget.dart';
 
 class ContactsList extends StatefulWidget {
@@ -20,13 +21,16 @@ class ContactsListState extends State<ContactsList> {
   @override
   void initState() {
     super.initState();
-    connectToPostgres().then((_) {
-      refreshContacts();
-    });
+    refreshContacts();
+    // connectToPostgres().then((_) {
+    //   refreshContacts();
+    // });
   }
 
   Future<void> refreshContacts() async {
-    final contacts = await PeoplePostgres.refreshCustomerList();
+    // final contacts = await PeoplePostgres.refreshCustomerList();
+
+    final contacts = await WooSignalService.getCustomers();
     setState(() {
       _contacts = contacts;
       _filteredContacts = contacts;
@@ -34,7 +38,10 @@ class ContactsListState extends State<ContactsList> {
   }
 
   Future<void> deleteCustomer(People customer) async {
-    await PeoplePostgres.deleteCustomer(customer.id);
+    _filteredContacts!.removeWhere((c) => c.id == customer.id);
+    setState(() {});
+    // await PeoplePostgres.deleteCustomer(customer.id);
+    await WooSignalService.deleteCustomer(customer.id);
     await refreshContacts();
   }
 
@@ -72,15 +79,11 @@ class ContactsListState extends State<ContactsList> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Create a new contact with default values
-              People newContact = People(
-                  id: 0, firstName: '', lastName: '', phone: '', email: '');
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ContactDetailWidget(
-                    contact: newContact,
+                    contact: People.empty(),// Create a new contact with default values
                     refresh: refreshContacts,
                   ),
                 ),
@@ -97,8 +100,18 @@ class ContactsListState extends State<ContactsList> {
               itemBuilder: (BuildContext context, int index) {
                 final contact = _filteredContacts![index];
                 return Dismissible(
+
                   key: Key(contact.id.toString()),
-                  background: Container(color: Colors.red),
+                  background: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    color: Colors.red,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(Icons.delete_forever),
+                        Icon(Icons.delete_forever),
+                      ],
+                    ),),
                   onDismissed: (direction) {
                     deleteCustomer(contact);
                   },

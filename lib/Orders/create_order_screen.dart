@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 
@@ -108,7 +109,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       print(
           "Ordered items data: ${orderedItems.map((e) => e.toMap()).toList()}");
 
-      await OrderPostgres().createOrder(newOrder, orderedItems);
+      // await OrderPostgres().createOrder(newOrder, orderedItems);
+      await WooSignalService.createOrder(newOrder, orderedItems);
     }
 
     await createOrder(
@@ -309,7 +311,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   void addItemToOrder () async {
-    final products =  await ProductPostgres.getAllProductsExceptIngredients();
+    // final products =  await awaitProductPostgres.getAllProductsExceptIngredients();
+    final products =  await WooSignalService.getProducts();
+
 
     final selectedProduct = await showDialog<Product>(
       context: context,
