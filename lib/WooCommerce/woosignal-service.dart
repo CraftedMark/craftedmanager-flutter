@@ -63,6 +63,15 @@ class WooSignalService {
 
     var wsCustomer = customer.toWSCustomer();
 
+    var billing = {
+      'state': customer.state,
+      'city': customer.city,
+      'country':customer.address1,
+      'postcode': customer.zip,
+      'phone': customer.phone,
+    };
+    print(wsCustomer.billing?.toJson());
+
     var newCustomer = await WooSignal.instance.createCustomer(
       firstName: customer.firstName,
       lastName: customer.lastName,
@@ -71,6 +80,7 @@ class WooSignalService {
       billing: wsCustomer.billing?.toJson(),
       shipping: wsCustomer.shipping?.toJson(),
     );
+    print(newCustomer?.id);
     return newCustomer?.id ?? -1;
   }
 

@@ -70,31 +70,35 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTextField(
-                      'First Name*',
-                      newCustomer.firstName,
+                  _buildTextField('First Name*', newCustomer.firstName,
                       (n) => newCustomer = newCustomer.copyWith(firstName: n),
+                    textInputType: TextInputType.name, maxLenght: 30
                   ),
                   _buildTextField('Last Name*', newCustomer.lastName,
-                      (n) => newCustomer = newCustomer.copyWith(lastName: n)),
-                  _buildTextField(
-                      'Phone*',
-                      newCustomer.phone,
+                      (n) => newCustomer = newCustomer.copyWith(lastName: n),
+                      textInputType: TextInputType.name, maxLenght: 30
+                  ),
+                  _buildTextField('Phone*', newCustomer.phone,
                       (n) => newCustomer = newCustomer.copyWith(phone: n),
-                      textInputType: TextInputType.phone,
+                      textInputType: TextInputType.phone, maxLenght: 10
                   ),
                   _buildTextField('Email*', newCustomer.email,
-                      (n) => newCustomer = newCustomer.copyWith(email: n), textInputType: TextInputType.emailAddress),
+                      (n) => newCustomer = newCustomer.copyWith(email: n),
+                      textInputType: TextInputType.emailAddress,
+                  ),
                   _buildTextField('Address 1*', newCustomer.address1,
-                      (n) => newCustomer = newCustomer.copyWith(address1: n)),
+                      (n) => newCustomer = newCustomer.copyWith(address1: n),
+                      textInputType: TextInputType.streetAddress),
                   _buildTextField('Address 2', newCustomer.address2,
                       (n) => newCustomer = newCustomer.copyWith(address2: n)),
                   _buildTextField('City*', newCustomer.city,
                       (n) => newCustomer = newCustomer.copyWith(city: n)),
                   _buildTextField('State*', newCustomer.state,
-                      (n) => newCustomer = newCustomer.copyWith(state: n)),
-                  _buildTextField(
-                      'ZIP*', newCustomer.zip, (n) => newCustomer = newCustomer.copyWith(zip: n), textInputType: TextInputType.number),
+                      (n) => newCustomer = newCustomer.copyWith(state: n),
+                  textInputType: TextInputType.text, maxLenght: 2),
+                  _buildTextField('ZIP*', newCustomer.zip,
+                      (n) => newCustomer = newCustomer.copyWith(zip: n),
+                      textInputType: TextInputType.number, maxLenght: 5),
                   _buildTextField('Brand', newCustomer.brand,
                       (n) => newCustomer = newCustomer.copyWith(brand: n)),
                   _buildTextField('Account Number', newCustomer.accountNumber,
@@ -145,12 +149,12 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
       print('try to create a customer name: ${newCustomer.firstName}');
 
       var newId = await WooSignalService.createCustomer(newCustomer);
-      if(newId == -1){
+      if(newId == -1 ){
         await showDialog(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
                   title: const Text('Error'),
-                  content: const Text('Correct your email'),
+                  content: const Text('Incorrent info'),
                   actions: [
                     TextButton(
                       child: const Text('OK'),
@@ -206,7 +210,9 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     String label,
     String? value,
     void Function(String) setter, {
-    TextInputType textInputType = TextInputType.text,}
+    TextInputType textInputType = TextInputType.text,
+    int? maxLenght,
+      }
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,6 +224,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
         SizedBox(height: 8),
         _editing
             ? TextField(
+          maxLength: maxLenght,
           keyboardType: textInputType,
                 onChanged: setter,
                 controller: TextEditingController(text: value ?? ''),
