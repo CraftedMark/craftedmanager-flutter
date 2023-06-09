@@ -1,5 +1,8 @@
 import 'package:woosignal/models/links.dart';
+import 'package:woosignal/models/response/customer.dart' as wsCustomer;
 import 'package:woosignal/models/response/customer_batch.dart';
+
+final DateTime _defaultDate = DateTime.parse('2000-00-00');
 
 class People {
   final int id;
@@ -145,6 +148,40 @@ class People {
       role: role
     );
   }
+
+  factory People.fromWSCustomerS( Customers customer){
+    return People(
+        id: customer.id ?? 1,
+        firstName: customer.firstName ?? "Unknown",
+        lastName: customer.lastName ?? "Unknown",
+        phone: customer.billing?.phone ?? "Unknown",
+        email: customer.email ?? "Unknown",
+        city: customer.billing?.city,
+        state: customer.billing?.state,
+        address1: customer.billing?.country,
+        createdDate: customer.dateCreated ?? _defaultDate,
+        zip: customer.billing?.postcode,
+        updatedDate: customer.dateModified ?? _defaultDate,
+    );
+  }
+
+
+  factory People.fromWSCustomer( wsCustomer.Customer customer) {
+    return People(
+      id: customer.id ?? 1,
+      firstName: customer.firstName ?? "Unknown",
+      lastName: customer.lastName ?? "Unknown",
+      phone: customer.billing?.phone ?? "Unknown",
+      email: customer.email ?? "Unknown",
+      city: customer.billing?.city,
+      state: customer.billing?.state,
+      address1: customer.billing?.country,
+      zip: customer.billing?.postcode,
+      createdDate: DateTime.tryParse(customer.dateCreated??'') ?? _defaultDate,
+      updatedDate: DateTime.tryParse(customer.dateModified?? '') ?? _defaultDate,
+    );
+  }
+
 
   factory People.fromMap(Map<String, dynamic> map) {
     return People(

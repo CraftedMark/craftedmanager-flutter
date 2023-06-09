@@ -1,5 +1,6 @@
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -104,7 +105,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _nameController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Name:'),
+                        decoration: _getInputDecoration('*Name:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -140,7 +141,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _descriptionController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Description:'),
+                        decoration: _getInputDecoration('*Description:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -161,14 +162,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         controller: _wholesalePriceController,
                         style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.number,
-                        decoration: _getInputDecoration('Wholesale Price:'),
+                        decoration: _getInputDecoration('*Wholesale Price:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
                         controller: _retailPriceController,
                         style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.number,
-                        decoration: _getInputDecoration('Retail Price:'),
+                        decoration: _getInputDecoration('*Retail Price:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -199,7 +200,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _imageUrlController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Image URL:'),
+                        decoration: _getInputDecoration('*Image URL:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -331,9 +332,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
 
     if (widget.isNewProduct) {
-      await ProductPostgres.addProduct(updatedProduct);
+      // await ProductPostgres.addProduct(updatedProduct);
+      await WooSignalService.createProduct(updatedProduct);
     } else {
-      await ProductPostgres.updateProduct(updatedProduct);
+      // await ProductPostgres.updateProduct(updatedProduct);
+      await WooSignalService.updateProduct(updatedProduct);
     }
   }
 }

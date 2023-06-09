@@ -3,6 +3,8 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/Products/product_detail.dart';
 import 'package:flutter/material.dart';
 
+import '../WooCommerce/woosignal-service.dart';
+
 // Add this function right below import statements
 String indexToType(int index) {
   switch (index) {
@@ -37,15 +39,16 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Future<void> _fetchProducts() async {
-    print('Fetching products for type: ${indexToType(_currentSegmentIndex)}');
-    _products =
-        ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
-    _products.then((value) {
-      print('Fetched products: $value');
-      setState(() {
-        _products = Future.value(value); // Update the products list.
-      });
-    });
+    // print('Fetching products for type: ${indexToType(_currentSegmentIndex)}');
+    _products = WooSignalService.getProducts();
+    setState(() {});
+    // _products =  ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
+    // _products.then((value) {
+    //   print('Fetched products: $value');
+    //   setState(() {
+    //     _products = Future.value(value); // Update the products list.
+    //   });
+    // });
   }
 
   void createNewProduct() {

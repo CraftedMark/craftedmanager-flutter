@@ -1,4 +1,5 @@
 
+import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:woosignal/models/payload/order_wc.dart';
@@ -28,6 +29,67 @@ class WooSignalService {
     print(app!.appName);
   }
 
+  static Future<void> createProduct(Product product) async{
+    //TODO: add product category to WooCommerce
+    var category = {'id': 1};
+    //TODO: check atributes
+    var atributes = {
+      "attributes": [
+        {
+          "id": 6,
+          "position": 0,
+          "visible": false,
+          "variation": true,
+          "options": [
+            "Black",
+            "Green"
+          ]
+        },
+        {
+          "name": "Size",
+          "position": 0,
+          "visible": true,
+          "variation": true,
+          "options": [
+            "S",
+            "M"
+          ]
+        }
+      ],
+      "default_attributes": [
+        {
+          "id": 6,
+          "option": "Black"
+        },
+        {
+          "name": "Size",
+          "option": "S"
+        }
+      ]
+    };
+
+    print('Create a product: ${product.toMap()}');
+
+    // await WooSignal.instance.createProduct(
+    //     name: product.name,
+    //     regularPrice: product.retailPrice.toString(),
+    //     description: product.description,
+    //     shortDescription: product.description,
+    //     categories: category,
+    //     images: {'src':'https://unsplash.com/photos/oL3-V8xhqlI'},
+    // );
+    var cat = wsProduct.Category(2, 'flutterTest', 'flutter_test');
+
+    await WooSignal.instance.createProduct(
+      name: 'Test Manual',
+      regularPrice: '1.1',
+      description: 'description',
+      shortDescription: 'short_description',
+      categories: category,
+      images: {'src':'https://via.placeholder.com/300x450'},
+    );
+  }
+
   static Future <List<Product>> getProducts() async {
     List<wsProduct.Product> products = await  WooSignal.instance.getProducts();
 
@@ -35,42 +97,29 @@ class WooSignalService {
         products.length,
         (index){
           var current = products[index];
-          return Product(
-            name: current.name?? 'Unknown',
-            retailPrice: double.parse(current.price ?? "0"),
-            assemblyItems: [],
-            id: current.id,
-            backordered: false,
-            bulkPricing: 0,
-            category: current.categories.first.toString()??"Unknown",
-            costOfGood: double.parse(current.price ?? "0"),
-
-          );
+          return Product.fromWSProduct(current);
         });
 
     return res;
   }
 
-  // static Future<void> createProduct(Product product) async {
-  //   wsProduct.Product prod = wsProduct.Product(
-  //     0,
-  //     '',
-  //
-  //   );
-  // }
+  static Future <int?> updateProduct(Product product) async {
+    var data = product.toWSMap();
+    print(data);
+    var response = await WooSignal.instance.updateProduct(product.id!, data: data);
 
+    return response?.id;
+  }
+
+
+
+  ///Created a customer in WooCoomerce
+  ///
+  ///IF success: return new customer id in DB
+  ///
+  ///IF fail: return -1
   static Future<int> createCustomer(People customer) async {
-
     var wsCustomer = customer.toWSCustomer();
-
-    var billing = {
-      'state': customer.state,
-      'city': customer.city,
-      'country':customer.address1,
-      'postcode': customer.zip,
-      'phone': customer.phone,
-    };
-    print(wsCustomer.billing?.toJson());
 
     var newCustomer = await WooSignal.instance.createCustomer(
       firstName: customer.firstName,
@@ -80,7 +129,6 @@ class WooSignalService {
       billing: wsCustomer.billing?.toJson(),
       shipping: wsCustomer.shipping?.toJson(),
     );
-    print(newCustomer?.id);
     return newCustomer?.id ?? -1;
   }
 
@@ -90,20 +138,20 @@ class WooSignalService {
       rawCustomers.length,
       (index) {
         var current = rawCustomers[index];
-        return People(
-            id: current.id??1,
-            firstName: current.firstName ?? "Unknown",
-            lastName: current.lastName ?? "Unknown",
-            phone: current.billing?.phone ?? "Unknown",
-            email: current.email ?? "Unknown",
-            city: current.billing?.city,
-            state: current.billing?.state,
-            address1: current.billing?.country,
-            createdDate: DateTime.tryParse(current.dateCreated?? '2003'),
-            zip: current.billing?.postcode,
-        );
+        return People.fromWSCustomer(current);
       },
     );
+  }
+
+  ///IF user with [id] exist: return customer
+  ///
+  ///IF fail: return null
+  static Future<People?> getCustomerById(int id) async{
+    final wsCustomer = await WooSignal.instance.retrieveCustomer(id: id);
+    if(wsCustomer != null){
+      return People.fromWSCustomerS(wsCustomer);
+    }
+    return null;
   }
 
   static Future<void> updateCustomer(People customer) async {
