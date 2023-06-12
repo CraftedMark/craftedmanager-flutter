@@ -1,4 +1,7 @@
-class Payment {
+import 'package:crafted_manager/Models/order_model.dart';
+import 'package:crafted_manager/Models/ordered_item_model.dart';
+
+class Payments {
   int id;
   int? orderId;
   double amount;
@@ -8,7 +11,7 @@ class Payment {
   bool collectedbymark;
   String? description;
 
-  Payment({
+  Payments({
     required this.id,
     this.orderId,
     required this.amount,
@@ -19,7 +22,7 @@ class Payment {
     this.description,
   });
 
-  Payment.fromMap(Map<String, dynamic> data)
+  Payments.fromMap(Map<String, dynamic> data)
       : id = data['id'],
         orderId = data['order_id'],
         amount = data['amount'],
@@ -30,14 +33,14 @@ class Payment {
         description = data['description'];
 }
 
-class Bill {
+class Bills {
   int id;
   String name;
   double amount;
   DateTime dateAdded;
   DateTime dueDate;
 
-  Bill({
+  Bills({
     required this.id,
     required this.name,
     required this.amount,
@@ -45,7 +48,7 @@ class Bill {
     required this.dueDate,
   });
 
-  Bill.fromMap(Map<String, dynamic> data)
+  Bills.fromMap(Map<String, dynamic> data)
       : id = data['id'],
         name = data['name'],
         amount = data['amount'],
@@ -53,7 +56,7 @@ class Bill {
         dueDate = DateTime.parse(data['due_date']);
 }
 
-class Expense {
+class Expenses {
   int id;
   String description;
   double amount;
@@ -62,7 +65,7 @@ class Expense {
   String vendor;
   String paidBy;
 
-  Expense({
+  Expenses({
     required this.id,
     required this.description,
     required this.amount,
@@ -72,7 +75,7 @@ class Expense {
     required this.paidBy,
   });
 
-  Expense.fromMap(Map<String, dynamic> data)
+  Expenses.fromMap(Map<String, dynamic> data)
       : id = data['id'],
         description = data['description'],
         amount = data['amount'],
@@ -80,4 +83,61 @@ class Expense {
         category = data['category'],
         vendor = data['vendor'],
         paidBy = data['paid_by'];
+}
+
+class Invoices {
+  final int id;
+  final int customerId;
+  final String invoiceNumber;
+  final Order order;
+  final double totalAmount;
+  final DateTime invoiceDate;
+  final DateTime dueDate;
+  final String status;
+  final List<OrderedItem> orderedItems;
+
+  Invoices({
+    required this.id,
+    required this.customerId,
+    required this.invoiceNumber,
+    required this.order,
+    required this.totalAmount,
+    required this.invoiceDate,
+    required this.dueDate,
+    required this.status,
+    required this.orderedItems,
+  });
+
+  factory Invoices.fromJson(Map<String, dynamic> json) {
+    List<OrderedItem>? orderedItems = [];
+    if (json['ordereditems'] != null) {
+      orderedItems = List.from(json['ordereditems'])
+          .map((item) => OrderedItem.fromJson(item))
+          .cast<OrderedItem>()
+          .toList();
+    }
+    return Invoices(
+      id: json['id'],
+      customerId: json['customer_id'],
+      invoiceNumber: json['invoice_number'],
+      order: Order.fromJson(json['order']),
+      totalAmount: json['total_amount'],
+      invoiceDate: DateTime.parse(json['invoice_date']),
+      dueDate: DateTime.parse(json['due_date']),
+      status: json['status'],
+      orderedItems: orderedItems,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'customer_id': customerId,
+        'invoice_number': invoiceNumber,
+        'order': order.toJson(),
+        'total_amount': totalAmount,
+        'invoice_date': invoiceDate.toIso8601String(),
+        'due_date': dueDate.toIso8601String(),
+        'status': status,
+        'ordered_items': orderedItems.map((item) => item.toJson()).toList()
+      };
 }

@@ -91,7 +91,7 @@ class _AddRecipeState extends State<AddRecipe> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: _addIngredient,
                 child: const Text('Add Ingredient'),
               ),

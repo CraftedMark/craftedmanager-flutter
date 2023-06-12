@@ -30,16 +30,6 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  ThemeData _buildThemeData() {
-    return ThemeData(
-      brightness: Brightness.dark,
-      primaryColor: Colors.blueAccent,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -52,7 +42,20 @@ class MyApp extends StatelessWidget {
         Locale('en', ''),
         Locale('es', ''),
       ],
-      theme: _buildThemeData(),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        primaryColor: Colors.blueAccent,
+        colorScheme: ColorScheme.dark().copyWith(
+          primary: Colors.blueAccent,
+          secondary: Color(0xFFB085F5),
+        ),
+        textTheme: TextTheme(
+          bodyText1: TextStyle(color: Color(0xFFB085F5)),
+          bodyText2: TextStyle(color: Color(0xFFB085F5)),
+        ),
+        iconTheme: IconThemeData(color: Color(0xFFB085F5)),
+      ),
       home: MyHomePage(),
     );
   }
@@ -155,14 +158,11 @@ class _SliderView extends StatelessWidget {
     this.onItemClick,
     this.backgroundColor = Colors.black,
     this.padding = const EdgeInsets.only(top: 30, bottom: 20),
-    this.menuTitleStyle = const TextStyle(
-      color: Colors.white,
-      fontWeight: FontWeight.bold,
-      fontSize: 18,
-    ),
     this.menuContentPadding = const EdgeInsets.symmetric(horizontal: 16),
     this.expansionTilePadding = const EdgeInsets.symmetric(horizontal: 2),
-  }) : super(key: key);
+  })  : menuTitleStyle =
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +192,8 @@ class _SliderView extends StatelessWidget {
               Text(
                 'Crafted Manager',
                 textAlign: TextAlign.left,
-                style: menuTitleStyle,
+                style: menuTitleStyle.copyWith(
+                    color: Theme.of(context).colorScheme.secondary),
               ),
               const SizedBox(
                 height: 20,
@@ -201,21 +202,26 @@ class _SliderView extends StatelessWidget {
                 return menuItem.subItems.isNotEmpty
                     ? ExpansionTile(
                         tilePadding: expansionTilePadding,
-                        title: Text(menuItem.title, style: menuTitleStyle),
+                        title: Text(menuItem.title,
+                            style: menuTitleStyle.copyWith(
+                                color:
+                                    Theme.of(context).colorScheme.secondary)),
                         leading: Icon(
                           menuItem.iconData,
-                          color: menuTitleStyle.color,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                         children: menuItem.subItems.map<Widget>((subItem) {
                           return ListTile(
                             contentPadding: menuContentPadding,
                             leading: Icon(
                               subItem.iconData,
-                              color: menuTitleStyle.color,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                             title: Text(
                               subItem.title,
-                              style: menuTitleStyle,
+                              style: menuTitleStyle.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary),
                             ),
                             onTap: () {
                               Navigator.push(
@@ -230,10 +236,13 @@ class _SliderView extends StatelessWidget {
                       )
                     : ListTile(
                         contentPadding: menuContentPadding,
-                        title: Text(menuItem.title, style: menuTitleStyle),
+                        title: Text(menuItem.title,
+                            style: menuTitleStyle.copyWith(
+                                color:
+                                    Theme.of(context).colorScheme.secondary)),
                         leading: Icon(
                           menuItem.iconData,
-                          color: menuTitleStyle.color,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                         onTap: () {
                           onItemClick?.call(menuItem.title);

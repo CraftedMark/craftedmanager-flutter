@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:crafted_manager/Admin/user_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:postgres/postgres.dart';
 
@@ -16,6 +17,19 @@ Future<PostgreSQLConnection> connectToPostgres() async {
   await connection.open();
   print('Connected to PostgreSQL');
   return connection;
+}
+
+Future<User?> getUserByUsernameAndPassword(
+    String username, String password) async {
+  final result = await searchData(
+      'users',
+      'username = @username AND password = @password',
+      {'username': username, 'password': password});
+
+  if (result.isNotEmpty) {
+    return User.fromJson(result.first);
+  }
+  return null;
 }
 
 // Fetches all data from the specified table

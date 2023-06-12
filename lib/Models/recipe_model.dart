@@ -50,4 +50,12 @@ class Recipe {
       'step_images': jsonEncode(stepImages),
     };
   }
+
+  double get costPerPiece {
+    double totalCost = 0;
+    for (int i = 0; i < ingredients.length; i++) {
+      totalCost += amounts[i] * costs[i];
+    }
+    return totalCost / pieces;
+  }
 }
