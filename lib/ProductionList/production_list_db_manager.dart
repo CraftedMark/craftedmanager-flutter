@@ -17,12 +17,12 @@ class ProductionListDbManager {
 
     final List<Order> openOrders = ordersResult
         .map((data) => Order.fromMap(data.toColumnMap()))
-        .where((order) => order.orderStatus == 'open')
+        // .where((order) => order.orderStatus == 'open')
         .toList();
 
     for (var order in openOrders) {
       final orderedItemsResult = await connection.query(
-        'SELECT * FROM ordered_items WHERE orderId = @orderId',
+        'SELECT * FROM ordered_items WHERE order_Id = @orderId',
         substitutionValues: {'orderId': order.id},
       );
 

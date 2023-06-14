@@ -10,8 +10,10 @@ class ProductionList extends StatefulWidget {
   final GlobalKey<SliderDrawerState> _sliderDrawerKey =
       GlobalKey<SliderDrawerState>();
 
+  final List<OrderedItem> orderedItems;
+
   ProductionList(
-      {Key? key, required this.itemSource, required List orderedItems})
+      {Key? key, required this.itemSource, required this.orderedItems})
       : super(key: key);
 
   @override
@@ -20,6 +22,7 @@ class ProductionList extends StatefulWidget {
 
 class _ProductionListState extends State<ProductionList> {
   List<Order> orders = [];
+  List<OrderedItem> filteredItems = [];
 
   @override
   void initState() {
@@ -27,7 +30,7 @@ class _ProductionListState extends State<ProductionList> {
     fetchOrders();
   }
 
-  void fetchOrders() async {
+  Future<void> fetchOrders() async {
     ProductionListDbManager dbManager = ProductionListDbManager();
     orders = await dbManager.getOpenOrdersWithAllOrderedItems();
     setState(() {});
@@ -37,9 +40,10 @@ class _ProductionListState extends State<ProductionList> {
     List<OrderedItem> filteredItems = [];
     for (var order in orders) {
       for (var item in order.orderedItems) {
-        if (item.itemSource == widget.itemSource) {
+        print(item.itemSource);
+        // if (item.itemSource == widget.itemSource) {
           filteredItems.add(item);
-        }
+        // }
       }
     }
     return filteredItems;
@@ -51,7 +55,8 @@ class _ProductionListState extends State<ProductionList> {
     debugPrint('ItemSource: ${widget.itemSource}');
     debugPrint('Orders: ${orders.map((e) => e.toString()).join(", ")}');
 
-    List<OrderedItem> filteredOrderedItems = getFilteredOrderedItems();
+    filteredItems = getFilteredOrderedItems();
+    print(filteredItems.length);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -73,14 +78,15 @@ class _ProductionListState extends State<ProductionList> {
           slider: SliderView(onItemClick: (title) {
             // Handle the menu item click as necessary
           }),
-          child: filteredOrderedItems.isNotEmpty
+          child: filteredItems.isNotEmpty
               ? ListView.builder(
-                  itemCount: filteredOrderedItems.length,
+                  shrinkWrap: true,
+                  itemCount: filteredItems.length,
                   itemBuilder: (context, index) {
-                    OrderedItem item = filteredOrderedItems[index];
+                    OrderedItem item = filteredItems[index];
                     return ListTile(
-                      title: Text(item.name),
-                      subtitle: Text('Quantity: ${item.quantity}'),
+                      title: Text(item.name, style: TextStyle(color: Colors.black),),
+                      subtitle: Text('Quantity: ${item.quantity}', style: TextStyle(color: Colors.black),),
                     );
                   },
                 )
