@@ -45,6 +45,19 @@ class _ProductionListState extends State<ProductionList> {
         // }
       }
     }
+
+    filteredItems.sort((a, b) => a.productId.compareTo(b.productId));
+
+    for(var i = 1; i<filteredItems.length;i++){
+      var prev = filteredItems[i-1];
+      var current = filteredItems[i];
+      if(prev.productId == current.productId){
+        prev.quantity += current.quantity;
+        filteredItems.removeAt(i);
+        i--;
+      }
+    }
+
     return filteredItems;
   }
 
