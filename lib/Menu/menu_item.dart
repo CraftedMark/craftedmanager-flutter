@@ -3,6 +3,7 @@ import 'package:crafted_manager/CBP/cbp_people_search.dart';
 import 'package:crafted_manager/Ingredients/ingredient_list.dart';
 import 'package:crafted_manager/Invoice/invoice_screen.dart';
 import 'package:crafted_manager/Orders/orders_list.dart';
+import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/Products/product_page.dart';
 import 'package:crafted_manager/Recipes/recipe_manager.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,10 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Production List",
         iconData: Icons.book,
-        destination: ProductListPage(),
+        destination: ProductionList(
+          itemSource: 'Production',
+          orderedItems: [],
+        ),
       ),
       MenuItem(
         title: "Assembly Items",
