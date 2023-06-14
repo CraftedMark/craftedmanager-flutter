@@ -43,6 +43,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       orderStatus: '',
       archived: false,
       notes: '',
+      orderedItems: [], // Add this line
     ),
   );
 

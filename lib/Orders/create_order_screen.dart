@@ -20,7 +20,9 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
-  double shippingCost = 10.0; // Default shipping cost
+  double shippingCost = 10.0;
+
+  // Default shipping cost
 
   Future<double?> getCustomProductPrice(int productId, int customerId) async {
     double? customPrice;
@@ -71,7 +73,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         productDescription: product.description,
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
-        itemSource: item_source,
+        itemSource: item_source.isNotEmpty
+            ? item_source
+            : product.itemSource ??
+                '', // Use the user-entered itemSource if it's not empty, otherwise use the itemSource from the product table
       ));
     });
   }
@@ -87,18 +92,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     final newOrder = Order(
       id: DateTime.now().millisecondsSinceEpoch,
       customerId: widget.client.id.toString(),
-      // Convert customerId to String
       orderDate: DateTime.now(),
       shippingAddress:
           '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
       billingAddress:
           '${widget.client.address1},${widget.client.city},${widget.client.state},${widget.client.zip}',
       productName: orderedItems.map((e) => e.productName).toList().join(','),
-      // Convert the list of product names to a comma-separated string
       totalAmount: totalAmount,
       orderStatus: 'Pending',
       notes: '',
       archived: false,
+      orderedItems: orderedItems, // Add this line
     );
 
     Future<void> createOrder(
@@ -308,14 +312,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
   }
 
-  void addItemToOrder () async {
-    final products =  await ProductPostgres.getAllProductsExceptIngredients();
+  void addItemToOrder() async {
+    final products = await ProductPostgres.getAllProductsExceptIngredients();
 
     final selectedProduct = await showDialog<Product>(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController searchController =
-        TextEditingController();
+        TextEditingController searchController = TextEditingController();
         List<Product> filteredProducts = products;
 
         return StatefulBuilder(
@@ -330,16 +333,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       hintText: "Search products",
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(25.0)),
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)),
                       ),
                     ),
                     onChanged: (value) {
                       setState(() {
                         filteredProducts = products
                             .where((product) => product.name
-                            .toLowerCase()
-                            .contains(value.toLowerCase()))
+                                .toLowerCase()
+                                .contains(value.toLowerCase()))
                             .toList();
                       });
                     },
@@ -363,18 +365,35 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
-      final quantity = await showDialog<int>(
+      var itemSourceController = TextEditingController(
+          text: selectedProduct.itemSource ??
+              ''); // Set the initial value for the itemSourceController
+
+      final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Enter Quantity'),
-            content: TextFormField(
-              controller: quantityController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
-                border: OutlineInputBorder(),
-              ),
+            title: const Text('Enter Quantity and Item Source'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: itemSourceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Item Source',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -387,7 +406,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 onPressed: () {
                   Navigator.pop(
                     context,
-                    int.parse(quantityController.text),
+                    {
+                      'quantity': int.parse(quantityController.text),
+                      'itemSource': itemSourceController.text,
+                    },
                   );
                 },
                 child: const Text("Add"),
@@ -397,10 +419,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         },
       );
 
-      if (quantity != null) {
-        await addOrderedItem(selectedProduct, quantity, 'created');
+      if (result != null) {
+        int quantity = result['quantity'];
+        String itemSource = result['itemSource'];
+        await addOrderedItem(selectedProduct, quantity, itemSource);
       }
-
     }
   }
 }

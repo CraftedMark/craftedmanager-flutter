@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
+import 'package:crafted_manager/Models/order_model.dart';
+import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,7 +24,6 @@ Future<void> main() async {
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
       print("new notification + ${result}");
-      // TODO: open appropriate page
     });
   }
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
+        backgroundColor: Colors.black,
         primaryColor: Colors.blueAccent,
         colorScheme: ColorScheme.dark().copyWith(
           primary: Colors.blueAccent,
@@ -56,7 +58,10 @@ class MyApp extends StatelessWidget {
         ),
         iconTheme: IconThemeData(color: Color(0xFFB085F5)),
       ),
-      home: MyHomePage(),
+      home: ProductionList(
+        orderedItems: [],
+        itemSource: '',
+      ),
     );
   }
 }
@@ -79,45 +84,24 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  List<Widget> buildHomepageCards() {
-    return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: ExpansionTileCard(
-          leading: const CircleAvatar(child: Text('1')),
-          title: const Text('Card 1'),
-          subtitle: const Text('This is the first card.'),
-          children: <Widget>[
-            const ListTile(
-              title: Text('Lorem Ipsum'),
-            ),
-          ],
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: ExpansionTileCard(
-          leading: const CircleAvatar(child: Text('2')),
-          title: const Text('Card 2'),
-          subtitle: const Text('This is the second card.'),
-          children: <Widget>[
-            const ListTile(
-              title: Text('Lorem Ipsum'),
-            ),
-          ],
-        ),
-      ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+        backgroundColor: Colors.black,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
         leading: IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(
+            Icons.menu,
+            color: Colors.black,
+          ),
           onPressed: () {
             _sliderDrawerKey.currentState?.openSlider();
           },
@@ -127,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SliderDrawer(
           key: _sliderDrawerKey,
           sliderOpenSize: 350,
-          slider: _SliderView(
+          slider: SliderView(
             onItemClick: (title) {
               _sliderDrawerKey.currentState!.closeSlider();
               setState(() {
@@ -136,41 +120,74 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
           child: ListView(
-            padding: EdgeInsets.all(24.0),
-            children: buildHomepageCards(),
-          ),
+              padding: EdgeInsets.all(24.0), children: buildHomepageCards()),
         ),
       ),
     );
   }
+
+  List<Widget> buildHomepageCards() {
+    List<Order> openOrders = [
+      Order(
+        id: 1,
+        customerId: '1',
+        orderDate: DateTime.now(),
+        shippingAddress: '1234 Street, City, Country',
+        billingAddress: '1234 Street, City, Country',
+        orderedItems: [
+          OrderedItem(
+            id: 1,
+            orderId: 1,
+            productName: 'Product 1',
+            productId: 101,
+            name: 'Item 1',
+            quantity: 10,
+            price: 100.0,
+            discount: 0.0,
+            productDescription: 'Description for Item 1',
+            productRetailPrice: 100.0,
+            status: 'New',
+            itemSource: 'Production',
+          ),
+        ],
+        totalAmount: 100.0,
+        orderStatus: 'New',
+        productName: 'Product 1',
+        notes: '',
+        archived: false,
+      ),
+    ];
+
+    return [
+      ...openOrders.map((order) {
+        return Column(
+          children: order.orderedItems.map((item) {
+            return ListTile(
+              title: Text(item.productName),
+              trailing: Text(item.quantity.toString()),
+            );
+          }).toList(),
+        );
+      }).toList(),
+    ];
+  }
 }
 
-class _SliderView extends StatelessWidget {
+class SliderView extends StatelessWidget {
   final Function(String)? onItemClick;
-  final Color backgroundColor;
-  final EdgeInsets padding;
-  final TextStyle menuTitleStyle;
-  final EdgeInsets menuContentPadding;
-  final EdgeInsets expansionTilePadding;
 
-  const _SliderView({
+  const SliderView({
     Key? key,
     this.onItemClick,
-    this.backgroundColor = Colors.black,
-    this.padding = const EdgeInsets.only(top: 30, bottom: 20),
-    this.menuContentPadding = const EdgeInsets.symmetric(horizontal: 16),
-    this.expansionTilePadding = const EdgeInsets.symmetric(horizontal: 2),
-  })  : menuTitleStyle =
-            const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundColor,
+      color: Colors.black,
       child: SafeArea(
         child: Padding(
-          padding: padding,
+          padding: const EdgeInsets.only(top: 30, bottom: 20),
           child: ListView(
             children: <Widget>[
               const SizedBox(
@@ -192,8 +209,9 @@ class _SliderView extends StatelessWidget {
               Text(
                 'Crafted Manager',
                 textAlign: TextAlign.left,
-                style: menuTitleStyle.copyWith(
-                    color: Theme.of(context).colorScheme.secondary),
+                style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)
+                    .copyWith(color: Theme.of(context).colorScheme.secondary),
               ),
               const SizedBox(
                 height: 20,
@@ -201,27 +219,34 @@ class _SliderView extends StatelessWidget {
               ...menuItems.map<Widget>((menuItem) {
                 return menuItem.subItems.isNotEmpty
                     ? ExpansionTile(
-                        tilePadding: expansionTilePadding,
+                        tilePadding: const EdgeInsets.symmetric(horizontal: 2),
                         title: Text(menuItem.title,
-                            style: menuTitleStyle.copyWith(
-                                color:
-                                    Theme.of(context).colorScheme.secondary)),
+                            style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 18)
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)),
                         leading: Icon(
                           menuItem.iconData,
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         children: menuItem.subItems.map<Widget>((subItem) {
                           return ListTile(
-                            contentPadding: menuContentPadding,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16),
                             leading: Icon(
                               subItem.iconData,
                               color: Theme.of(context).colorScheme.secondary,
                             ),
                             title: Text(
                               subItem.title,
-                              style: menuTitleStyle.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.secondary),
+                              style: const TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 18)
+                                  .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary),
                             ),
                             onTap: () {
                               Navigator.push(
@@ -235,11 +260,15 @@ class _SliderView extends StatelessWidget {
                         }).toList(),
                       )
                     : ListTile(
-                        contentPadding: menuContentPadding,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
                         title: Text(menuItem.title,
-                            style: menuTitleStyle.copyWith(
-                                color:
-                                    Theme.of(context).colorScheme.secondary)),
+                            style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 18)
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)),
                         leading: Icon(
                           menuItem.iconData,
                           color: Theme.of(context).colorScheme.secondary,

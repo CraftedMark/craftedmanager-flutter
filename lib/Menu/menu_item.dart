@@ -32,6 +32,11 @@ List<MenuItem> menuItems = [
     destination: Container(),
     subItems: [
       MenuItem(
+        title: "Create Orders",
+        iconData: Icons.list_alt,
+        destination: const OrdersList(title: "New Orders"),
+      ),
+      MenuItem(
         title: "Open Orders",
         iconData: Icons.list_alt,
         destination: const OrdersList(title: "Orders"),

@@ -1,3 +1,5 @@
+import 'ordered_item_model.dart';
+
 class Order {
   int id;
   String customerId;
@@ -9,6 +11,7 @@ class Order {
   String productName;
   String notes;
   bool archived;
+  List<OrderedItem> orderedItems;
 
   Order({
     required this.id,
@@ -21,6 +24,7 @@ class Order {
     required this.productName,
     required this.notes,
     required this.archived,
+    required this.orderedItems,
   });
 
   Order copyWith({
@@ -34,6 +38,7 @@ class Order {
     String? productName,
     String? notes,
     bool? archived,
+    List<OrderedItem>? orderedItems,
   }) {
     return Order(
       id: id ?? this.id,
@@ -46,23 +51,8 @@ class Order {
       productName: productName ?? this.productName,
       notes: notes ?? this.notes,
       archived: archived ?? this.archived,
+      orderedItems: orderedItems ?? this.orderedItems,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'order_id': id,
-      'customerId': customerId,
-      'orderDate': orderDate.toIso8601String(),
-      'shippingAddress': shippingAddress,
-      'billingAddress': billingAddress,
-      'totalAmount': totalAmount,
-      'orderStatus': orderStatus,
-      'productName': productName,
-      'notes': notes,
-      //'firstName': firstName, // added new field
-      //'lastName': lastName, // added new field
-    };
   }
 
   factory Order.fromMap(Map<String, dynamic> map) {
@@ -70,8 +60,12 @@ class Order {
       try {
         return DateTime.parse(date);
       } catch (_) {
-        return DateTime.now(); // Return a default date value when parsing fails
+        return DateTime.now();
       }
+    }
+
+    List<OrderedItem> parseOrderedItems(List<dynamic> items) {
+      return items.map((item) => OrderedItem.fromMap(item)).toList();
     }
 
     return Order(
@@ -86,8 +80,26 @@ class Order {
       productName: map['product_name'] ?? '',
       notes: map['notes'] ?? '',
       archived: map['archived'] == 1,
-      //firstName: map['first_name'] ?? '', // added new field
-      //lastName: map['last_name'] ?? '', // added new field
+      orderedItems: parseOrderedItems(map['ordered_items'] ?? []),
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    List<Map<String, dynamic>> orderedItemsToMap() {
+      return orderedItems.map((item) => item.toMap()).toList();
+    }
+
+    return {
+      'order_id': id,
+      'customerId': customerId,
+      'orderDate': orderDate.toIso8601String(),
+      'shippingAddress': shippingAddress,
+      'billingAddress': billingAddress,
+      'totalAmount': totalAmount,
+      'orderStatus': orderStatus,
+      'productName': productName,
+      'notes': notes,
+      'ordered_items': orderedItemsToMap(),
+    };
   }
 }
