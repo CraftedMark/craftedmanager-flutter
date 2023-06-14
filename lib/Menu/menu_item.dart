@@ -94,6 +94,11 @@ List<MenuItem> menuItems = [
         destination: RecipeManager(),
       ),
       MenuItem(
+        title: "Production List",
+        iconData: Icons.book,
+        destination: ProductListPage(),
+      ),
+      MenuItem(
         title: "Assembly Items",
         iconData: Icons.layers,
         destination: AssemblyItemManagement(),
