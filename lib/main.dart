@@ -92,7 +92,7 @@ class SliderView extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 60,
                   backgroundImage: Image.network(
-                          'https://nikhilvadoliya.github.io/assets/images/nikhil_1.webp')
+                          'https://craftedsolutions.co/UserProfile.png')
                       .image,
                 ),
               ),
