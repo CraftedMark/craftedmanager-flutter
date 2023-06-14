@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
       ),
       home: ProductionList(
         orderedItems: [],
-        itemSource: '',
+        itemSource: 'Production',
       ),
     );
   }
