@@ -1,3 +1,6 @@
+import 'package:woosignal/models/response/order.dart'as wsOrder;
+
+
 class Order {
   int id;
   String customerId;
@@ -90,4 +93,20 @@ class Order {
       //lastName: map['last_name'] ?? '', // added new field
     );
   }
+
+  factory Order.fromOrderWS(wsOrder.Order order){
+    return Order(
+      customerId: order.customerId.toString(),
+      archived: false,
+      id: order.id!,
+      notes: order.customerNote ?? '',
+      orderDate: DateTime.parse(order.dateCreated??''),
+      orderStatus: order.status??"Pending",
+      billingAddress: order.billing!.address1!,
+      productName: "Test fetch product from WooCommerce order_model.dart",
+      totalAmount: 0,
+      shippingAddress: order.shipping!.address1!,
+    );
+  }
 }
+

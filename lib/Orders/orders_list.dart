@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/order_postgres.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -66,16 +67,19 @@ class _OrdersListState extends State<OrdersList> {
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: OrdersPostgres.fetchAllOrders(),
-          builder: (_, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+        // child: FutureBuilder<List<Map<String, dynamic>>>(
+        child: FutureBuilder<List<Order>>(
+          // future: OrdersPostgres.fetchAllOrders(),
+          future: WooSignalService.getOrders(),
+
+          builder: (_,  snapshot) {
             if (snapshot.hasData) {
               final rawOrders = snapshot.data;
 
               if (rawOrders != null && rawOrders.isNotEmpty) {
-                final orders = rawOrders
-                    .map((rawOrder) => Order.fromMap(rawOrder))
-                    .toList();
+                final orders = rawOrders;
+                    // .map((rawOrder) => Order.fromMap(rawOrder))
+                    // .toList();
 
                 var sortedOrders = <Order>[];
                 if (widget.listType == OrderListType.archived) {
