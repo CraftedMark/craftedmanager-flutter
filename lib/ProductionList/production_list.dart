@@ -45,9 +45,9 @@ class _ProductionListState extends State<ProductionList> {
     List<OrderedItem> filteredItems = [];
     for (var order in orders) {
       for (var item in order.orderedItems) {
-        // if (item.itemSource == widget.itemSource) {
+        if (item.itemSource == widget.itemSource) {
           filteredItems.add(item);
-        // }
+        }
       }
     }
 
