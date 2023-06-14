@@ -40,7 +40,6 @@ class _ProductionListState extends State<ProductionList> {
     List<OrderedItem> filteredItems = [];
     for (var order in orders) {
       for (var item in order.orderedItems) {
-        print(item.itemSource);
         // if (item.itemSource == widget.itemSource) {
           filteredItems.add(item);
         // }
@@ -56,7 +55,6 @@ class _ProductionListState extends State<ProductionList> {
     debugPrint('Orders: ${orders.map((e) => e.toString()).join(", ")}');
 
     filteredItems = getFilteredOrderedItems();
-    print(filteredItems.length);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
