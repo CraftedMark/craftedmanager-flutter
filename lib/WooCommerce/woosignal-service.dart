@@ -68,7 +68,6 @@ class WooSignalService {
       ]
     };
 
-    print('Create a product: ${product.toMap()}');
 
     // await WooSignal.instance.createProduct(
     //     name: product.name,
@@ -81,12 +80,12 @@ class WooSignalService {
     var cat = wsProduct.Category(2, 'flutterTest', 'flutter_test');
 
     await WooSignal.instance.createProduct(
-      name: 'Test Manual',
-      regularPrice: '1.1',
-      description: 'description',
-      shortDescription: 'short_description',
-      categories: category,
-      images: {'src':'https://via.placeholder.com/300x450'},
+      name: product.name,
+      regularPrice: product.retailPrice.toString(),
+      description: product.description,
+      shortDescription: product.description,
+      categories: {},
+      images: {},
     );
   }
 
