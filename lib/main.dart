@@ -31,6 +31,8 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -66,113 +68,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<SliderDrawerState> _sliderDrawerKey =
-      GlobalKey<SliderDrawerState>();
-  late String title;
-
-  @override
-  void initState() {
-    title = "Dashboard";
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.menu,
-            color: Colors.black,
-          ),
-          onPressed: () {
-            _sliderDrawerKey.currentState?.openSlider();
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: SliderDrawer(
-          key: _sliderDrawerKey,
-          sliderOpenSize: 350,
-          slider: SliderView(
-            onItemClick: (title) {
-              _sliderDrawerKey.currentState!.closeSlider();
-              setState(() {
-                this.title = title;
-              });
-            },
-          ),
-          child: ListView(
-              padding: EdgeInsets.all(24.0), children: buildHomepageCards()),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> buildHomepageCards() {
-    List<Order> openOrders = [
-      Order(
-        id: 1,
-        customerId: '1',
-        orderDate: DateTime.now(),
-        shippingAddress: '1234 Street, City, Country',
-        billingAddress: '1234 Street, City, Country',
-        orderedItems: [
-          OrderedItem(
-            id: 1,
-            orderId: 1,
-            productName: 'Product 1',
-            productId: 101,
-            name: 'Item 1',
-            quantity: 10,
-            price: 100.0,
-            discount: 0.0,
-            productDescription: 'Description for Item 1',
-            productRetailPrice: 100.0,
-            status: 'New',
-            itemSource: 'Production',
-          ),
-        ],
-        totalAmount: 100.0,
-        orderStatus: 'New',
-        productName: 'Product 1',
-        notes: '',
-        archived: false,
-      ),
-    ];
-
-    return [
-      ...openOrders.map((order) {
-        return Column(
-          children: order.orderedItems.map((item) {
-            return ListTile(
-              title: Text(item.productName),
-              trailing: Text(item.quantity.toString()),
-            );
-          }).toList(),
-        );
-      }).toList(),
-    ];
-  }
-}
-
 class SliderView extends StatelessWidget {
   final Function(String)? onItemClick;
 
@@ -190,9 +85,7 @@ class SliderView extends StatelessWidget {
           padding: const EdgeInsets.only(top: 30, bottom: 20),
           child: ListView(
             children: <Widget>[
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 10),
               CircleAvatar(
                 radius: 65,
                 backgroundColor: Colors.black,
@@ -203,9 +96,7 @@ class SliderView extends StatelessWidget {
                       .image,
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               Text(
                 'Crafted Manager',
                 textAlign: TextAlign.left,
@@ -213,9 +104,7 @@ class SliderView extends StatelessWidget {
                         fontWeight: FontWeight.bold, fontSize: 18)
                     .copyWith(color: Theme.of(context).colorScheme.secondary),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               ...menuItems.map<Widget>((menuItem) {
                 return menuItem.subItems.isNotEmpty
                     ? ExpansionTile(
