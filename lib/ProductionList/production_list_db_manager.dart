@@ -3,7 +3,9 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:postgres/postgres.dart';
 
 class ProductionListDbManager {
-  final connection = PostgreSQLConnection(
+  ProductionListDbManager._();
+
+  static final connection = PostgreSQLConnection(
     'web.craftedsolutions.co', // Database host
     5432, // Port number
     'craftedmanager_db', // Database name
@@ -11,7 +13,7 @@ class ProductionListDbManager {
     password: '!!Laganga1983', // Database password
   );
 
-  Future<List<Order>> getOpenOrdersWithAllOrderedItems() async {
+  static Future<List<Order>> getOpenOrdersWithAllOrderedItems() async {
     await connection.open();
     final ordersResult = await connection.query('SELECT * FROM orders');
 

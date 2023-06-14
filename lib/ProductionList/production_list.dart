@@ -27,13 +27,18 @@ class _ProductionListState extends State<ProductionList> {
   @override
   void initState() {
     super.initState();
-    fetchOrders();
+    manageOrders();
+  }
+
+  Future<void> manageOrders() async{
+    await fetchOrders();
+    filteredItems = getFilteredOrderedItems();
+    setState(() {});
+
   }
 
   Future<void> fetchOrders() async {
-    ProductionListDbManager dbManager = ProductionListDbManager();
-    orders = await dbManager.getOpenOrdersWithAllOrderedItems();
-    setState(() {});
+    orders = await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
   }
 
   List<OrderedItem> getFilteredOrderedItems() {
@@ -57,7 +62,6 @@ class _ProductionListState extends State<ProductionList> {
         i--;
       }
     }
-
     return filteredItems;
   }
 
@@ -67,7 +71,7 @@ class _ProductionListState extends State<ProductionList> {
     debugPrint('ItemSource: ${widget.itemSource}');
     debugPrint('Orders: ${orders.map((e) => e.toString()).join(", ")}');
 
-    filteredItems = getFilteredOrderedItems();
+    // filteredItems = getFilteredOrderedItems();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -97,7 +101,7 @@ class _ProductionListState extends State<ProductionList> {
                   itemBuilder: (context, index) {
                     OrderedItem item = filteredItems[index];
                     return ListTile(
-                      title: Text(item.name, style: TextStyle(color: Colors.black),),
+                      title: Text(item.productName, style: TextStyle(color: Colors.black),),
                       subtitle: Text('Quantity: ${item.quantity}', style: TextStyle(color: Colors.black),),
                     );
                   },
@@ -106,7 +110,7 @@ class _ProductionListState extends State<ProductionList> {
                   child: Text(
                     'No items to show',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 20,
                     ),
                   ),
