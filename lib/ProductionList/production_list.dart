@@ -73,6 +73,7 @@ class _ProductionListState extends State<ProductionList> {
       ),
       body: SafeArea(
         child: SliderDrawer(
+          appBar: SizedBox.shrink(),
           key: widget._sliderDrawerKey,
           sliderOpenSize: 250,
           slider: SliderView(onItemClick: (title) {
