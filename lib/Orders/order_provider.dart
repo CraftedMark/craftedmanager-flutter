@@ -51,10 +51,6 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addOrder(Order order) {
-    _orders.add(order);
-    notifyListeners();
-  }
 
   void updateOrder(Order updatedOrder) {
     final index = _orders.indexWhere((order) => order.id == updatedOrder.id);

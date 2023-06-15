@@ -6,9 +6,7 @@ import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:postgres/postgres.dart';
 
 class OrderPostgres {
-  final OrderProvider orderProvider;
-
-  OrderPostgres({required this.orderProvider});
+  OrderPostgres();
 
   static Future<PostgreSQLConnection> openConnection() async {
     print('Opening connection...');
@@ -283,7 +281,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
       });
 
       // Adding order to the provider
-      orderProvider.addOrder(order);
+      // orderProvider.addOrder(order);
 
       print('Order created.');
     } catch (e) {

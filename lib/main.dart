@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/Orders/order_provider.dart'; // Assuming your OrderProvider is in this file
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
@@ -16,6 +17,8 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  OrderProvider provider = OrderProvider();
+
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
     OneSignal.shared.promptUserForPushNotificationPermission();
@@ -24,19 +27,29 @@ void main() async {
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
       print("new notification + ${result}");
     });
+    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) {
+      print('___________update orders___________');
+      provider.fetchOrders();
+    });
   }
+
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
   runApp(
     ChangeNotifierProvider(
-      create: (context) => OrderProvider(),
+      create: (context) => provider,
       child: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,6 +85,8 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+
+
 }
 
 class SliderView extends StatelessWidget {
