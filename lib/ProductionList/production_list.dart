@@ -23,6 +23,7 @@ class ProductionList extends StatefulWidget {
 }
 
 class _ProductionListState extends State<ProductionList> {
+  bool isLoading = true;
   List<Order> orders = [];
   List<OrderedItem> filteredItems = [];
 
@@ -33,42 +34,16 @@ class _ProductionListState extends State<ProductionList> {
       await Provider.of<OrderProvider>(context, listen: false).fetchOrders();
       Provider.of<OrderProvider>(context, listen: false)
           .filterOrderedItems(widget.itemSource);
-    });
-  }
+      updateLoadingState();
 
-  Future<void> manageOrders() async {
-    await fetchOrders();
-    filteredItems = getFilteredOrderedItems();
+    });
+
+  }
+  void updateLoadingState(){
+    isLoading = false;
     setState(() {});
   }
 
-  Future<void> fetchOrders() async {
-    orders = await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
-  }
-
-  List<OrderedItem> getFilteredOrderedItems() {
-    List<OrderedItem> filteredItems = [];
-    for (var order in orders) {
-      for (var item in order.orderedItems) {
-        if (item.itemSource == widget.itemSource) {
-          filteredItems.add(item);
-        }
-      }
-    }
-
-    filteredItems.sort((a, b) => a.productId.compareTo(b.productId));
-
-    for (var i = 1; i < filteredItems.length; i++) {
-      var prev = filteredItems[i - 1];
-      var current = filteredItems[i];
-      if (prev.productId == current.productId) {
-        prev.quantity += current.quantity;
-        filteredItems.removeAt(i);
-        i--;
-      }
-    }
-    return filteredItems;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +72,10 @@ class _ProductionListState extends State<ProductionList> {
           slider: SliderView(onItemClick: (title) {
             // Handle the menu item click as necessary
           }),
-          child: filteredItems.isNotEmpty
+          child:
+          isLoading?
+          Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary,)):
+          filteredItems.isNotEmpty
               ? ListView.builder(
                   shrinkWrap: true,
                   itemCount: filteredItems.length,
