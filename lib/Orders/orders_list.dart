@@ -53,6 +53,7 @@ class _OrdersListState extends State<OrdersList> {
         backgroundColor: Colors.black,
         title: Text(widget.title, style: TextStyle(color: Colors.white)),
         actions: [
+          if(widget.listType != OrderListType.archived)
           IconButton(
             onPressed: () {
               Navigator.push(
