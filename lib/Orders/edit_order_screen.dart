@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/Orders/orders_db_manager.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,12 +27,14 @@ class EditOrderScreen extends StatefulWidget {
 
 class _EditOrderScreenState extends State<EditOrderScreen> {
   late List<OrderedItem> _orderedItems;
+  late OrderPostgres _orderPostgres;
   double _subTotal = 0.0;
   String _status = '';
 
   @override
   void initState() {
     super.initState();
+
     _orderedItems = List.from(widget.orderedItems);
     _subTotal = calculateSubtotal();
     _status = widget.order.orderStatus;
@@ -114,7 +117,22 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       orderedItems: _orderedItems,
     );
 
-    orderProvider.updateOrder(updatedOrder);
+    bool result = await OrderPostgres.updateOrder(updatedOrder, _orderedItems);
+
+    if (result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order updated successfully.'),
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating order.'),
+        ),
+      );
+    }
   }
 
   @override
