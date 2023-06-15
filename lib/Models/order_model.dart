@@ -11,6 +11,7 @@ class Order {
   String productName;
   String notes;
   bool archived;
+  bool isArchived = false;
   List<OrderedItem> orderedItems;
 
   Order({

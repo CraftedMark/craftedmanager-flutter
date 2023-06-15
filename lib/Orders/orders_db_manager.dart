@@ -2,9 +2,14 @@ import 'dart:core';
 
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:postgres/postgres.dart';
 
 class OrderPostgres {
+  final OrderProvider orderProvider;
+
+  OrderPostgres({required this.orderProvider});
+
   static Future<PostgreSQLConnection> openConnection() async {
     print('Opening connection...');
     final connection = PostgreSQLConnection(
@@ -277,13 +282,16 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
         }
       });
 
+      // Adding order to the provider
+      orderProvider.addOrder(order);
+
       print('Order created.');
     } catch (e) {
       print('Error creating order: ${e.toString()}');
     } finally {
       if (connection != null) {
         print('Closing connection...');
-        await closeConnection(connection);
+        await connection.close();
         print('Connection closed.');
       }
     }

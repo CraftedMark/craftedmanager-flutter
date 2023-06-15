@@ -5,7 +5,9 @@ import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 
@@ -22,38 +24,26 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
   double shippingCost = 10.0;
 
-  // Default shipping cost
-
   Future<double?> getCustomProductPrice(int productId, int customerId) async {
     double? customPrice;
-    // Fetch the customer's assigned pricing list id
     int? pricingListId = await CustomerBasedPricingDbManager.instance
         .getPricingListByCustomerId(customerId);
 
-    print(
-        'Fetched pricingListId: $pricingListId'); // Print the fetched pricingListId
-
     if (pricingListId != null) {
-      // Fetch the custom pricing for the product based on the pricing list id
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
           .getCustomerProductPricing(productId, pricingListId);
-
-      print(
-          'Fetched pricingData: $pricingData'); // Print the fetched pricingData
 
       if (pricingData != null) {
         customPrice = pricingData['price'];
       }
     }
 
-    print('Custom Price: $customPrice'); // Print the custom price
     return customPrice;
   }
 
   Future<void> addOrderedItem(
       Product product, int quantity, String item_source) async {
-    // Fetch custom price for the product if it exists
     double? customPrice =
         await getCustomProductPrice(product.id!, widget.client.id);
 
@@ -68,15 +58,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         name: product.name,
         quantity: quantity,
         price: customPrice ?? product.retailPrice,
-        // check this line
         discount: 0,
         productDescription: product.description,
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
-        itemSource: item_source.isNotEmpty
-            ? item_source
-            : product.itemSource ??
-                '', // Use the user-entered itemSource if it's not empty, otherwise use the itemSource from the product table
+        itemSource:
+            item_source.isNotEmpty ? item_source : product.itemSource ?? '',
       ));
     });
   }
@@ -88,7 +75,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
     double totalAmount = subTotal + shippingCost;
 
-    // Create a new Order instance with the necessary values from the People model
     final newOrder = Order(
       id: DateTime.now().millisecondsSinceEpoch,
       customerId: widget.client.id.toString(),
@@ -102,22 +88,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       orderStatus: 'Pending',
       notes: '',
       archived: false,
-      orderedItems: orderedItems, // Add this line
+      orderedItems: orderedItems,
     );
 
-    Future<void> createOrder(
-        Order order, List<OrderedItem> orderedItems) async {
-      print("Creating new order...");
-      print("Order data: ${newOrder.toMap()}");
-      print(
-          "Ordered items data: ${orderedItems.map((e) => e.toMap()).toList()}");
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    orderProvider.addOrder(newOrder);
 
-      await OrderPostgres().createOrder(newOrder, orderedItems);
-    }
-
-    await createOrder(
-        newOrder, orderedItems); // Call the 'createOrder' method here
-    sendNewOrderNotification();
+    // Save the order to the database
+    final ordersDbManager = OrderPostgres(
+        orderProvider: orderProvider); // create an instance of OrdersDbManager
+    await ordersDbManager.createOrder(
+        newOrder, orderedItems); // call the createOrder method on the instance
   }
 
   Future<void> sendNewOrderNotification() async {
@@ -188,10 +169,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 itemCount: orderedItems.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    // Add the 'return' statement here
                     title: Text(orderedItems[index].productName),
                     trailing: Text('\$${orderedItems[index].price}'),
-                    // Use 'price' instead of 'productRetailPrice'
                     subtitle: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -208,7 +187,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         text: orderedItems[index]
                                             .quantity
                                             .toString());
-                                // Add TextEditingController for the price
                                 TextEditingController priceController =
                                     TextEditingController(
                                         text: orderedItems[index]
@@ -251,7 +229,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           orderedItems[index].quantity =
                                               int.parse(
                                                   quantityController.text);
-                                          // Update the price of the ordered item
                                           orderedItems[index].price =
                                               double.parse(
                                                   priceController.text);
@@ -365,9 +342,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
-      var itemSourceController = TextEditingController(
-          text: selectedProduct.itemSource ??
-              ''); // Set the initial value for the itemSourceController
+      var itemSourceController =
+          TextEditingController(text: selectedProduct.itemSource ?? '');
 
       final result = await showDialog<Map<String, dynamic>>(
         context: context,

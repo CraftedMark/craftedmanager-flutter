@@ -164,9 +164,8 @@ class _OrdersListState extends State<OrdersList> {
                       order: order,
                       customer: customer,
                       orderedItems: orderedItems,
-                      products: products,
                       onStateChanged: () {
-                        setState(() {});
+                        // Handle state change if needed
                       },
                     ),
                   ),
