@@ -92,13 +92,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
 
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    orderProvider.addOrder(newOrder);
+    // orderProvider.addOrder(newOrder);
 
     // Save the order to the database
-    final ordersDbManager = OrderPostgres(
-        orderProvider: orderProvider); // create an instance of OrdersDbManager
-    await ordersDbManager.createOrder(
-        newOrder, orderedItems); // call the createOrder method on the instance
+    await OrderPostgres().createOrder(newOrder, orderedItems);
+    // Send notification to subscribed device
+    sendNewOrderNotification();
   }
 
   Future<void> sendNewOrderNotification() async {
