@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:postgres/postgres.dart';
 
 // Establishes a connection to the PostgreSQL database

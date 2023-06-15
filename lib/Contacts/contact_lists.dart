@@ -20,9 +20,7 @@ class ContactsListState extends State<ContactsList> {
   @override
   void initState() {
     super.initState();
-    connectToPostgres().then((_) {
-      refreshContacts();
-    });
+    refreshContacts();
   }
 
   Future<void> refreshContacts() async {
