@@ -1,9 +1,11 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/ProductionList/production_list_db_manager.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
+import 'package:provider/provider.dart';
 
 class ProductionList extends StatefulWidget {
   final String itemSource;
@@ -27,14 +29,17 @@ class _ProductionListState extends State<ProductionList> {
   @override
   void initState() {
     super.initState();
-    manageOrders();
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      await Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+      Provider.of<OrderProvider>(context, listen: false)
+          .filterOrderedItems(widget.itemSource);
+    });
   }
 
-  Future<void> manageOrders() async{
+  Future<void> manageOrders() async {
     await fetchOrders();
     filteredItems = getFilteredOrderedItems();
     setState(() {});
-
   }
 
   Future<void> fetchOrders() async {
@@ -53,10 +58,10 @@ class _ProductionListState extends State<ProductionList> {
 
     filteredItems.sort((a, b) => a.productId.compareTo(b.productId));
 
-    for(var i = 1; i<filteredItems.length;i++){
-      var prev = filteredItems[i-1];
+    for (var i = 1; i < filteredItems.length; i++) {
+      var prev = filteredItems[i - 1];
       var current = filteredItems[i];
-      if(prev.productId == current.productId){
+      if (prev.productId == current.productId) {
         prev.quantity += current.quantity;
         filteredItems.removeAt(i);
         i--;
@@ -67,11 +72,12 @@ class _ProductionListState extends State<ProductionList> {
 
   @override
   Widget build(BuildContext context) {
-    // Log the itemSource and orders values received
+// Log the itemSource and orders values received
     debugPrint('ItemSource: ${widget.itemSource}');
     debugPrint('Orders: ${orders.map((e) => e.toString()).join(", ")}');
+    var orderProvider = context.watch<OrderProvider>();
+    var filteredItems = orderProvider.filteredItems;
 
-    // filteredItems = getFilteredOrderedItems();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -101,8 +107,14 @@ class _ProductionListState extends State<ProductionList> {
                   itemBuilder: (context, index) {
                     OrderedItem item = filteredItems[index];
                     return ListTile(
-                      title: Text(item.productName, style: TextStyle(color: Colors.black),),
-                      subtitle: Text('Quantity: ${item.quantity}', style: TextStyle(color: Colors.black),),
+                      title: Text(
+                        item.productName,
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      subtitle: Text(
+                        'Quantity: ${item.quantity}',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     );
                   },
                 )

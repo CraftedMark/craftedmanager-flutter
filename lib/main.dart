@@ -1,21 +1,20 @@
 import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
-import 'package:crafted_manager/Models/order_model.dart';
-import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/Orders/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:provider/provider.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
@@ -27,7 +26,12 @@ Future<void> main() async {
     });
   }
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => OrderProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -60,9 +64,11 @@ class MyApp extends StatelessWidget {
         ),
         iconTheme: IconThemeData(color: Color(0xFFB085F5)),
       ),
-      home: ProductionList(
-        orderedItems: [],
-        itemSource: 'Production',
+      home: Builder(
+        builder: (context) => ProductionList(
+          orderedItems: [],
+          itemSource: 'Production',
+        ),
       ),
     );
   }

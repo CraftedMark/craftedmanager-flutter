@@ -169,7 +169,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     }
   }
 
-  Future<List<Order>> getAllOrders() async {
+  static Future<List<Order>> getAllOrders() async {
     final orders = <Order>[];
     try {
       final connection = await openConnection();
