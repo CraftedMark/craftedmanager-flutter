@@ -17,6 +17,10 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  PostgreSQLConnectionManager.init();
+  await PostgreSQLConnectionManager.open();
+
   OrderProvider provider = OrderProvider();
 
   if (!Platform.isWindows) {
@@ -86,7 +90,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-
+  @override
+  void dispose() {
+    PostgreSQLConnectionManager.disconnect();
+    super.dispose();
+  }
 }
 
 class SliderView extends StatelessWidget {
