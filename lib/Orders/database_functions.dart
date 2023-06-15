@@ -1,32 +1,16 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:postgres/postgres.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Establishes a connection to the PostgreSQL database
-Future<PostgreSQLConnection> connectToPostgres() async {
-  final connection = PostgreSQLConnection(
-    'web.craftedsolutions.co', // Database host
-    5432, // Port number
-    'craftedmanager_db', // Database name
-    username: 'craftedmanager_dbuser', // Database username
-    password: '!!Laganga1983', // Database password
-  );
+import '../PostresqlConnection/postqresql_connection_manager.dart';
 
-  await connection.open();
-  debugPrint('Connected to PostgreSQL');
-  return connection;
-}
 
 // Fetches the schema for the specified table
 Future<List<Map<String, dynamic>>> fetchTableSchema(String tableName) async {
-  final connection = await connectToPostgres();
+  final connection = PostgreSQLConnectionManager.connection;
   final result = await connection.query(
       'SELECT column_name, data_type FROM information_schema.columns WHERE table_name = @tableName',
       substitutionValues: {'tableName': tableName});
-  await connection.close();
-  debugPrint('Closed connection to PostgreSQL');
 
   if (kDebugMode) {
     debugPrint('Fetched $tableName schema: $result');
@@ -37,11 +21,9 @@ Future<List<Map<String, dynamic>>> fetchTableSchema(String tableName) async {
 
 // Fetches the schema for all tables in the database and stores them in SharedPreferences
 Future<void> fetchAndStoreAllSchemas() async {
-  final connection = await connectToPostgres();
+  final connection = PostgreSQLConnectionManager.connection;
   final result = await connection.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'");
-  await connection.close();
-  debugPrint('Closed connection to PostgreSQL');
 
   if (result != null) {
     final allSchemas = <String, List<Map<String, dynamic>>>{};

@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:crafted_manager/postgres.dart';
 
+import '../PostresqlConnection/postqresql_connection_manager.dart';
+
 class OrdersPostgres {
   static Future<List<Map<String, dynamic>>> fetchAllOrders() async {
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     // Replace 'orders' with your table name
     final results = await connection.query('SELECT * FROM orders');
 
@@ -12,11 +14,6 @@ class OrdersPostgres {
     for (final row in results) {
       orders.add(row.toColumnMap());
     }
-    print("------------------------------------");
-    print("Orders received from Postgres");
-    orders.forEach((o) =>print( o["order_id"]));
-    print("------------------------------------");
-    await connection.close();
     return orders;
   }
 }

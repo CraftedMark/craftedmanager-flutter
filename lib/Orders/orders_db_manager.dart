@@ -5,28 +5,10 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:postgres/postgres.dart';
 
+import '../PostresqlConnection/postqresql_connection_manager.dart';
+
 class OrderPostgres {
   OrderPostgres();
-
-  static Future<PostgreSQLConnection> openConnection() async {
-    print('Opening connection...');
-    final connection = PostgreSQLConnection(
-      'web.craftedsolutions.co', // Database host
-      5432, // Port number
-      'craftedmanager_db', // Database name
-      username: 'craftedmanager_dbuser', // Database username
-      password: '!!Laganga1983', // Database password
-    );
-    await connection.open();
-    print('Connection opened');
-    return connection;
-  }
-
-  static Future<void> closeConnection(PostgreSQLConnection connection) async {
-    print('Closing connection...');
-    await connection.close();
-    print('Connection closed');
-  }
 
   static Future<int?> getProductId(
       PostgreSQLExecutionContext ctx, String productName) async {
@@ -58,8 +40,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
 
   Future<bool> updateOrderStatus(Order updatedOrder) async {
     try {
-      final connection = await openConnection();
-      print('Connection opened');
+      final connection = PostgreSQLConnectionManager.connection;
 
       await connection.transaction((ctx) async {
         print('Updating order status with values: ${updatedOrder.toMap()}');
@@ -75,8 +56,6 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         print('Order status updated');
       });
 
-      await closeConnection(connection);
-      print('Connection closed');
       return true;
     } catch (e) {
       print('Error: ${e.toString()}');
@@ -87,8 +66,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
   static Future<bool> updateOrder(
       Order order, List<OrderedItem> orderedItems) async {
     try {
-      final connection = await openConnection();
-      print('Connection opened');
+      final connection = PostgreSQLConnectionManager.connection;
 
       await connection.transaction((ctx) async {
         print('Updating order with values: ${order.toMap()}');
@@ -133,8 +111,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
         }
       });
 
-      await closeConnection(connection);
-      print('Connection closed');
       return true;
     } catch (e) {
       print('Error: ${e.toString()}');
@@ -144,8 +120,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
 
   Future<bool> updateOrderStatusAndArchived(Order updatedOrder) async {
     try {
-      final connection = await openConnection();
-      print('Connection opened');
+      final connection = PostgreSQLConnectionManager.connection;
 
       await connection.transaction((ctx) async {
         print(
@@ -162,9 +137,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
         });
         print('Order status and archived updated');
       });
-
-      await closeConnection(connection);
-      print('Connection closed');
       return true;
     } catch (e) {
       print('Error: ${e.toString()}');
@@ -175,7 +147,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
   static Future<List<Order>> getAllOrders() async {
     final orders = <Order>[];
     try {
-      final connection = await openConnection();
+      final connection = PostgreSQLConnectionManager.connection;
       List<Map<String, Map<String, dynamic>>> results =
           await connection.mappedResultsQuery('''
     SELECT * FROM orders
@@ -185,7 +157,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
       for (var row in results) {
         orders.add(Order.fromMap(row.values.first));
       }
-      await closeConnection(connection);
     } catch (e) {
       print(e.toString());
     }
@@ -197,15 +168,13 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
 
   static Future<Order?> getOrderById(String id) async {
     try {
-      final connection = await openConnection();
+      final connection = PostgreSQLConnectionManager.connection;
       List<Map<String, Map<String, dynamic>>> results =
           await connection.mappedResultsQuery('''
     SELECT * FROM orders WHERE order_id = @id
   ''', substitutionValues: {
         'id': id,
       });
-
-      await closeConnection(connection);
 
       if (results.isNotEmpty) {
         return Order.fromMap(results.first.values.first);
@@ -220,7 +189,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
 
   static Future<void> deleteOrder(String id) async {
     try {
-      final connection = await openConnection();
+      final connection = PostgreSQLConnectionManager.connection;
       await connection.transaction((ctx) async {
         // Delete ordered items for this order
         await ctx.query('''
@@ -236,20 +205,15 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
           'id': id,
         });
       });
-      await closeConnection(connection);
     } catch (e) {
       print(e.toString());
     }
   }
 
   Future<void> createOrder(Order order, List<OrderedItem> orderedItems) async {
-    PostgreSQLConnection? connection;
+    PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
-      print('Opening connection...');
-      connection = await openConnection();
-      print('Connection opened.');
-
-      await connection.transaction((ctx) async {
+        await connection.transaction((ctx) async {
         // Insert order into orders table
         print('Inserting order into orders table...');
         print('Order data: ${order.toMap()}');
@@ -286,12 +250,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
       print('Order created.');
     } catch (e) {
       print('Error creating order: ${e.toString()}');
-    } finally {
-      if (connection != null) {
-        print('Closing connection...');
-        await connection.close();
-        print('Connection closed.');
-      }
     }
   }
 }

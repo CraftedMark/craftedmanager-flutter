@@ -1,20 +1,12 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:postgres/postgres.dart';
 
 class ProductionListDbManager {
-  ProductionListDbManager._();
-
-  static final connection = PostgreSQLConnection(
-    'web.craftedsolutions.co', // Database host
-    5432, // Port number
-    'craftedmanager_db', // Database name
-    username: 'craftedmanager_dbuser', // Database username
-    password: '!!Laganga1983', // Database password
-  );
 
   static Future<List<Order>> getOpenOrdersWithAllOrderedItems() async {
-    await connection.open();
+    var connection = PostgreSQLConnectionManager.connection;
     final ordersResult = await connection.query('SELECT * FROM orders');
 
     final List<Order> openOrders = ordersResult
@@ -32,8 +24,6 @@ class ProductionListDbManager {
           .map((data) => OrderedItem.fromMap(data.toColumnMap()))
           .toList();
     }
-
-    await connection.close();
     return openOrders;
   }
 }
