@@ -13,10 +13,6 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
 
   List<People> _searchResults = [];
 
-  @override
-  void initState() {
-    super.initState();
-  }
 
   Future<void> _fetchPeople(String query) async {
     // Define the details you want to search customers by
@@ -56,6 +52,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text('Search People'),
           leading: GestureDetector(

@@ -29,7 +29,7 @@ class _ProductionListState extends State<ProductionList> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<OrderProvider>(context, listen: false).fetchOrders();
       Provider.of<OrderProvider>(context, listen: false)
           .filterOrderedItems(widget.itemSource);
@@ -72,9 +72,6 @@ class _ProductionListState extends State<ProductionList> {
 
   @override
   Widget build(BuildContext context) {
-// Log the itemSource and orders values received
-    debugPrint('ItemSource: ${widget.itemSource}');
-    debugPrint('Orders: ${orders.map((e) => e.toString()).join(", ")}');
     var orderProvider = context.watch<OrderProvider>();
     var filteredItems = orderProvider.filteredItems;
 
