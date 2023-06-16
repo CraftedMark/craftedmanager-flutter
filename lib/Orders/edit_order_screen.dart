@@ -8,16 +8,16 @@ import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'ordered_item_postgres.dart';
+
 class EditOrderScreen extends StatefulWidget {
   final Order order;
   final People customer;
-  final List<OrderedItem> orderedItems;
   final List<Product> products;
 
-  EditOrderScreen({
+  const EditOrderScreen({
     required this.order,
     required this.customer,
-    required this.orderedItems,
     required this.products,
   });
 
@@ -26,21 +26,22 @@ class EditOrderScreen extends StatefulWidget {
 }
 
 class _EditOrderScreenState extends State<EditOrderScreen> {
-  late List<OrderedItem> _orderedItems;
-  late OrderPostgres _orderPostgres;
+  List<OrderedItem> _orderedItems = [];
   double _subTotal = 0.0;
   String _status = '';
 
   @override
   void initState() {
     super.initState();
-
-    _orderedItems = List.from(widget.orderedItems);
     _subTotal = calculateSubtotal();
     _status = widget.order.orderStatus;
     if (!['Pending', 'In-Progress', 'Completed'].contains(_status)) {
       _status = 'Pending';
     }
+  }
+
+  Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
+    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
   }
 
   double calculateSubtotal() {
@@ -143,182 +144,191 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       ),
       body: Consumer<OrderProvider>(
         builder: (context, orderProvider, child) {
-          return ListView(
-            children: [
-              SizedBox(height: 12.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          return FutureBuilder(
+            future: getOrderedItemsByOrderId(),
+            builder: (_, snapshot){
+              if(snapshot.hasData){
+                _orderedItems = snapshot.data!;
+                return ListView(
                   children: [
-                    Text(
-                      'Order information',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(height: 12),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Customer:',
-                        border: OutlineInputBorder(),
-                      ),
-                      enabled: false,
-                      initialValue: widget.customer.firstName +
-                          ' ' +
-                          widget.customer.lastName,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    List<Product> products = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ProductSearchScreen(products: widget.products),
-                      ),
-                    );
-
-                    if (products != null && products.isNotEmpty) {
-                      final result = await showDialog<Map<String, dynamic>>(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            AddOrderedItemDialog(products: products),
-                      );
-
-                      if (result != null) {
-                        addOrderedItem(result['product'], result['quantity']);
-                      }
-                    }
-                  },
-                  child: Text('Add Item'),
-                ),
-              ),
-              SizedBox(height: 10.0),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: _orderedItems.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      title: TextFormField(
-                        initialValue: _orderedItems[index].productName,
-                        decoration: InputDecoration(
-                          labelText: 'Product Name',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          updateOrderedItem(
-                            index,
-                            value,
-                            _orderedItems[index].price,
-                            _orderedItems[index].quantity,
-                          );
-                        },
-                      ),
-                      subtitle: Column(
+                    SizedBox(height: 12.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextFormField(
-                            initialValue:
-                                _orderedItems[index].price.toStringAsFixed(2),
-                            keyboardType: TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Price',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (value) {
-                              updateOrderedItem(
-                                index,
-                                _orderedItems[index].productName,
-                                double.tryParse(value) ??
-                                    _orderedItems[index].price,
-                                _orderedItems[index].quantity,
-                              );
-                            },
+                          Text(
+                            'Order information',
+                            style: TextStyle(fontSize: 18),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 12),
                           TextFormField(
-                            initialValue:
-                                _orderedItems[index].quantity.toString(),
-                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Quantity',
+                              labelText: 'Customer:',
                               border: OutlineInputBorder(),
                             ),
-                            onChanged: (value) {
-                              updateOrderedItem(
-                                index,
-                                _orderedItems[index].productName,
-                                _orderedItems[index].price,
-                                int.tryParse(value) ??
-                                    _orderedItems[index].quantity,
-                              );
-                            },
+                            enabled: false,
+                            initialValue: widget.customer.firstName +
+                                ' ' +
+                                widget.customer.lastName,
                           ),
                         ],
                       ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle_outline),
-                        onPressed: () => editOrderedItem(index),
+                    ),
+                    SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          List<Product> products = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductSearchScreen(products: widget.products),
+                            ),
+                          );
+
+                          if (products != null && products.isNotEmpty) {
+                            final result = await showDialog<Map<String, dynamic>>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  AddOrderedItemDialog(products: products),
+                            );
+
+                            if (result != null) {
+                              addOrderedItem(result['product'], result['quantity']);
+                            }
+                          }
+                        },
+                        child: Text('Add Item'),
                       ),
                     ),
-                  );
-                },
-              ),
-              SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Sub Total:',
-                    border: OutlineInputBorder(),
-                  ),
-                  enabled: false,
-                  initialValue: '\$$_subTotal',
-                ),
-              ),
-              SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Order Status:',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _status,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _status = newValue!;
-                    });
-                  },
-                  items: ['Pending', 'In-Progress', 'Completed']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-              SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: ElevatedButton(
-                  onPressed: () {
-                    updateOrder(orderProvider);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Save'),
-                ),
-              ),
-            ],
+                    SizedBox(height: 10.0),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: _orderedItems.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: TextFormField(
+                              initialValue: _orderedItems[index].productName,
+                              decoration: InputDecoration(
+                                labelText: 'Product Name',
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) {
+                                updateOrderedItem(
+                                  index,
+                                  value,
+                                  _orderedItems[index].price,
+                                  _orderedItems[index].quantity,
+                                );
+                              },
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  initialValue:
+                                  _orderedItems[index].price.toStringAsFixed(2),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: 'Price',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (value) {
+                                    updateOrderedItem(
+                                      index,
+                                      _orderedItems[index].productName,
+                                      double.tryParse(value) ??
+                                          _orderedItems[index].price,
+                                      _orderedItems[index].quantity,
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  initialValue:
+                                  _orderedItems[index].quantity.toString(),
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Quantity',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (value) {
+                                    updateOrderedItem(
+                                      index,
+                                      _orderedItems[index].productName,
+                                      _orderedItems[index].price,
+                                      int.tryParse(value) ??
+                                          _orderedItems[index].quantity,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.remove_circle_outline),
+                              onPressed: () => editOrderedItem(index),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Sub Total:',
+                          border: OutlineInputBorder(),
+                        ),
+                        enabled: false,
+                        initialValue: '\$$_subTotal',
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Order Status:',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _status,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _status = newValue!;
+                          });
+                        },
+                        items: ['Pending', 'In-Progress', 'Completed']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          updateOrder(orderProvider);
+                          Navigator.pop(context);
+                        },
+                        child: Text('Save'),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary));
+            },
           );
         },
       ),

@@ -34,7 +34,7 @@ class OrdersList extends StatefulWidget {
 
 class _OrdersListState extends State<OrdersList> {
 
-
+  var cachedCustomers = <People>{};
 
   Future<void> _refreshOrdersList() async {
     setState(() {});
@@ -45,9 +45,9 @@ class _OrdersListState extends State<OrdersList> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(widget.title, style: TextStyle(color: Colors.white)),
+        title: Text(widget.title, style: const TextStyle(color: Colors.white)),
         actions: [
-          if(widget.listType != OrderListType.archived)
+          if( widget.listType != OrderListType.archived)
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -78,7 +78,7 @@ class _OrdersListState extends State<OrdersList> {
             return EasyRefresh(
               child: ListView.builder(
                 cacheExtent: 10000,//for cache more orders in one time(UI)
-                addAutomaticKeepAlives: true,
+                // addAutomaticKeepAlives: true,
                 itemCount: sortedOrders.length,
                 itemBuilder: (BuildContext context, int index) {
                   return _OrderWidget(order: sortedOrders[index]);
@@ -230,17 +230,12 @@ class _OrderWidget extends StatelessWidget {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () async {
-                // Fetch customer, orderedItems, and products data here
-                List<OrderedItem> orderedItems =
-                await fetchOrderedItems(order.id);
-
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => OrderDetailScreen(
                       order: order,
                       customer: customer,
-                      orderedItems: orderedItems,
                       onStateChanged: () {
                         // Handle state change if needed
                       },
