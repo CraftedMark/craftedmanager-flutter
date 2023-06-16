@@ -28,7 +28,7 @@ class PostgreSQLConnectionManager{
     }
   }
 
-  static Future<void> disconnect() async {
+  static Future<void> close() async {
     if(_connection != null){
       await _connection!.close();
     }
