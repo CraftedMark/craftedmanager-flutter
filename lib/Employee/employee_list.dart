@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/employee_model.dart';
 import 'package:flutter/material.dart';
 
 import 'add_employee.dart'; // Import the EmployeePage
+import 'employee_detail.dart';
 
 class EmployeeManager extends StatefulWidget {
   @override
@@ -43,7 +44,13 @@ class _EmployeeManagerState extends State<EmployeeManager> {
                   title: Text('${employee.firstName} ${employee.lastName}'),
                   subtitle: Text(employee.email),
                   onTap: () {
-                    // TODO: Navigate to Employee Detail screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EmployeeDetail(employee: employee),
+                      ),
+                    );
                   },
                 );
               },

@@ -7,14 +7,14 @@ class EmployeeDatabaseManager {
   final PostgreSQLConnection _connection =
       PostgreSQLConnectionManager.connection;
 
-  Future<int> createEmployee(Employee employee) async {
+  Future<void> createEmployee(Employee employee) async {
     // Check if there already exists an employee with the same first name, last name or email
     var existingEmployees = await _connection.query(
-      'SELECT * FROM employee WHERE firstName = @a AND lastName = @b OR email = @c',
+      'SELECT * FROM employee WHERE firstName = @firstName AND lastName = @lastName OR email = @email',
       substitutionValues: {
-        'a': employee.firstName,
-        'b': employee.lastName,
-        'c': employee.email,
+        'firstName': employee.firstName,
+        'lastName': employee.lastName,
+        'email': employee.email,
       },
     );
 
@@ -22,20 +22,20 @@ class EmployeeDatabaseManager {
       throw Exception('Employee with the same name or email already exists');
     }
 
-    // SQL statement to insert a new Employee if no duplicate is found
-    var result = await _connection.query(
-      'INSERT INTO employee (firstname, lastname, payrate, phone, position, email, dateofhire) VALUES (@a, @b, @c, @d, @e, @f, @g)',
+    // Save the employee data to the database
+    await _connection.query(
+      'INSERT INTO employee (firstName, lastName, payRate, phone, position, email, dateOfHire, imagePath) VALUES (@firstName, @lastName, @payRate, @phone, @position, @email, @dateOfHire, @imagePath)',
       substitutionValues: {
-        'a': employee.firstName,
-        'b': employee.lastName,
-        'c': employee.payRate,
-        'd': employee.phone,
-        'e': employee.position,
-        'f': employee.email,
-        'g': employee.dateOfHire?.toIso8601String(),
+        'firstName': employee.firstName,
+        'lastName': employee.lastName,
+        'payRate': employee.payRate,
+        'phone': employee.phone,
+        'position': employee.position,
+        'email': employee.email,
+        'dateOfHire': employee.dateOfHire?.toIso8601String(),
+        'imagePath': employee.imagePath,
       },
     );
-    return result.affectedRowCount;
   }
 
   Future<List<Employee>> getEmployees() async {

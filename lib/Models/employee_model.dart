@@ -1,5 +1,5 @@
 class Employee {
-  final String? employeeID;
+  final int? employeeID;
   final String firstName;
   final String lastName;
   final double payRate;
@@ -7,6 +7,8 @@ class Employee {
   final String position;
   final String email;
   final String phone;
+  final String imageUrl; // Add this field for image URL
+  String imagePath;
 
   Employee({
     this.employeeID,
@@ -17,18 +19,24 @@ class Employee {
     required this.position,
     required this.email,
     required this.phone,
+    required this.imageUrl, // Add this field for image URL
+    required this.imagePath, // Add this line
   });
 
   factory Employee.fromMap(Map<String, dynamic> map) {
     return Employee(
-      employeeID: map['id']?.toString(),
+      employeeID: map['id'] as int?,
       firstName: map['firstname'] as String? ?? '',
       lastName: map['lastname'] as String? ?? '',
-      payRate: double.parse(map['payrate'].toString()),
+      payRate: (map['payrate'] as String?) != null
+          ? double.tryParse(map['payrate'] as String) ?? 0.0
+          : 0.0,
       phone: map['phone'] as String? ?? '',
       position: map['position'] as String? ?? '',
       email: map['email'] as String? ?? '',
       dateOfHire: map['dateofhire'] as DateTime?,
+      imageUrl: map['imageurl'] as String? ?? '',
+      imagePath: map["imagePath"] as String? ?? '', // Add this line
     );
   }
 
@@ -41,5 +49,7 @@ class Employee {
         "Position": position,
         "Email": email,
         "Phone": phone,
+        "imageurl": imageUrl,
+        "imagePath": imagePath, // Add this line// Add this field for image URL
       };
 }
