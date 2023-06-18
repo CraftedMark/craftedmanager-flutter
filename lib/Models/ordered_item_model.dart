@@ -11,6 +11,7 @@ class OrderedItem {
   double productRetailPrice;
   String status;
   String itemSource;
+  String packaging;
 
   OrderedItem({
     required this.id,
@@ -25,6 +26,7 @@ class OrderedItem {
     required this.productRetailPrice,
     required this.status,
     required this.itemSource,
+    required this.packaging,
   });
 
   OrderedItem copyWith({
@@ -40,6 +42,7 @@ class OrderedItem {
     double? productRetailPrice,
     String? status,
     String? itemSource,
+    String? packaging,
   }) {
     return OrderedItem(
       id: id ?? this.id,
@@ -54,6 +57,7 @@ class OrderedItem {
       productRetailPrice: productRetailPrice ?? this.productRetailPrice,
       status: status ?? this.status,
       itemSource: itemSource ?? this.itemSource,
+      packaging: packaging ?? this.packaging,
     );
   }
 
@@ -83,6 +87,7 @@ class OrderedItem {
       productRetailPrice: parseNum(map['retail_price']).toDouble(),
       status: map['status'] ?? "Unknown",
       itemSource: map['item_source'] ?? "Unknown",
+      packaging: map['packaging'] ?? "Unknown",
     );
   }
 
@@ -99,6 +104,7 @@ class OrderedItem {
       'retail_price': productRetailPrice,
       'status': status,
       'item_source': itemSource,
+      'packaging': packaging,
     };
   }
 }

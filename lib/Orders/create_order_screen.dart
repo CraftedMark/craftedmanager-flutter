@@ -42,8 +42,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     return customPrice;
   }
 
-  Future<void> addOrderedItem(
-      Product product, int quantity, String item_source) async {
+  Future<void> addOrderedItem(Product product, int quantity, String itemSource,
+      String packaging) async {
     double? customPrice =
         await getCustomProductPrice(product.id!, widget.client.id);
 
@@ -63,7 +63,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
         itemSource:
-            item_source.isNotEmpty ? item_source : product.itemSource ?? '',
+            itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
+        packaging: packaging,
       ));
     });
   }
@@ -92,11 +93,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
 
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    // orderProvider.addOrder(newOrder);
-
-    // Save the order to the database
     await OrderPostgres().createOrder(newOrder, orderedItems);
-    // Send notification to subscribed device
     sendNewOrderNotification();
   }
 
@@ -115,11 +112,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       (previousValue, element) =>
           previousValue + (element.productRetailPrice * element.quantity),
     );
-    void updateOrderedItemPrice(int index, double newPrice) {
-      setState(() {
-        orderedItems[index].price = newPrice;
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -191,8 +183,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         text: orderedItems[index]
                                             .price
                                             .toString());
+                                TextEditingController packagingController =
+                                    TextEditingController(
+                                        text: orderedItems[index].packaging);
                                 return AlertDialog(
-                                  title: const Text('Edit Quantity and Price'),
+                                  title: const Text(
+                                      'Edit Quantity, Price, and Packaging'),
                                   content: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -210,6 +206,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         keyboardType: TextInputType.number,
                                         decoration: const InputDecoration(
                                           labelText: 'Price',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: packagingController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Packaging',
                                           border: OutlineInputBorder(),
                                         ),
                                       ),
@@ -231,6 +235,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           orderedItems[index].price =
                                               double.parse(
                                                   priceController.text);
+                                          orderedItems[index].packaging =
+                                              packagingController.text;
                                         });
                                         Navigator.pop(context);
                                       },
@@ -343,12 +349,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       var quantityController = TextEditingController(text: '1');
       var itemSourceController =
           TextEditingController(text: selectedProduct.itemSource ?? '');
+      var packagingController = TextEditingController();
 
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Enter Quantity and Item Source'),
+            title: const Text('Enter Quantity, Item Source, and Packaging'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -368,6 +375,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: packagingController,
+                  decoration: const InputDecoration(
+                    labelText: 'Packaging',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -384,6 +399,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     {
                       'quantity': int.parse(quantityController.text),
                       'itemSource': itemSourceController.text,
+                      'packaging': packagingController.text,
                     },
                   );
                 },
@@ -397,7 +413,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       if (result != null) {
         int quantity = result['quantity'];
         String itemSource = result['itemSource'];
-        await addOrderedItem(selectedProduct, quantity, itemSource);
+        String packaging = result['packaging'];
+        await addOrderedItem(selectedProduct, quantity, itemSource, packaging);
       }
     }
   }

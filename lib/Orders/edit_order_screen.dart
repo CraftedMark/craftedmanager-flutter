@@ -93,6 +93,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           productRetailPrice: product.retailPrice,
           status: 'Processing',
           itemSource: '',
+          packaging: '',
         ));
         _subTotal = calculateSubtotal();
       });

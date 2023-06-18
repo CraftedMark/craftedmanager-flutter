@@ -1,5 +1,6 @@
 import 'package:crafted_manager/Admin/create_user.dart';
 import 'package:crafted_manager/CBP/cbp_people_search.dart';
+import 'package:crafted_manager/Employee/employee_list.dart';
 import 'package:crafted_manager/Ingredients/ingredient_list.dart';
 import 'package:crafted_manager/Invoice/invoice_screen.dart';
 import 'package:crafted_manager/Orders/orders_list.dart';
@@ -110,6 +111,18 @@ List<MenuItem> menuItems = [
     ],
   ),
   MenuItem(
+    title: "Production",
+    iconData: Icons.account_balance,
+    destination: Container(),
+    subItems: [
+      MenuItem(
+        title: "Production Sheets",
+        iconData: Icons.money_off,
+        destination: FinancialScreen(),
+      ),
+    ],
+  ),
+  MenuItem(
     title: "Accounting",
     iconData: Icons.account_balance,
     destination: Container(),
@@ -122,12 +135,22 @@ List<MenuItem> menuItems = [
     ],
   ),
   MenuItem(
-    title: "Admin",
+    title: "Management",
     iconData: Icons.account_balance,
     destination: Container(),
     subItems: [
       MenuItem(
         title: "Users",
+        iconData: Icons.money_off,
+        destination: UserCreate(),
+      ),
+      MenuItem(
+        title: "Employees",
+        iconData: Icons.money_off,
+        destination: EmployeeManager(),
+      ),
+      MenuItem(
+        title: "Labor Rates",
         iconData: Icons.money_off,
         destination: UserCreate(),
       ),
