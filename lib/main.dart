@@ -53,7 +53,34 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async  {
+
+    if(state == AppLifecycleState.paused){
+      await PostgreSQLConnectionManager.close();
+    }
+    if(state == AppLifecycleState.resumed){
+      PostgreSQLConnectionManager.init();
+      await PostgreSQLConnectionManager.open();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -88,12 +115,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    PostgreSQLConnectionManager.disconnect();
-    super.dispose();
   }
 }
 

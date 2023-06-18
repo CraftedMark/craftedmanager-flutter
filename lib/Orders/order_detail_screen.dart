@@ -13,13 +13,11 @@ class OrderDetailScreen extends StatefulWidget {
     Key? key,
     required this.order,
     required this.customer,
-    required this.orderedItems,
     required this.onStateChanged,
   }) : super(key: key);
 
   final People customer;
   final Order order;
-  final List<OrderedItem> orderedItems;
   final VoidCallback onStateChanged;
 
   @override
@@ -49,7 +47,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     final orderProvider = Provider.of<OrderProvider>(context);
     final order = orderProvider.getOrderedItemsForOrder(widget.order.id);
-    final orderedItems = widget.orderedItems;
 
     return CupertinoApp(
       theme: const CupertinoThemeData(
@@ -116,6 +113,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   Widget _topBarGoBack() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.pop(context);
       },
@@ -142,7 +140,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             builder: (context) => EditOrderScreen(
               order: widget.order,
               customer: widget.customer,
-              orderedItems: widget.orderedItems, // Update this line
               products: [],
             ),
           ),
