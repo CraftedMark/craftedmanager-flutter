@@ -36,7 +36,7 @@ void main() async {
     });
   }
 
-  WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
+  WooSignalService.init();
   runApp(
     ChangeNotifierProvider(
       create: (context) => provider,
