@@ -19,6 +19,9 @@ enum OrderListType {
   archived,
 }
 
+var _cachedCustomers = <People>{};//replace with Provider
+
+
 class OrdersList extends StatefulWidget {
   final OrderListType listType;
   final String title;
@@ -35,7 +38,6 @@ class OrdersList extends StatefulWidget {
 
 class _OrdersListState extends State<OrdersList> {
 
-  var cachedCustomers = <People>{};
 
   Future<void> _refreshOrdersList() async {
     setState(() {});
@@ -117,79 +119,6 @@ class _OrdersListState extends State<OrdersList> {
   void _sortOrderByDate(List<Order> orders) {
     orders.sort((o1, o2) => o2.orderDate.compareTo(o1.orderDate));
   }
-
-  // Widget _orderWidget(Order order) {
-  //   return Container(
-  //     decoration: const BoxDecoration(
-  //       border: Border(
-  //         bottom: BorderSide(color: Colors.black),
-  //       ),
-  //     ),
-  //     child: FutureBuilder<People>(
-  //       future: _getCustomerById(int.parse(order.customerId)),
-  //       builder: (context, snapshot) {
-  //         if (snapshot.hasData) {
-  //           var customer = snapshot.data!;
-  //           return GestureDetector(
-  //             behavior: HitTestBehavior.opaque,
-  //             onTap: () async {
-  //               // Fetch customer, orderedItems, and products data here
-  //               final customer =
-  //                   await _getCustomerById(int.parse(order.customerId));
-  //               List<OrderedItem> orderedItems =
-  //                   await fetchOrderedItems(order.id);
-  //
-  //               Navigator.push(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                   builder: (context) => OrderDetailScreen(
-  //                     order: order,
-  //                     customer: customer,
-  //                     orderedItems: orderedItems,
-  //                     onStateChanged: () {
-  //                       // Handle state change if needed
-  //                     },
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //             child: Padding(
-  //               padding:
-  //                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Text(
-  //                     'Order ID: ${order.id}',
-  //                     style: const TextStyle(
-  //                       fontWeight: FontWeight.bold,
-  //                     ),
-  //                   ),
-  //                   const SizedBox(height: 4),
-  //                   Text('Total: \$${order.totalAmount}'),
-  //                   Text('Status: ${order.orderStatus}'),
-  //                   Text(
-  //                     'Order Date: ${DateFormat('MM-dd-yyyy').format(order.orderDate)}',
-  //                   ),
-  //                   Text(
-  //                       'Customer: ${customer.firstName} ${customer.lastName}'),
-  //                 ],
-  //               ),
-  //             ),
-  //           );
-  //         } else if (snapshot.hasError) {
-  //           return Center(
-  //             child: Text('Error: ${snapshot.error}'),
-  //           );
-  //         } else {
-  //           return const Center(
-  //             child: CircularProgressIndicator(),
-  //           );
-  //         }
-  //       },
-  //     ),
-  //   );
-  // }
 }
 
 Future<People> _getCustomerById(int customerId) async {
@@ -203,7 +132,14 @@ Future<People> _getCustomerById(int customerId) async {
     brand: 'brand',
     notes: 'notes',
   );
-  return await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+
+  var cachedUser = _cachedCustomers.where((c) => c.id == customerId);
+  if(cachedUser.isEmpty){
+    var newUser = await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+    _cachedCustomers.addAll([newUser]);
+    return newUser;
+  }
+  return cachedUser.first;
 }
 
 class _OrderWidget extends StatelessWidget {
@@ -226,45 +162,49 @@ class _OrderWidget extends StatelessWidget {
       child: FutureBuilder<People>(
         future: _getCustomerById(int.parse(order.customerId)),
         builder: (context, snapshot) {
+          const height = 90.0;
           if (snapshot.hasData) {
             var customer = snapshot.data!;
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderDetailScreen(
-                      order: order,
-                      customer: customer,
-                      onStateChanged: () {
-                        // Handle state change if needed
-                      },
-                    ),
-                  ),
-                );
-              },
-              child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Order ID: ${order.id}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+            return SizedBox(
+              height: height,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OrderDetailScreen(
+                        order: order,
+                        customer: customer,
+                        onStateChanged: () {
+                          // Handle state change if needed
+                        },
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text('Total: \$${order.totalAmount}'),
-                    Text('Status: ${order.orderStatus}'),
-                    Text(
-                      'Order Date: ${DateFormat('MM-dd-yyyy').format(order.orderDate)}',
-                    ),
-                    Text(
-                        'Customer: ${customer.firstName} ${customer.lastName}'),
-                  ],
+                  );
+                },
+                child: Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Order ID: ${order.id}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('Total: \$${order.totalAmount}'),
+                      Text('Status: ${order.orderStatus}'),
+                      Text(
+                        'Order Date: ${DateFormat('MM-dd-yyyy').format(order.orderDate)}',
+                      ),
+                      Text(
+                          'Customer: ${customer.firstName} ${customer.lastName}'),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -273,8 +213,11 @@ class _OrderWidget extends StatelessWidget {
               child: Text('Error: ${snapshot.error}'),
             );
           } else {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return const SizedBox.square(
+              dimension: height,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           }
         },
