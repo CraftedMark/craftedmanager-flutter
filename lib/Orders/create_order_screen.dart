@@ -113,8 +113,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       await WooSignalService.createOrder(newOrder, orderedItems);
     }
 
-    await createOrder(
-        newOrder, orderedItems); // Call the 'createOrder' method here
+    await createOrder(newOrder, orderedItems);
     sendNewOrderNotification();
   }
 
@@ -154,6 +153,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         backgroundColor: Colors.black,
         actions: [
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () async {
               await saveOrder();
               Navigator.pop(context);
