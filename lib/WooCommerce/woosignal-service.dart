@@ -182,23 +182,22 @@ class WooSignalService {
 
 
 
-  static Future<void> createOrder(Order order, List<OrderedItem> items) async {
+  static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items) async {
     final customer = await  WooSignal.instance.retrieveCustomer(id: int.parse(order.customerId));
 
-    final orderStatuses = ["processing", "completed"];
+    final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 
     List<bs.LineItems> orderedItems = List.generate(
         items.length,
         (index)  {
           final currentItem = items[index];
           return bs.LineItems(
-            // name: currentItem.productName,
+            name: currentItem.productName,
             productId: currentItem.productId,
             quantity: currentItem.quantity,
-            // subtotal: (currentItem.productRetailPrice*currentItem.quantity).toString(),
-            // taxClass: '0.0',
-            // total: (currentItem.productRetailPrice*currentItem.quantity).toString(),
-            // variationId: 0
+            subtotal: (currentItem.productRetailPrice*currentItem.quantity).toString(),
+            total: (currentItem.productRetailPrice*currentItem.quantity).toString(),
+            variationId: 0,
           );
         },
     );
@@ -211,32 +210,26 @@ class WooSignalService {
 
 
     bs.OrderWC _order = bs.OrderWC(
-      status: "processing",
-      // setPaid: false, //work
-      // paymentMethod: 'bacs',
-      billing: billing,//work
-      shipping: shipping,//work
+      status: orderStatuses[0],
+      billing: billing,
+      shipping: shipping,
+      customerNote: order.notes,
       lineItems: orderedItems,
       customerId: int.parse(order.customerId),
+      // setPaid: false, //work
+      // paymentMethod: 'bacs',
       // paymentMethodTitle: "Direct Bank Transfer",//work
       // shippingLines: [bs.ShippingLines(total: '0', methodId: "flat_rate", methodTitle: "Flat_rate")],
-      customerNote: "Test notes",
       // currency: null,
       // feeLines: null,
       // metaData: null,
       // parentId: 0,
-      // paymentMethod: null,
-      // paymentMethodTitle: null,
-      // setPaid: null,
-      // shippingLines: null,
     );
-    await WooSignal.instance.createOrder(_order);
-
+    return await WooSignal.instance.createOrder(_order);
   }
 
   static Future<List<Order>> getOrders() async {
     var wcOrders = await WooSignal.instance.getOrders();
-    wcOrders.forEach((element) {print(element.toJson());});
     return List.generate(wcOrders.length, (index) => Order.fromOrderWS(wcOrders[index]));
   }
 
@@ -249,14 +242,17 @@ class WooSignalService {
     return null;
   }
 
+  ///Delete an order
+  ///
+  /// don`t use await because WooSignal plugin has an error with parsing price field for returned value
+  static Future<void> deleteOrder (int id) async {
+    WooSignal.instance.deleteOrder(id);
+  }
 
 
 
 
-  //
-  // static Future<>  () async {
-  //   return WooSignal.instance.
-  // }
+
   //
   // static Future< >  () async {
   //   return WooSignal.instance.

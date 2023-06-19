@@ -101,10 +101,10 @@ class Order {
       id: order.id!,
       notes: order.customerNote ?? '',
       orderDate: DateTime.parse(order.dateCreated??''),
-      orderStatus: order.status??"Pending",
+      orderStatus: order.status!,
       billingAddress: order.billing!.address1!,
       productName: "Test fetch product from WooCommerce order_model.dart",
-      totalAmount: 0,
+      totalAmount: double.parse(order.total!),
       shippingAddress: order.shipping!.address1!,
     );
   }
