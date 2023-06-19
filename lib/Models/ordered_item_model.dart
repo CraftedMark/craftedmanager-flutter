@@ -101,4 +101,14 @@ class OrderedItem {
       'item_source': itemSource,
     };
   }
+  Map<String, dynamic> mapForUpdateOrder(){
+    return {
+      "name":name,
+      "product_id":productId.toString(),
+      "variation_id":0,
+      "quantity":quantity,
+      "subtotal":(productRetailPrice*quantity).toString(),
+      "total":(productRetailPrice*quantity).toString(),
+    };
+  }
 }

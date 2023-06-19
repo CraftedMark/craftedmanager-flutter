@@ -172,7 +172,6 @@ class WooSignalService {
   static Future<void> updateCustomer(People customer) async {
     var data = customer.toWSCustomer().toJson();
     data.removeWhere((key, value) => key =='username');//with [username] field don`t work
-
     await WooSignal.instance.updateCustomer(customer.id, data: data);
   }
 
@@ -181,11 +180,11 @@ class WooSignalService {
   }
 
 
+  static final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 
   static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items) async {
     final customer = await  WooSignal.instance.retrieveCustomer(id: int.parse(order.customerId));
 
-    final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 
     List<bs.LineItems> orderedItems = List.generate(
         items.length,
@@ -240,6 +239,26 @@ class WooSignalService {
       return Order.fromOrderWS(rawOrder);
     }
     return null;
+  }
+
+  static Future<void> updateOrder(Order order, List<OrderedItem> items) async {
+    print('try to update order id: ${order.id}');
+    final line =  [{"name":"Flutter", "product_id":"26", "variation_id":0, "quantity":1, "subtotal":"0.9","total":"0.9"}];
+
+    var data = <String, dynamic>{"status": orderStatuses[1]};//TODO: CHANGE
+
+    List<Map<String, dynamic>> orderedItems = List.generate(
+      items.length, (index) => items[index].mapForUpdateOrder(),
+    );
+    data.addAll({"line_items": orderedItems});
+    data.addAll({"customer_note":order.notes});
+
+    // shipping_lines
+    // fee_lines
+    // coupon_lines
+    // set_paid
+    await WooSignal.instance.updateOrder(order.id, data: data);
+
   }
 
   ///Delete an order
