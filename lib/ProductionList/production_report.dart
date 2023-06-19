@@ -1,4 +1,6 @@
+import 'package:crafted_manager/Models/employee_model.dart';
 import 'package:crafted_manager/Models/order_model.dart';
+import 'package:crafted_manager/Models/task_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +13,7 @@ class ProductionReport extends StatefulWidget {
 
 class _ProductionReportState extends State<ProductionReport> {
   final List<Task> tasks = [];
+  final List<Employee> selectedEmployees = [];
   final taskController = TextEditingController();
   final startController = TextEditingController();
   final stopController = TextEditingController();
@@ -50,7 +53,7 @@ class _ProductionReportState extends State<ProductionReport> {
   }
 
   void addTask() {
-    if (selectedOrder != null) {
+    if (selectedOrder != null && selectedEmployees.isNotEmpty) {
       try {
         DateTime startTime = DateTime.parse(startController.text);
         DateTime stopTime = DateTime.parse(stopController.text);
@@ -58,6 +61,7 @@ class _ProductionReportState extends State<ProductionReport> {
         setState(() {
           tasks.add(Task(
             selectedOrder!,
+            List<Employee>.from(selectedEmployees),
             taskController.text,
             startTime,
             stopTime,
@@ -67,6 +71,7 @@ class _ProductionReportState extends State<ProductionReport> {
           startController.clear();
           stopController.clear();
           notesController.clear();
+          selectedEmployees.clear();
         });
       } catch (e) {
         //show an error message
@@ -83,7 +88,27 @@ class _ProductionReportState extends State<ProductionReport> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              OrderDataTable(),
+              OrderDataTable(
+                (order) => setState(() {
+                  selectedOrder = order;
+                }),
+                selectedOrder ??
+                    Order(
+                      id: -1,
+                      // or any other "default" value
+                      customerId: "",
+                      orderDate: DateTime.now(),
+                      // or any other "default" value
+                      shippingAddress: "",
+                      billingAddress: "",
+                      totalAmount: 0.0,
+                      orderStatus: "",
+                      productName: "",
+                      notes: "",
+                      archived: false,
+                      orderedItems: [],
+                    ), // Provide a default Order object if selectedOrder is null
+              ),
               Form(
                 child: Column(
                   children: [
@@ -166,6 +191,7 @@ class _ProductionReportState extends State<ProductionReport> {
                   DataColumn(label: Text("Start Time")),
                   DataColumn(label: Text("Stop Time")),
                   DataColumn(label: Text("Notes")),
+                  DataColumn(label: Text("Employees")),
                 ],
                 rows: tasks
                     .map((task) => DataRow(cells: [
@@ -176,6 +202,9 @@ class _ProductionReportState extends State<ProductionReport> {
                           DataCell(Text(
                               DateFormat('hh:mm:ss').format(task.stopTime))),
                           DataCell(Text(task.notes)),
+                          DataCell(Text(task.employees
+                              .map((e) => e.firstName + ' ' + e.lastName)
+                              .join(', '))),
                         ]))
                     .toList(),
               ),
@@ -186,6 +215,14 @@ class _ProductionReportState extends State<ProductionReport> {
 }
 
 class OrderDataTable extends StatelessWidget {
+  final Function(Order) onOrderSelected;
+
+  final Order selectedOrder;
+
+  OrderDataTable(this.onOrderSelected, this.selectedOrder);
+
+  // OrderDataTable(this.onOrderSelected, Object selectedOrder);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<OrderProvider>(
@@ -200,28 +237,35 @@ class OrderDataTable extends StatelessWidget {
                   height: 300,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
-
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
-                        columnSpacing: 25,//56
+                        columnSpacing: 25, //56
                         horizontalMargin: 10,
                         columns: const [
-                            DataColumn(label: Text('Order ID')),
-                            DataColumn(label: Text('Customer ID')),
-                            DataColumn(label: Text('Customer Name')),
-                            DataColumn(label: Text('Order Status')),
+                          DataColumn(label: Text('Order ID')),
+                          DataColumn(label: Text('Customer ID')),
+                          DataColumn(label: Text('Customer Name')),
+                          DataColumn(label: Text('Order Status')),
+                          DataColumn(label: Text('Select Order')),
                         ],
                         rows: snapshot.data!
                             .map((fullOrder) => DataRow(cells: [
-                          DataCell(Text(fullOrder.order.id.toString())),
-                          DataCell(
-                              Text(fullOrder.order.customerId.toString())),
-                          DataCell(Text(fullOrder.person.firstName +
-                              " " +
-                              fullOrder.person.lastName)),
-                          DataCell(Text(fullOrder.order.orderStatus)),
-                        ]))
+                                  DataCell(Text(fullOrder.order.id.toString())),
+                                  DataCell(Text(
+                                      fullOrder.order.customerId.toString())),
+                                  DataCell(Text(fullOrder.employees
+                                      .map(
+                                          (e) => e.firstName + ' ' + e.lastName)
+                                      .join(', '))),
+                                  DataCell(Text(fullOrder.order.orderStatus)),
+                                  DataCell(Checkbox(
+                                    value: selectedOrder == fullOrder.order,
+                                    onChanged: (value) {
+                                      onOrderSelected(fullOrder.order);
+                                    },
+                                  )),
+                                ]))
                             .toList(),
                       ),
                     ),
@@ -235,14 +279,3 @@ class OrderDataTable extends StatelessWidget {
     );
   }
 }
-
-class Task {
-  Order order;
-  String name;
-  DateTime startTime;
-  DateTime stopTime;
-  String notes;
-
-  Task(this.order, this.name, this.startTime, this.stopTime, this.notes);
-}
-

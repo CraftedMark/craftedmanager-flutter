@@ -1,6 +1,8 @@
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:flutter/foundation.dart';
 
 import '../Contacts/people_db_manager.dart';
+import '../Models/employee_model.dart';
 import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
@@ -9,8 +11,9 @@ import '../ProductionList/production_list_db_manager.dart';
 class FullOrder {
   final Order order;
   final People person;
+  final List<Employee> employees;
 
-  FullOrder(this.order, this.person);
+  FullOrder(this.order, this.person, this.employees);
 }
 
 class OrderProvider with ChangeNotifier {
@@ -103,19 +106,69 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<Employee>> fetchEmployeesByOrderId(int orderId) async {
+    final connection = await PostgreSQLConnectionManager.connection;
+
+    // Query to fetch tasks related to the order.
+    // Replace 'tasks' and 'orders' with your actual table names.
+    // Replace 'employee_id', 'order_id' with your actual column names.
+    final query = '''
+    SELECT * 
+    FROM tasks 
+    WHERE order_id = @orderId;
+  ''';
+
+    final results = await connection
+        .mappedResultsQuery(query, substitutionValues: {'orderId': orderId});
+
+    if (results.isEmpty) {
+      return [];
+    }
+
+    // List to hold the fetched employees.
+    List<Employee> employees = [];
+
+    for (final row in results) {
+      // Query to fetch employee details using the employee ID.
+      final employeeQuery = '''
+      SELECT * 
+      FROM employee 
+      WHERE id = @employeeId;
+    ''';
+
+      final employeeResults = await connection.mappedResultsQuery(employeeQuery,
+          substitutionValues: {'employeeId': row['tasks']?['employee_id']});
+
+      if (employeeResults.isNotEmpty) {
+        final employeeMap = employeeResults.first['employees'];
+        final employee = Employee.fromMap(employeeMap!);
+        employees.add(employee);
+      }
+    }
+
+    return employees;
+  }
+
   Future<List<FullOrder>> getFullOrders() async {
-    if(_orders.isEmpty){
+    if (_orders.isEmpty) {
       await fetchOrders();
     }
 
     Set<People> customers = {};
     List<FullOrder> full = [];
-    for(final o in _orders){
-      if(customers.where((c) => c.id.toString() == o.customerId).isEmpty){
+    for (final o in _orders) {
+      if (customers.where((c) => c.id.toString() == o.customerId).isEmpty) {
         final customer = await fetchCustomerById(int.parse(o.customerId));
         customers.add(customer);
       }
-      full.add(FullOrder(o, customers.firstWhere((c) => c.id.toString() == o.customerId)));
+
+      // Fetch the employees for this order
+      final employees = await fetchEmployeesByOrderId(o.id);
+
+      full.add(FullOrder(
+          o,
+          customers.firstWhere((c) => c.id.toString() == o.customerId),
+          employees));
     }
 
     return full;
