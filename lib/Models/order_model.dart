@@ -89,6 +89,27 @@ class Order {
   }
 
   factory Order.fromOrderWS(wsOrder.Order order){
+
+    final orderedItems = List.generate(order.lineItems!.length, (index) {
+      final currentItem = order.lineItems![index];
+      var item = OrderedItem(
+        id: currentItem.id??-1,
+        name: currentItem.name??"",
+       productId:currentItem.id??-1,
+       productName: currentItem.name??"",
+       quantity: currentItem.quantity??0,
+        status: "",//TODO:CHANGE,
+        discount: 0,
+        orderId: order.id ??-1,
+        price: double.parse(currentItem.price??'0'),
+        packaging: '',
+        itemSource: '',
+        productDescription: '',
+        productRetailPrice: double.parse(currentItem.price??'0')
+      );
+      return item;
+    });
+
     return Order(
       customerId: order.customerId.toString(),
       archived: false,
@@ -100,6 +121,7 @@ class Order {
       productName: "Test fetch product from WooCommerce order_model.dart",
       totalAmount: double.parse(order.total!),
       shippingAddress: order.shipping!.address1!,
+      orderedItems: orderedItems,
     );
   }
 
