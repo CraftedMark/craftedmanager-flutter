@@ -196,26 +196,35 @@ class OrderDataTable extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasData) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: const [
-                        DataColumn(label: Text('Order ID')),
-                        DataColumn(label: Text('Customer ID')),
-                        DataColumn(label: Text('Customer Name')),
-                        DataColumn(label: Text('Order Status')),
-                    ],
-                    rows: snapshot.data!
-                        .map((fullOrder) => DataRow(cells: [
-                      DataCell(Text(fullOrder.order.id.toString())),
-                      DataCell(
-                          Text(fullOrder.order.customerId.toString())),
-                      DataCell(Text(fullOrder.person.firstName +
-                          " " +
-                          fullOrder.person.lastName)),
-                      DataCell(Text(fullOrder.order.orderStatus)),
-                    ]))
-                        .toList(),
+                return SizedBox(
+                  height: 300,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columnSpacing: 25,//56
+                        horizontalMargin: 10,
+                        columns: const [
+                            DataColumn(label: Text('Order ID')),
+                            DataColumn(label: Text('Customer ID')),
+                            DataColumn(label: Text('Customer Name')),
+                            DataColumn(label: Text('Order Status')),
+                        ],
+                        rows: snapshot.data!
+                            .map((fullOrder) => DataRow(cells: [
+                          DataCell(Text(fullOrder.order.id.toString())),
+                          DataCell(
+                              Text(fullOrder.order.customerId.toString())),
+                          DataCell(Text(fullOrder.person.firstName +
+                              " " +
+                              fullOrder.person.lastName)),
+                          DataCell(Text(fullOrder.order.orderStatus)),
+                        ]))
+                            .toList(),
+                      ),
+                    ),
                   ),
                 );
               } else {
