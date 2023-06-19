@@ -170,39 +170,6 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
       await WooSignalService.updateCustomer(newCustomer);
     }
     widget.refresh();
-    // else {
-    //   People? updatedContact;
-    //
-    //   if (value.id <= 0) {
-    //     int newId = await PeoplePostgres.createCustomer(value);
-    //     updatedContact = await PeoplePostgres.fetchCustomer(newId);
-    //   } else {
-    //     updatedContact = await PeoplePostgres.updateCustomer(value);
-    //   }
-    //
-    //   if (updatedContact != null && updatedContact.id > 0) {
-    //     setState(() {
-    //       _editing = false;
-    //       value = updatedContact ?? value;
-    //     });
-    //     widget.refresh();
-    //   } else {
-    //     await showDialog(
-    //       context: context,
-    //       builder: (BuildContext context) => AlertDialog(
-    //         title: const Text('Error'),
-    //         content: const Text('Failed to save contact.'),
-    //         actions: [
-    //           TextButton(
-    //             child: const Text('OK'),
-    //             onPressed: () => Navigator.of(context).pop(),
-    //           ),
-    //         ],
-    //       ),
-    //     );
-    //     setState(() => _editing = false);
-    //   }
-    // }
   }
 
 
