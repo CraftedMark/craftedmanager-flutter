@@ -14,20 +14,35 @@ class OrderDataTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OrderProvider>(
       builder: (_, orderProvider, __) {
-        return DataTable(
-          columns: [
-            DataColumn(label: Text('Order ID')),
-            DataColumn(label: Text('Customer ID')),
-            DataColumn(label: Text('Order Status')),
-          ],
-          rows: orderProvider.orders
-              .map((order) => DataRow(cells: [
-                    DataCell(Text(order.id.toString())),
-                    DataCell(Text(order.customerId.toString())),
-                    DataCell(Text(order.orderStatus)),
-                  ]))
-              .toList(),
-        );
+        return FutureBuilder(
+            future: orderProvider.getFullOrders(),
+            builder: (context, AsyncSnapshot<List<FullOrder>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasData) {
+                return DataTable(
+                  columns: [
+                    DataColumn(label: Text('Order ID')),
+                    DataColumn(label: Text('Customer ID')),
+                    DataColumn(label: Text('Customer Name')),
+                    DataColumn(label: Text('Order Status')),
+                  ],
+                  rows: snapshot.data!
+                      .map((fullOrder) => DataRow(cells: [
+                            DataCell(Text(fullOrder.order.id.toString())),
+                            DataCell(
+                                Text(fullOrder.order.customerId.toString())),
+                            DataCell(Text(fullOrder.person.firstName +
+                                " " +
+                                fullOrder.person.lastName)),
+                            DataCell(Text(fullOrder.order.orderStatus)),
+                          ]))
+                      .toList(),
+                );
+              } else {
+                return Text("Error loading data");
+              }
+            });
       },
     );
   }
@@ -86,19 +101,26 @@ class _ProductionReportState extends State<ProductionReport> {
 
   void addTask() {
     if (selectedOrder != null) {
-      setState(() {
-        tasks.add(Task(
-          selectedOrder!,
-          taskController.text,
-          DateTime.parse(startController.text),
-          DateTime.parse(stopController.text),
-          notesController.text,
-        ));
-        taskController.clear();
-        startController.clear();
-        stopController.clear();
-        notesController.clear();
-      });
+      try {
+        DateTime startTime = DateTime.parse(startController.text);
+        DateTime stopTime = DateTime.parse(stopController.text);
+
+        setState(() {
+          tasks.add(Task(
+            selectedOrder!,
+            taskController.text,
+            startTime,
+            stopTime,
+            notesController.text,
+          ));
+          taskController.clear();
+          startController.clear();
+          stopController.clear();
+          notesController.clear();
+        });
+      } catch (e) {
+        //show an error message
+      }
     }
   }
 

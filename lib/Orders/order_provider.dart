@@ -1,8 +1,17 @@
-import 'package:crafted_manager/Models/order_model.dart';
-import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/ProductionList/production_list_db_manager.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
+import '../Contacts/people_db_manager.dart';
+import '../Models/order_model.dart';
+import '../Models/ordered_item_model.dart';
+import '../Models/people_model.dart';
+import '../ProductionList/production_list_db_manager.dart';
+
+class FullOrder {
+  final Order order;
+  final People person;
+
+  FullOrder(this.order, this.person);
+}
 
 class OrderProvider with ChangeNotifier {
   List<Order> _orders = [];
@@ -23,7 +32,6 @@ class OrderProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('Error fetching orders: $e');
-      // Handle the error if needed
     }
   }
 
@@ -93,5 +101,25 @@ class OrderProvider with ChangeNotifier {
       order.isArchived = true;
     }
     notifyListeners();
+  }
+
+  Future<List<FullOrder>> getFullOrders() async {
+    await fetchOrders();
+    return Future.wait(_orders.map((Order order) async {
+      People person = await fetchCustomerById(int.parse(order.customerId));
+      return FullOrder(order, person);
+    }).toList());
+  }
+
+  // Fetch People data by their id
+  Future<People> fetchCustomerById(int id) async {
+    // Fetch customer's data using fetchCustomer from PeoplePostgres
+    People? customer = await PeoplePostgres.fetchCustomer(id);
+
+    if (customer == null) {
+      throw Exception('No customer data found with ID: $id');
+    }
+
+    return customer;
   }
 }
