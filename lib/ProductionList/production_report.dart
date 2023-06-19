@@ -9,55 +9,6 @@ class ProductionReport extends StatefulWidget {
   _ProductionReportState createState() => _ProductionReportState();
 }
 
-class OrderDataTable extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<OrderProvider>(
-      builder: (_, orderProvider, __) {
-        return FutureBuilder(
-            future: orderProvider.getFullOrders(),
-            builder: (context, AsyncSnapshot<List<FullOrder>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasData) {
-                return DataTable(
-                  columns: [
-                    DataColumn(label: Text('Order ID')),
-                    DataColumn(label: Text('Customer ID')),
-                    DataColumn(label: Text('Customer Name')),
-                    DataColumn(label: Text('Order Status')),
-                  ],
-                  rows: snapshot.data!
-                      .map((fullOrder) => DataRow(cells: [
-                            DataCell(Text(fullOrder.order.id.toString())),
-                            DataCell(
-                                Text(fullOrder.order.customerId.toString())),
-                            DataCell(Text(fullOrder.person.firstName +
-                                " " +
-                                fullOrder.person.lastName)),
-                            DataCell(Text(fullOrder.order.orderStatus)),
-                          ]))
-                      .toList(),
-                );
-              } else {
-                return Text("Error loading data");
-              }
-            });
-      },
-    );
-  }
-}
-
-class Task {
-  Order order;
-  String name;
-  DateTime startTime;
-  DateTime stopTime;
-  String notes;
-
-  Task(this.order, this.name, this.startTime, this.stopTime, this.notes);
-}
-
 class _ProductionReportState extends State<ProductionReport> {
   final List<Task> tasks = [];
   final taskController = TextEditingController();
@@ -71,15 +22,14 @@ class _ProductionReportState extends State<ProductionReport> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchOpenOrders();
     });
   }
 
   Future<void> fetchOpenOrders() async {
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    await orderProvider.fetchOrders();
-    List<Order> allOrders = orderProvider.orders;
+    var allOrders = orderProvider.orders;
     setState(() {
       openOrders =
           allOrders.where((order) => order.orderStatus == 'open').toList();
@@ -234,3 +184,56 @@ class _ProductionReportState extends State<ProductionReport> {
         ));
   }
 }
+
+class OrderDataTable extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<OrderProvider>(
+      builder: (_, orderProvider, __) {
+        return FutureBuilder(
+            future: orderProvider.getFullOrders(),
+            builder: (context, AsyncSnapshot<List<FullOrder>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasData) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: const [
+                        DataColumn(label: Text('Order ID')),
+                        DataColumn(label: Text('Customer ID')),
+                        DataColumn(label: Text('Customer Name')),
+                        DataColumn(label: Text('Order Status')),
+                    ],
+                    rows: snapshot.data!
+                        .map((fullOrder) => DataRow(cells: [
+                      DataCell(Text(fullOrder.order.id.toString())),
+                      DataCell(
+                          Text(fullOrder.order.customerId.toString())),
+                      DataCell(Text(fullOrder.person.firstName +
+                          " " +
+                          fullOrder.person.lastName)),
+                      DataCell(Text(fullOrder.order.orderStatus)),
+                    ]))
+                        .toList(),
+                  ),
+                );
+              } else {
+                return Text("Error loading data ${snapshot.error}");
+              }
+            });
+      },
+    );
+  }
+}
+
+class Task {
+  Order order;
+  String name;
+  DateTime startTime;
+  DateTime stopTime;
+  String notes;
+
+  Task(this.order, this.name, this.startTime, this.stopTime, this.notes);
+}
+

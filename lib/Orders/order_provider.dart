@@ -104,11 +104,21 @@ class OrderProvider with ChangeNotifier {
   }
 
   Future<List<FullOrder>> getFullOrders() async {
-    await fetchOrders();
-    return Future.wait(_orders.map((Order order) async {
-      People person = await fetchCustomerById(int.parse(order.customerId));
-      return FullOrder(order, person);
-    }).toList());
+    if(_orders.isEmpty){
+      await fetchOrders();
+    }
+
+    Set<People> customers = {};
+    List<FullOrder> full = [];
+    for(final o in _orders){
+      if(customers.where((c) => c.id.toString() == o.customerId).isEmpty){
+        final customer = await fetchCustomerById(int.parse(o.customerId));
+        customers.add(customer);
+      }
+      full.add(FullOrder(o, customers.firstWhere((c) => c.id.toString() == o.customerId)));
+    }
+
+    return full;
   }
 
   // Fetch People data by their id
