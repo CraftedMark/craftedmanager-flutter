@@ -70,6 +70,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text('Search People'),
           leading: GestureDetector(

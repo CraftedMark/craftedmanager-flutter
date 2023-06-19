@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/database_functions.dart';
 
+import '../PostresqlConnection/postqresql_connection_manager.dart';
+
 class PeoplePostgres {
   // Fetch a customer by customerId
   static Future<People?> fetchCustomer(int customerId) async {
@@ -11,12 +13,11 @@ class PeoplePostgres {
       throw Exception('Invalid ID: Customer ID must be a positive integer');
     }
 
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query(
         'SELECT * FROM people WHERE id = @customerId',
         substitutionValues: {'customerId': customerId});
 
-    await connection.close();
     return result.isNotEmpty
         ? People.fromMap(result.first.toColumnMap())
         : null;
@@ -24,10 +25,9 @@ class PeoplePostgres {
 
   // Refresh the customer list
   static Future<List<People>> refreshCustomerList() async {
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query('SELECT * FROM people');
 
-    await connection.close();
     return result.map((row) => People.fromMap(row.toColumnMap())).toList();
   }
 
@@ -36,7 +36,7 @@ class PeoplePostgres {
       throw Exception('Invalid ID: Customer ID must be a positive integer');
     }
 
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     final map = customer.toMap();
     final values = <String>[];
     map.forEach((key, value) {
@@ -57,7 +57,6 @@ class PeoplePostgres {
         'SELECT * FROM people WHERE id = @customerId',
         substitutionValues: {'customerId': customer.id});
 
-    await connection.close();
     return result.isNotEmpty
         ? People.fromMap(result.first.toColumnMap())
         : null;
@@ -68,17 +67,17 @@ class PeoplePostgres {
       throw Exception('Invalid ID: Customer ID must be a positive integer');
     }
 
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     await connection.execute('DELETE FROM people WHERE id = @customerId',
         substitutionValues: {'customerId': customerId});
-    await connection.close();
+
   }
 
   static Future<List<People>> fetchCustomersByDetails(
       String firstName, String lastName, String phone) async {
     List<People> customers = [];
     try {
-      final connection = await connectToPostgres();
+      final connection = PostgreSQLConnectionManager.connection;
       final result = await connection.query('''
       SELECT * FROM people WHERE
       LOWER(firstname) LIKE LOWER(@firstName) OR
@@ -93,8 +92,6 @@ class PeoplePostgres {
       for (var row in result) {
         customers.add(People.fromMap(row.toColumnMap()));
       }
-
-      await connection.close();
     } catch (e) {
       print('Error fetching customers by details: ${e.toString()}');
     }
@@ -102,7 +99,7 @@ class PeoplePostgres {
   }
 
   static Future<int> createCustomer(People customer) async {
-    final connection = await connectToPostgres();
+    final connection = PostgreSQLConnectionManager.connection;
     final random = Random(); // Create a Random instance
     final newId = random.nextInt(1 << 32); // Generate a random 32-bit integer
 
@@ -118,7 +115,6 @@ class PeoplePostgres {
       "INSERT INTO people ($columns) VALUES ($values)",
     );
 
-    await connection.close();
 
     return newId; // Return the new contact ID
   }

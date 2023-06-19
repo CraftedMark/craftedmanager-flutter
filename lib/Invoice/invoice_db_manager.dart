@@ -1,4 +1,4 @@
-import 'package:crafted_manager/Models/invoice_model.dart';
+import 'package:crafted_manager/Models/invoices_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/orders_db_manager.dart';
 import 'package:postgres/postgres.dart';

@@ -2,9 +2,10 @@ import 'package:crafted_manager/Financial/finances_db_manager.dart';
 
 class FinanceDbManager {
   // Tables
-  static const String paymentTable = 'payment';
-  static const String billTable = 'bill';
-  static const String expenseTable = 'expense';
+  static const String paymentTable = 'payments';
+  static const String billTable = 'bills';
+  static const String expenseTable = 'expenses';
+  static const String invoiceTable = 'invoices';
 
   // Payment
   Future<List<Map<String, dynamic>>> getAllPayments() async {
@@ -70,5 +71,27 @@ class FinanceDbManager {
 
   Future<void> deleteExpense(int id) async {
     await delete(expenseTable, id);
+  }
+
+  // Invoice
+  Future<List<Map<String, dynamic>>> getAllInvoices() async {
+    return getAll(invoiceTable);
+  }
+
+  Future<List<Map<String, dynamic>>> searchInvoices(
+      String searchQuery, Map<String, dynamic> substitutionValues) async {
+    return search(invoiceTable, searchQuery, substitutionValues);
+  }
+
+  Future<void> addInvoice(Map<String, dynamic> data) async {
+    await add(invoiceTable, data);
+  }
+
+  Future<void> updateInvoice(int id, Map<String, dynamic> updatedData) async {
+    await update(invoiceTable, id, updatedData);
+  }
+
+  Future<void> deleteInvoice(int id) async {
+    await delete(invoiceTable, id);
   }
 }

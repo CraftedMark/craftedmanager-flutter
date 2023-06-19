@@ -44,8 +44,16 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow access to Camera </string>
 	<key>NSContactsUsageDescription</key>
 	<string>We require read access to the Contacts so that we can import them to the db</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow access to the microphone</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow Photo Library Additions</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow Access to Photo Library</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

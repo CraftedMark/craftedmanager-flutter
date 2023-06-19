@@ -1,3 +1,4 @@
+import 'package:crafted_manager/Recipes/add_recipe.dart';
 import 'package:flutter/material.dart';
 
 class RecipeManager extends StatefulWidget {
@@ -28,7 +29,18 @@ class _RecipeManagerState extends State<RecipeManager> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Add new recipe
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddRecipe(
+                onAddRecipe: (newRecipe) {
+                  setState(() {
+                    recipes.add(newRecipe);
+                  });
+                },
+              ),
+            ),
+          );
         },
         child: Icon(Icons.add),
       ),

@@ -22,9 +22,6 @@ class ContactsListState extends State<ContactsList> {
   void initState() {
     super.initState();
     refreshContacts();
-    // connectToPostgres().then((_) {
-    //   refreshContacts();
-    // });
   }
 
   Future<void> refreshContacts() async {

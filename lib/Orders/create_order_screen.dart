@@ -6,7 +6,9 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 
@@ -21,38 +23,28 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
-  double shippingCost = 10.0; // Default shipping cost
+  double shippingCost = 10.0;
 
   Future<double?> getCustomProductPrice(int productId, int customerId) async {
     double? customPrice;
-    // Fetch the customer's assigned pricing list id
     int? pricingListId = await CustomerBasedPricingDbManager.instance
         .getPricingListByCustomerId(customerId);
 
-    print(
-        'Fetched pricingListId: $pricingListId'); // Print the fetched pricingListId
-
     if (pricingListId != null) {
-      // Fetch the custom pricing for the product based on the pricing list id
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
           .getCustomerProductPricing(productId, pricingListId);
-
-      print(
-          'Fetched pricingData: $pricingData'); // Print the fetched pricingData
 
       if (pricingData != null) {
         customPrice = pricingData['price'];
       }
     }
 
-    print('Custom Price: $customPrice'); // Print the custom price
     return customPrice;
   }
 
-  Future<void> addOrderedItem(
-      Product product, int quantity, String item_source) async {
-    // Fetch custom price for the product if it exists
+  Future<void> addOrderedItem(Product product, int quantity, String itemSource,
+      String packaging) async {
     double? customPrice =
         await getCustomProductPrice(product.id!, widget.client.id);
 
@@ -67,12 +59,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         name: product.name,
         quantity: quantity,
         price: customPrice ?? product.retailPrice,
-        // check this line
         discount: 0,
         productDescription: product.description,
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
-        itemSource: item_source,
+        itemSource:
+            itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
+        packaging: packaging,
       ));
     });
   }
@@ -84,36 +77,24 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
     double totalAmount = subTotal + shippingCost;
 
-    // Create a new Order instance with the necessary values from the People model
     final newOrder = Order(
       id: DateTime.now().millisecondsSinceEpoch,
       customerId: widget.client.id.toString(),
-      // Convert customerId to String
       orderDate: DateTime.now(),
       shippingAddress:
           '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
       billingAddress:
           '${widget.client.address1},${widget.client.city},${widget.client.state},${widget.client.zip}',
       productName: orderedItems.map((e) => e.productName).toList().join(','),
-      // Convert the list of product names to a comma-separated string
       totalAmount: totalAmount,
       orderStatus: 'Pending',
       notes: '',
       archived: false,
+      orderedItems: orderedItems,
     );
 
-    Future<void> createOrder(
-        Order order, List<OrderedItem> orderedItems) async {
-      print("Creating new order...");
-      print("Order data: ${newOrder.toMap()}");
-      print(
-          "Ordered items data: ${orderedItems.map((e) => e.toMap()).toList()}");
-
-      // await OrderPostgres().createOrder(newOrder, orderedItems);
-      await WooSignalService.createOrder(newOrder, orderedItems);
-    }
-
-    await createOrder(newOrder, orderedItems);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    await OrderPostgres().createOrder(newOrder, orderedItems);
     sendNewOrderNotification();
   }
 
@@ -132,11 +113,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       (previousValue, element) =>
           previousValue + (element.productRetailPrice * element.quantity),
     );
-    void updateOrderedItemPrice(int index, double newPrice) {
-      setState(() {
-        orderedItems[index].price = newPrice;
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -186,10 +162,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 itemCount: orderedItems.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    // Add the 'return' statement here
                     title: Text(orderedItems[index].productName),
                     trailing: Text('\$${orderedItems[index].price}'),
-                    // Use 'price' instead of 'productRetailPrice'
                     subtitle: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -206,14 +180,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         text: orderedItems[index]
                                             .quantity
                                             .toString());
-                                // Add TextEditingController for the price
                                 TextEditingController priceController =
                                     TextEditingController(
                                         text: orderedItems[index]
                                             .price
                                             .toString());
+                                TextEditingController packagingController =
+                                    TextEditingController(
+                                        text: orderedItems[index].packaging);
                                 return AlertDialog(
-                                  title: const Text('Edit Quantity and Price'),
+                                  title: const Text(
+                                      'Edit Quantity, Price, and Packaging'),
                                   content: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -234,6 +211,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           border: OutlineInputBorder(),
                                         ),
                                       ),
+                                      SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: packagingController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Packaging',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   actions: [
@@ -249,10 +234,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           orderedItems[index].quantity =
                                               int.parse(
                                                   quantityController.text);
-                                          // Update the price of the ordered item
                                           orderedItems[index].price =
                                               double.parse(
                                                   priceController.text);
+                                          orderedItems[index].packaging =
+                                              packagingController.text;
                                         });
                                         Navigator.pop(context);
                                       },
@@ -310,16 +296,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
   }
 
-  void addItemToOrder () async {
-    // final products =  await awaitProductPostgres.getAllProductsExceptIngredients();
-    final products =  await WooSignalService.getProducts();
+  void addItemToOrder() async {
+    final products = await ProductPostgres.getAllProductsExceptIngredients();
 
 
     final selectedProduct = await showDialog<Product>(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController searchController =
-        TextEditingController();
+        TextEditingController searchController = TextEditingController();
         List<Product> filteredProducts = products;
 
         return StatefulBuilder(
@@ -334,16 +318,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       hintText: "Search products",
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(25.0)),
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)),
                       ),
                     ),
                     onChanged: (value) {
                       setState(() {
                         filteredProducts = products
                             .where((product) => product.name
-                            .toLowerCase()
-                            .contains(value.toLowerCase()))
+                                .toLowerCase()
+                                .contains(value.toLowerCase()))
                             .toList();
                       });
                     },
@@ -367,18 +350,43 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
-      final quantity = await showDialog<int>(
+      var itemSourceController =
+          TextEditingController(text: selectedProduct.itemSource ?? '');
+      var packagingController = TextEditingController();
+
+      final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Enter Quantity'),
-            content: TextFormField(
-              controller: quantityController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
-                border: OutlineInputBorder(),
-              ),
+            title: const Text('Enter Quantity, Item Source, and Packaging'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: itemSourceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Item Source',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: packagingController,
+                  decoration: const InputDecoration(
+                    labelText: 'Packaging',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -391,7 +399,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 onPressed: () {
                   Navigator.pop(
                     context,
-                    int.parse(quantityController.text),
+                    {
+                      'quantity': int.parse(quantityController.text),
+                      'itemSource': itemSourceController.text,
+                      'packaging': packagingController.text,
+                    },
                   );
                 },
                 child: const Text("Add"),
@@ -401,10 +413,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         },
       );
 
-      if (quantity != null) {
-        await addOrderedItem(selectedProduct, quantity, 'created');
+      if (result != null) {
+        int quantity = result['quantity'];
+        String itemSource = result['itemSource'];
+        String packaging = result['packaging'];
+        await addOrderedItem(selectedProduct, quantity, itemSource, packaging);
       }
-
     }
   }
 }
