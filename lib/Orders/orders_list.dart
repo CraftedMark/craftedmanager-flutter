@@ -81,7 +81,6 @@ class _OrdersListState extends State<OrdersList> {
             return EasyRefresh(
               child: ListView.builder(
                 cacheExtent: 10000,//for cache more orders in one time(UI)
-                // addAutomaticKeepAlives: true,
                 itemCount: sortedOrders.length,
                 itemBuilder: (BuildContext context, int index) {
                   return _OrderWidget(order: sortedOrders[index]);
