@@ -6,6 +6,8 @@ import 'add_employee.dart'; // Import the EmployeePage
 import 'employee_detail.dart';
 
 class EmployeeManager extends StatefulWidget {
+  const EmployeeManager({super.key});
+
   @override
   _EmployeeManagerState createState() => _EmployeeManagerState();
 }
@@ -27,7 +29,7 @@ class _EmployeeManagerState extends State<EmployeeManager> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Employee Manager'),
+        title: const Text('Employee Manager'),
       ),
       body: FutureBuilder<List<Employee>>(
         future: _fetchEmployees(),
@@ -56,18 +58,18 @@ class _EmployeeManagerState extends State<EmployeeManager> {
               },
             );
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading employees'));
+            return const Center(child: Text('Error loading employees'));
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EmployeePage(),
+              builder: (context) => const EmployeePage(),
             ),
           );
         },

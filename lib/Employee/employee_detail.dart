@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class EmployeeDetail extends StatelessWidget {
   final Employee employee;
 
-  EmployeeDetail({required this.employee});
+  const EmployeeDetail({super.key, required this.employee});
 
   @override
   Widget build(BuildContext context) {
@@ -20,47 +20,47 @@ class EmployeeDetail extends StatelessWidget {
         child: ListView(
           children: [
             Text('${employee.firstName} ${employee.lastName}',
-                style: TextStyle(fontSize: 24.0, color: Colors.white)),
-            SizedBox(height: 20),
+                style: const TextStyle(fontSize: 24.0, color: Colors.white)),
+            const SizedBox(height: 20),
             Card(
               color: Colors.grey[900],
               child: ListTile(
-                title: Text('Email', style: TextStyle(color: Colors.white)),
-                subtitle: Text('${employee.email}',
-                    style: TextStyle(color: Colors.white)),
+                title: const Text('Email', style: TextStyle(color: Colors.white)),
+                subtitle: Text(employee.email,
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
             Card(
               color: Colors.grey[900],
               child: ListTile(
-                title: Text('Phone', style: TextStyle(color: Colors.white)),
-                subtitle: Text('${employee.phone}',
-                    style: TextStyle(color: Colors.white)),
+                title: const Text('Phone', style: TextStyle(color: Colors.white)),
+                subtitle: Text(employee.phone,
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
             Card(
               color: Colors.grey[900],
               child: ListTile(
-                title: Text('Position', style: TextStyle(color: Colors.white)),
-                subtitle: Text('${employee.position}',
-                    style: TextStyle(color: Colors.white)),
+                title: const Text('Position', style: TextStyle(color: Colors.white)),
+                subtitle: Text(employee.position,
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
             Card(
               color: Colors.grey[900],
               child: ListTile(
-                title: Text('Pay Rate', style: TextStyle(color: Colors.white)),
+                title: const Text('Pay Rate', style: TextStyle(color: Colors.white)),
                 subtitle: Text('\$${employee.payRate}',
-                    style: TextStyle(color: Colors.white)),
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
             Card(
               color: Colors.grey[900],
               child: ListTile(
                 title:
-                    Text('Date of Hire', style: TextStyle(color: Colors.white)),
+                const Text('Date of Hire', style: TextStyle(color: Colors.white)),
                 subtitle: Text('${employee.dateOfHire?.toString()}',
-                    style: TextStyle(color: Colors.white)),
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
           ],

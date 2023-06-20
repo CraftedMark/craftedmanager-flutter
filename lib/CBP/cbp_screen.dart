@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class CustomerPricingScreen extends StatefulWidget {
   final int customerId;
 
-  CustomerPricingScreen({required this.customerId});
+  const CustomerPricingScreen({super.key, required this.customerId});
 
   @override
   _CustomerPricingScreenState createState() => _CustomerPricingScreenState();
@@ -21,11 +21,11 @@ class _CustomerPricingScreenState extends State<CustomerPricingScreen> {
   }
 
   void _fetchCustomPricing() async {
-    List<Map<String, dynamic>> results = await CustomerBasedPricingDbManager
+    var results = await CustomerBasedPricingDbManager
         .instance
         .fetchCustomerBasedPricing(widget.customerId);
     setState(() {
-      _productPrices = results;
+      _productPrices = [results?? {}];
     });
   }
 

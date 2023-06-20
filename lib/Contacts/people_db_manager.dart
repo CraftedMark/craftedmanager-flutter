@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:crafted_manager/Models/people_model.dart';
-import 'package:crafted_manager/Orders/database_functions.dart';
 
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
@@ -108,7 +107,7 @@ class PeoplePostgres {
 
     final columns = map.keys.join(', ');
     final values = map.values
-        .map((value) => value == null ? 'NULL' : "'${value}'")
+        .map((value) => value == null ? 'NULL' : "'$value'")
         .join(', ');
 
     await connection.execute(

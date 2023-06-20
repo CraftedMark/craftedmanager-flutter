@@ -5,6 +5,8 @@ import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 
 class SearchPeopleScreen extends StatefulWidget {
+  const SearchPeopleScreen({super.key});
+
   @override
   State<SearchPeopleScreen> createState() => _SearchPeopleScreenState();
 }
@@ -72,7 +74,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
-        appBarTheme: AppBarTheme(color: Colors.black),
+        appBarTheme: const AppBarTheme(color: Colors.black),
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(

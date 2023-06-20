@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ProductionReport extends StatefulWidget {
+  const ProductionReport({super.key});
+
   @override
   _ProductionReportState createState() => _ProductionReportState();
 }
@@ -78,17 +80,17 @@ class _ProductionReportState extends State<ProductionReport> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Production Report"),
+          title: const Text("Production Report"),
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              OrderDataTable(),
+              const OrderDataTable(),
               Form(
                 child: Column(
                   children: [
                     ElevatedButton(
-                      child: Text("Search Order"),
+                      child: const Text("Search Order"),
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -102,7 +104,7 @@ class _ProductionReportState extends State<ProductionReport> {
                                     decoration: InputDecoration(
                                       labelText: "Search",
                                       suffixIcon: IconButton(
-                                        icon: Icon(Icons.search),
+                                        icon: const Icon(Icons.search),
                                         onPressed: () {
                                           searchOrders(
                                               searchTextController.text);
@@ -110,7 +112,7 @@ class _ProductionReportState extends State<ProductionReport> {
                                       ),
                                     ),
                                   ),
-                                  Container(
+                                  SizedBox(
                                     height: 200,
                                     child: ListView.builder(
                                       shrinkWrap: true,
@@ -138,29 +140,29 @@ class _ProductionReportState extends State<ProductionReport> {
                     ),
                     TextFormField(
                       controller: taskController,
-                      decoration: InputDecoration(labelText: "Task"),
+                      decoration: const InputDecoration(labelText: "Task"),
                     ),
                     TextFormField(
                       controller: startController,
-                      decoration: InputDecoration(labelText: "Start Time"),
+                      decoration: const InputDecoration(labelText: "Start Time"),
                     ),
                     TextFormField(
                       controller: stopController,
-                      decoration: InputDecoration(labelText: "Stop Time"),
+                      decoration: const InputDecoration(labelText: "Stop Time"),
                     ),
                     TextFormField(
                       controller: notesController,
-                      decoration: InputDecoration(labelText: "Notes"),
+                      decoration: const InputDecoration(labelText: "Notes"),
                     ),
                     ElevatedButton(
-                      child: Text("Add Task"),
                       onPressed: addTask,
+                      child: const Text("Add Task"),
                     ),
                   ],
                 ),
               ),
               DataTable(
-                columns: [
+                columns: const [
                   DataColumn(label: Text("Order ID")),
                   DataColumn(label: Text("Task")),
                   DataColumn(label: Text("Start Time")),
@@ -186,6 +188,8 @@ class _ProductionReportState extends State<ProductionReport> {
 }
 
 class OrderDataTable extends StatelessWidget {
+  const OrderDataTable({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Consumer<OrderProvider>(
@@ -217,9 +221,7 @@ class OrderDataTable extends StatelessWidget {
                           DataCell(Text(fullOrder.order.id.toString())),
                           DataCell(
                               Text(fullOrder.order.customerId.toString())),
-                          DataCell(Text(fullOrder.person.firstName +
-                              " " +
-                              fullOrder.person.lastName)),
+                          DataCell(Text("${fullOrder.person.firstName} ${fullOrder.person.lastName}")),
                           DataCell(Text(fullOrder.order.orderStatus)),
                         ]))
                             .toList(),

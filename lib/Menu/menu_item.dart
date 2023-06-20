@@ -67,7 +67,7 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Customers",
         iconData: Icons.people,
-        destination: ContactsList(),
+        destination: const ContactsList(),
       ),
     ],
   ),
@@ -79,35 +79,35 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Products",
         iconData: Icons.shopping_basket,
-        destination: ProductListPage(),
+        destination: const ProductListPage(),
       ),
       MenuItem(
         title: "Customer Based Pricing",
         iconData: Icons.price_change,
-        destination: CustomerSearchScreen(),
+        destination: const CustomerSearchScreen(),
       ),
       MenuItem(
         title: "Ingredients",
         iconData: Icons.local_dining,
-        destination: IngredientList(),
+        destination: const IngredientList(),
       ),
       MenuItem(
         title: "Recipes",
         iconData: Icons.book,
-        destination: RecipeManager(),
+        destination: const RecipeManager(),
       ),
       MenuItem(
         title: "Production List",
         iconData: Icons.book,
         destination: ProductionList(
           itemSource: 'Production',
-          orderedItems: [],
+          orderedItems: const [],
         ),
       ),
       MenuItem(
         title: "Assembly Items",
         iconData: Icons.layers,
-        destination: AssemblyItemManagement(),
+        destination: const AssemblyItemManagement(),
       ),
     ],
   ),
@@ -119,7 +119,7 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Production Sheets",
         iconData: Icons.money_off,
-        destination: ProductionReport(),
+        destination: const ProductionReport(),
       ),
     ],
   ),

@@ -15,7 +15,7 @@ class EditOrderScreen extends StatefulWidget {
   final People customer;
   final List<Product> products;
 
-  const EditOrderScreen({
+  const EditOrderScreen({super.key,
     required this.order,
     required this.customer,
     required this.products,
@@ -123,14 +123,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
     if (result) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Order updated successfully.'),
         ),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Error updating order.'),
         ),
       );
@@ -141,7 +141,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Order'),
+        title: const Text('Edit Order'),
       ),
       body: Consumer<OrderProvider>(
         builder: (context, orderProvider, child) {
@@ -152,31 +152,29 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 _orderedItems = snapshot.data!;
                 return ListView(
                   children: [
-                    SizedBox(height: 12.0),
+                    const SizedBox(height: 12.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Order information',
                             style: TextStyle(fontSize: 18),
                           ),
-                          SizedBox(height: 12),
+                          const SizedBox(height: 12),
                           TextFormField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Customer:',
                               border: OutlineInputBorder(),
                             ),
                             enabled: false,
-                            initialValue: widget.customer.firstName +
-                                ' ' +
-                                widget.customer.lastName,
+                            initialValue: '${widget.customer.firstName} ${widget.customer.lastName}',
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: ElevatedButton(
@@ -189,7 +187,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             ),
                           );
 
-                          if (products != null && products.isNotEmpty) {
+                          if (products.isNotEmpty) {
                             final result = await showDialog<Map<String, dynamic>>(
                               context: context,
                               builder: (BuildContext context) =>
@@ -201,20 +199,20 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             }
                           }
                         },
-                        child: Text('Add Item'),
+                        child: const Text('Add Item'),
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     ListView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: _orderedItems.length,
                       itemBuilder: (context, index) {
                         return Card(
                           child: ListTile(
                             title: TextFormField(
                               initialValue: _orderedItems[index].productName,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Product Name',
                                 border: OutlineInputBorder(),
                               ),
@@ -233,10 +231,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                                 TextFormField(
                                   initialValue:
                                   _orderedItems[index].price.toStringAsFixed(2),
-                                  keyboardType: TextInputType.numberWithOptions(
+                                  keyboardType: const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Price',
                                     border: OutlineInputBorder(),
                                   ),
@@ -250,12 +248,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                                     );
                                   },
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 TextFormField(
                                   initialValue:
                                   _orderedItems[index].quantity.toString(),
                                   keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Quantity',
                                     border: OutlineInputBorder(),
                                   ),
@@ -272,18 +270,18 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                               ],
                             ),
                             trailing: IconButton(
-                              icon: Icon(Icons.remove_circle_outline),
+                              icon: const Icon(Icons.remove_circle_outline),
                               onPressed: () => editOrderedItem(index),
                             ),
                           ),
                         );
                       },
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: TextFormField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Sub Total:',
                           border: OutlineInputBorder(),
                         ),
@@ -291,11 +289,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                         initialValue: '\$$_subTotal',
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Order Status:',
                           border: OutlineInputBorder(),
                         ),
@@ -314,7 +312,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                         }).toList(),
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: ElevatedButton(
@@ -322,7 +320,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           updateOrder(orderProvider);
                           Navigator.pop(context);
                         },
-                        child: Text('Save'),
+                        child: const Text('Save'),
                       ),
                     ),
                   ],
@@ -340,7 +338,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 class AddOrderedItemDialog extends StatefulWidget {
   final List<Product> products;
 
-  AddOrderedItemDialog({required this.products});
+  const AddOrderedItemDialog({super.key, required this.products});
 
   @override
   _AddOrderedItemDialogState createState() => _AddOrderedItemDialogState();
@@ -353,7 +351,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Item'),
+      title: const Text('Add Item'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -371,12 +369,12 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
                 child: Text(product.name),
               );
             }).toList(),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Product',
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           TextFormField(
             keyboardType: TextInputType.number,
             initialValue: '1',
@@ -385,7 +383,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
                 _quantity = int.tryParse(value) ?? 1;
               });
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Quantity',
               border: OutlineInputBorder(),
             ),
@@ -397,7 +395,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -410,7 +408,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
               // Show error message
             }
           },
-          child: Text('Add'),
+          child: const Text('Add'),
         ),
       ],
     );

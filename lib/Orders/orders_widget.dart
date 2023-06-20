@@ -24,7 +24,7 @@ class OrderList extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           final order = orders[index];
           final customer =
-              customers.firstWhere((c) => c.id == order.customerId);
+              customers.firstWhere((c) => c.id.toString() == order.customerId);
 
           return InkWell(
             onTap: () {

@@ -2,7 +2,6 @@ import 'dart:core';
 
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:postgres/postgres.dart';
 
 import '../PostresqlConnection/postqresql_connection_manager.dart';

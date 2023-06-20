@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CustomerPricingListScreen extends StatefulWidget {
   final int customerId;
 
-  CustomerPricingListScreen({required this.customerId});
+  const CustomerPricingListScreen({super.key, required this.customerId});
 
   @override
   _CustomerPricingListScreenState createState() =>
@@ -12,14 +12,14 @@ class CustomerPricingListScreen extends StatefulWidget {
 }
 
 class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
   int? _pricingListId;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _pricingListId = await CustomerBasedPricingDbManager.instance
           .getPricingListIdByCustomerId(widget.customerId);
     });
@@ -46,28 +46,28 @@ class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
 
   Future<void> _showPriceInputDialog(
       BuildContext context, int productId) async {
-    TextEditingController _priceController = TextEditingController();
+    final TextEditingController priceController = TextEditingController();
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter New Price'),
+          title: const Text('Enter New Price'),
           content: TextField(
-            controller: _priceController,
+            controller: priceController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'Price'),
+            decoration: const InputDecoration(labelText: 'Price'),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Save'),
+              child: const Text('Save'),
               onPressed: () async {
-                double newPrice = double.tryParse(_priceController.text) ?? 0;
+                double newPrice = double.tryParse(priceController.text) ?? 0;
                 if (newPrice > 0) {
                   print(
                       'Saving new price: $newPrice for product: $productId and customer: ${widget.customerId}');
@@ -94,12 +94,12 @@ class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
-        appBarTheme: AppBarTheme(color: Colors.black),
+        appBarTheme: const AppBarTheme(color: Colors.black),
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Customer Pricing List'),
+          title: const Text('Customer Pricing List'),
         ),
         body: Column(
           children: [
@@ -109,7 +109,7 @@ class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (_) => _searchProducts(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Search Product',
                   prefixIcon: Icon(Icons.search),
                 ),

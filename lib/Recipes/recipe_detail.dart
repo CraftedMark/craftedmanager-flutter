@@ -5,7 +5,7 @@ import 'recipe_manager.dart';
 class RecipeDetail extends StatelessWidget {
   final Recipe recipe;
 
-  RecipeDetail({required this.recipe});
+  const RecipeDetail({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,8 @@ import 'package:crafted_manager/Models/product_model.dart';
 import 'package:flutter/material.dart';
 
 class AddAssemblyItem extends StatefulWidget {
+  const AddAssemblyItem({super.key});
+
   @override
   _AddAssemblyItemState createState() => _AddAssemblyItemState();
 }
@@ -29,19 +31,19 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.black,
-        appBarTheme: AppBarTheme(color: Colors.black),
-        textTheme: TextTheme(
-          headline4: TextStyle(
+        appBarTheme: const AppBarTheme(color: Colors.black),
+        textTheme: const TextTheme(
+          headlineMedium: TextStyle(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
-          subtitle1: TextStyle(color: Colors.white),
+          titleMedium: TextStyle(color: Colors.white),
         ),
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Add Assembly Item'),
+          title: const Text('Add Assembly Item'),
         ),
         backgroundColor: Colors.black,
         body: Container(
@@ -70,8 +72,8 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     child: const Text('Create Assembly Item'),
-                    style: ElevatedButton.styleFrom(primary: Colors.blue),
                   ),
                 ],
               ),
@@ -84,7 +86,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
 
   Widget _buildProductDropdown() {
     return DropdownButtonFormField(
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Product',
         labelStyle: TextStyle(color: Colors.white),
       ),
@@ -93,7 +95,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
           value: product.id,
           child: Text(
             product.name,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         );
       }).toList(),
@@ -105,7 +107,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
 
   Widget _buildIngredientDropdown() {
     return DropdownButtonFormField(
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Ingredient',
         labelStyle: TextStyle(color: Colors.white),
       ),
@@ -114,7 +116,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
           value: product.id,
           child: Text(
             product.name,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         );
       }).toList(),
@@ -126,11 +128,11 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
 
   Widget _buildQuantityInput() {
     return TextFormField(
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Quantity',
         labelStyle: TextStyle(color: Colors.white),
       ),
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       onSaved: (String? value) {
         // Handle quantity input here
       },
@@ -139,7 +141,7 @@ class _AddAssemblyItemState extends State<AddAssemblyItem> {
 
   Widget _buildUnitInput() {
     return TextFormField(
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Unit',
         labelStyle: TextStyle(color: Colors.white),
       ),

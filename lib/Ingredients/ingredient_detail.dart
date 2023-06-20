@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class IngredientDetail extends StatefulWidget {
   final Ingredient? ingredient;
 
-  IngredientDetail({this.ingredient});
+  const IngredientDetail({super.key, this.ingredient});
 
   @override
   _IngredientDetailState createState() => _IngredientDetailState();
@@ -16,20 +16,20 @@ class _IngredientDetailState extends State<IngredientDetail> {
   bool _isEditing = false;
   late Ingredient _editableIngredient;
 
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _brandController = TextEditingController();
-  TextEditingController _categoryController = TextEditingController();
-  TextEditingController _bulkPricingController = TextEditingController();
-  TextEditingController _perGramCostController = TextEditingController();
-  TextEditingController _pkgWeightController = TextEditingController();
-  TextEditingController _qtyInStockController = TextEditingController();
-  TextEditingController _reorderLevelController = TextEditingController();
-  TextEditingController _reorderQtyController = TextEditingController();
-  TextEditingController _suppliersController = TextEditingController();
-  TextEditingController _productDescriptionController = TextEditingController();
-  TextEditingController _weightController = TextEditingController();
-  TextEditingController _bulkMeasurementController = TextEditingController();
-  TextEditingController _manufacturerController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _brandController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
+  final TextEditingController _bulkPricingController = TextEditingController();
+  final TextEditingController _perGramCostController = TextEditingController();
+  final TextEditingController _pkgWeightController = TextEditingController();
+  final TextEditingController _qtyInStockController = TextEditingController();
+  final TextEditingController _reorderLevelController = TextEditingController();
+  final TextEditingController _reorderQtyController = TextEditingController();
+  final TextEditingController _suppliersController = TextEditingController();
+  final TextEditingController _productDescriptionController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _bulkMeasurementController = TextEditingController();
+  final TextEditingController _manufacturerController = TextEditingController();
 
   @override
   void initState() {
@@ -123,14 +123,14 @@ class _IngredientDetailState extends State<IngredientDetail> {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
         cardColor: Colors.grey[900],
-        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
+        appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       ),
       home: Scaffold(
         appBar: AppBar(
           title: Text(widget.ingredient?.name ?? 'New Ingredient'),
           actions: [
             IconButton(
-              icon: Icon(Icons.chevron_left),
+              icon: const Icon(Icons.chevron_left),
               onPressed: () => Navigator.pop(context),
             ),
             IconButton(
@@ -140,14 +140,14 @@ class _IngredientDetailState extends State<IngredientDetail> {
           ],
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: _isEditing
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -160,7 +160,7 @@ class _IngredientDetailState extends State<IngredientDetail> {
                     ),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -174,10 +174,10 @@ class _IngredientDetailState extends State<IngredientDetail> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -191,10 +191,10 @@ class _IngredientDetailState extends State<IngredientDetail> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -217,7 +217,7 @@ class _IngredientDetailState extends State<IngredientDetail> {
                   children: [
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -230,7 +230,7 @@ class _IngredientDetailState extends State<IngredientDetail> {
                     ),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -244,10 +244,10 @@ class _IngredientDetailState extends State<IngredientDetail> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -261,10 +261,10 @@ class _IngredientDetailState extends State<IngredientDetail> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

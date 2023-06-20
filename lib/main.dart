@@ -3,7 +3,6 @@ import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/Orders/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
-import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -28,7 +27,7 @@ void main() async {
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
-      print("new notification + ${result}");
+      print("new notification + $result");
     });
     OneSignal.shared.setNotificationWillShowInForegroundHandler((event) {
       print('___________update orders___________');
@@ -40,7 +39,7 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => provider,
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -95,21 +94,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
-        backgroundColor: Colors.black,
         primaryColor: Colors.blueAccent,
-        colorScheme: ColorScheme.dark().copyWith(
+        colorScheme: const ColorScheme.dark().copyWith(
           primary: Colors.blueAccent,
-          secondary: Color(0xFFB085F5),
+          secondary: const Color(0xFFB085F5),
+          background: Colors.black,
         ),
-        textTheme: TextTheme(
-          bodyText1: TextStyle(color: Color(0xFFB085F5)),
-          bodyText2: TextStyle(color: Color(0xFFB085F5)),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFB085F5)),
+          bodyMedium: TextStyle(color: Color(0xFFB085F5)),
         ),
-        iconTheme: IconThemeData(color: Color(0xFFB085F5)),
+        iconTheme: const IconThemeData(color: Color(0xFFB085F5)),
       ),
       home: Builder(
         builder: (context) => ProductionList(
-          orderedItems: [],
+          orderedItems: const [],
           itemSource: 'Production',
         ),
       ),

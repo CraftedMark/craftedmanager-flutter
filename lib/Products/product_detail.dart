@@ -8,8 +8,8 @@ class ProductDetailPage extends StatefulWidget {
   final bool isNewProduct;
   final Function onProductSaved;
 
-  ProductDetailPage(
-      {required this.product,
+  const ProductDetailPage(
+      {super.key, required this.product,
       this.isNewProduct = false,
       required this.onProductSaved});
 
@@ -74,11 +74,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   InputDecoration _getInputDecoration(String labelText) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: TextStyle(color: Colors.white),
-      focusedBorder: OutlineInputBorder(
+      labelStyle: const TextStyle(color: Colors.white),
+      focusedBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
       ),
     );
@@ -242,14 +242,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         value: _isAssemblyItemController.text.isEmpty
                             ? null
                             : _isAssemblyItemController.text,
-                        items: <DropdownMenuItem<String>>[
+                        items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(
                             value: "true",
-                            child: const Text('Yes'),
+                            child: Text('Yes'),
                           ),
                           DropdownMenuItem<String>(
                             value: "false",
-                            child: const Text('No'),
+                            child: Text('No'),
                           ),
                         ],
                         onChanged: (String? newValue) {

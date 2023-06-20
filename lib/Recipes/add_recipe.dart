@@ -4,11 +4,10 @@ import 'recipe_manager.dart';
 
 class AddRecipe extends StatefulWidget {
   final Function(Recipe) onAddRecipe;
-
-  AddRecipe({required this.onAddRecipe});
+  const AddRecipe({Key? key, required this.onAddRecipe}) : super(key: key);
 
   @override
-  _AddRecipeState createState() => _AddRecipeState();
+  State<AddRecipe> createState() => _AddRecipeState();
 }
 
 class _AddRecipeState extends State<AddRecipe> {
@@ -36,7 +35,9 @@ class _AddRecipeState extends State<AddRecipe> {
 
   double _calculatePieceCost() {
     double totalCost = 0;
-    ingredients.forEach((ingredient) => totalCost += ingredient.cost);
+    for (final ingredient in ingredients) {
+      totalCost += ingredient.cost;
+    }
     return totalCost / totalPieces;
   }
 
@@ -65,10 +66,10 @@ class _AddRecipeState extends State<AddRecipe> {
               const SizedBox(height: 10),
               const Text('Ingredients'),
               ...ingredients.map((ingredient) => ListTile(
-                    title: Text(ingredient.name),
-                    subtitle: Text('Weight: ${ingredient.quantity}'),
-                    trailing: Text('Cost: ${ingredient.cost}'),
-                  )),
+                title: Text(ingredient.name),
+                subtitle: Text('Weight: ${ingredient.quantity}'),
+                trailing: Text('Cost: ${ingredient.cost}'),
+              )),
               TextField(
                 controller: _ingredientNameController,
                 decoration: const InputDecoration(
@@ -81,7 +82,7 @@ class _AddRecipeState extends State<AddRecipe> {
                   hintText: 'Ingredient Cost',
                 ),
                 keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                const TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
                 controller: _ingredientWeightController,
@@ -89,7 +90,7 @@ class _AddRecipeState extends State<AddRecipe> {
                   hintText: 'Ingredient Weight',
                 ),
                 keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                const TextInputType.numberWithOptions(decimal: true),
               ),
               ElevatedButton(
                 onPressed: _addIngredient,

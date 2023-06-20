@@ -1,5 +1,4 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
-import 'package:crafted_manager/postgres.dart';
 import 'package:flutter/material.dart';
 
 import '../Models/people_model.dart';
@@ -16,7 +15,7 @@ class ContactsList extends StatefulWidget {
 class ContactsListState extends State<ContactsList> {
   List<People>? _contacts;
   List<People>? _filteredContacts;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -66,7 +65,7 @@ class ContactsListState extends State<ContactsList> {
                         .toList();
                   });
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     suffixIcon: Icon(Icons.search),
                     hintText: 'Search Contacts...'),
               ),
@@ -75,7 +74,7 @@ class ContactsListState extends State<ContactsList> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
                 context,
@@ -92,7 +91,7 @@ class ContactsListState extends State<ContactsList> {
         backgroundColor: Colors.black,
       ),
       body: _filteredContacts == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _filteredContacts!.length,
               itemBuilder: (BuildContext context, int index) {
@@ -128,7 +127,7 @@ class ContactsListState extends State<ContactsList> {
                     child: ListTile(
                       title: _filteredContacts != null
                           ? Text('${contact.firstName} ${contact.lastName}')
-                          : CircularProgressIndicator(),
+                          : const CircularProgressIndicator(),
                       subtitle: Text(contact.phone),
                     ),
                   ),

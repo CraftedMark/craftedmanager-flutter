@@ -1,7 +1,6 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
-import 'package:crafted_manager/ProductionList/production_list_db_manager.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -54,19 +53,19 @@ class _ProductionListState extends State<ProductionList> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.white),
+          icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
             widget._sliderDrawerKey.currentState?.toggle();
           },
         ),
-        title: Text(
+        title: const Text(
           'Production List',
           style: TextStyle(color: Colors.white),
         ),
       ),
       body: SafeArea(
         child: SliderDrawer(
-          appBar: SizedBox.shrink(),
+          appBar: const SizedBox.shrink(),
           key: widget._sliderDrawerKey,
           sliderOpenSize: 250,
           slider: SliderView(onItemClick: (title) {
@@ -84,16 +83,16 @@ class _ProductionListState extends State<ProductionList> {
                     return ListTile(
                       title: Text(
                         item.productName,
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                       ),
                       subtitle: Text(
                         'Quantity: ${item.quantity}',
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                       ),
                     );
                   },
                 )
-              : Center(
+              : const Center(
                   child: Text(
                     'No items to show',
                     style: TextStyle(

@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 class ProductSearchScreen extends StatefulWidget {
   final List<Product> products;
 
-  const ProductSearchScreen({required this.products});
+  const ProductSearchScreen({super.key, required this.products});
 
   @override
   _ProductSearchScreenState createState() => _ProductSearchScreenState();
 }
 
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   late List<Product> filteredProducts;
   int selectedQuantity = 1;
 
@@ -35,7 +35,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     return MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.black),
+        appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       ),
       home: Scaffold(
         appBar: AppBar(
@@ -49,7 +49,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 child: TextField(
                   controller: _searchController,
                   onChanged: _filterProducts,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Search product',
                     border: OutlineInputBorder(),
                   ),
@@ -81,7 +81,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                   TextFormField(
                                     controller: quantityController,
                                     keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText: 'Quantity',
                                       border: OutlineInputBorder(),
                                     ),

@@ -5,13 +5,13 @@ class TimeEntry {
   final DateTime clockOut;
 
   TimeEntry({
-    @required this.entryID,
-    @required this.employeeID,
-    @required this.clockIn,
-    this.clockOut,
+    required this.entryID,
+    required this.employeeID,
+    required this.clockIn,
+    required this.clockOut,
   });
 
-  factory TimeEntry.fromMap(Map<String, dynamic> json) => new TimeEntry(
+  factory TimeEntry.fromMap(Map<String, dynamic> json) => TimeEntry(
         entryID: json["EntryID"],
         employeeID: json["EmployeeID"],
         clockIn: DateTime.parse(json["ClockIn"]),
@@ -22,6 +22,6 @@ class TimeEntry {
         "EntryID": entryID,
         "EmployeeID": employeeID,
         "ClockIn": clockIn.toIso8601String(),
-        "ClockOut": clockOut?.toIso8601String(),
+        "ClockOut": clockOut.toIso8601String(),
       };
 }

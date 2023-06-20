@@ -1,5 +1,4 @@
 
-import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:woosignal/models/payload/order_wc.dart' as bs ;
@@ -208,7 +207,7 @@ class WooSignalService {
     var shipping = bs.Shipping.fromJson(customerShipping!.toJson());
 
 
-    bs.OrderWC _order = bs.OrderWC(
+    bs.OrderWC orderForSend = bs.OrderWC(
       status: orderStatuses[0],
       billing: billing,
       shipping: shipping,
@@ -224,7 +223,7 @@ class WooSignalService {
       // metaData: null,
       // parentId: 0,
     );
-    return await WooSignal.instance.createOrder(_order);
+    return await WooSignal.instance.createOrder(orderForSend);
   }
 
   static Future<List<Order>> getOrders() async {

@@ -3,6 +3,8 @@ import 'package:crafted_manager/Models/people_model.dart';
 import 'package:flutter/material.dart';
 
 class UserCreate extends StatefulWidget {
+  const UserCreate({super.key});
+
   @override
   _UserCreateState createState() => _UserCreateState();
 }
@@ -49,20 +51,20 @@ class _UserCreateState extends State<UserCreate> {
   void createUserAccount() async {
     if (selectedPerson == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a person first.')),
+        const SnackBar(content: Text('Please select a person first.')),
       );
       return;
     }
     if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text('Both username and password fields are required.')),
       );
       return;
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('User account created successfully.')),
+      const SnackBar(content: Text('User account created successfully.')),
     );
 
     usernameController.clear();
@@ -79,20 +81,20 @@ class _UserCreateState extends State<UserCreate> {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black,
-          title: Text('Create User Account'),
+          title: const Text('Create User Account'),
         ),
         body: Row(
           children: [
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.4,
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: searchController,
                       onChanged: filterPeopleList,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Search',
                         hintText: 'Search by first name or last name',
                         suffixIcon: Icon(Icons.search),
@@ -129,38 +131,38 @@ class _UserCreateState extends State<UserCreate> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (selectedPerson != null) ...[
                         Text(
                           'Selected person: ${selectedPerson!.firstName} ${selectedPerson!.lastName}',
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextField(
                           controller: usernameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Username',
                             hintText: 'Enter a username',
                             border: OutlineInputBorder(),
                           ),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextField(
                           controller: passwordController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Password',
                             hintText: 'Enter a password',
                             border: OutlineInputBorder(),
                           ),
                           obscureText: true,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: createUserAccount,
-                          child: Text('Create User Account'),
+                          child: const Text('Create User Account'),
                         ),
                       ],
                     ],

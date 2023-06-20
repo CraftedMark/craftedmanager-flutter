@@ -187,7 +187,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   initialValue: _costOfGood.toString(),
                   decoration: const InputDecoration(labelText: 'Cost of Good'),
                   keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  const TextInputType.numberWithOptions(decimal: true, signed: false),
                   onSaved: (value) => _costOfGood = double.parse(value!),
                 ),
                 TextFormField(
@@ -195,7 +195,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   decoration:
                   const InputDecoration(labelText: 'Manufacturing Price'),
                   keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  const TextInputType.numberWithOptions(decimal: true, signed: false),
                   onSaved: (value) =>
                   _manufacturingPrice = double.parse(value!),
                 ),
@@ -204,14 +204,14 @@ class _EditProductPageState extends State<EditProductPage> {
                   decoration: const InputDecoration(
                       labelText: 'Wholesale Price'),
                   keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  const TextInputType.numberWithOptions(decimal: true, signed: false),
                   onSaved: (value) => _wholesalePrice = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _retailPrice,
                   decoration: const InputDecoration(labelText: 'Retail Price'),
                   keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  const TextInputType.numberWithOptions(decimal: true, signed: false),
                   onSaved: (value) => _retailPrice = value!,
                 ),
                 TextFormField(
@@ -277,14 +277,14 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _quantitySold.toString(),
                   decoration: const InputDecoration(labelText: 'Quantity Sold'),
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  keyboardType: const TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _quantitySold = int.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _quantityInStock.toString(),
                   decoration: const InputDecoration(
                       labelText: 'Quantity In Stock'),
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  keyboardType: const TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _quantityInStock = int.parse(value!),
                 ),
                 // Add TextFormField for the new fields
@@ -296,14 +296,14 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _perGramCost.toString(),
                   decoration: const InputDecoration(labelText: 'Per Gram Cost'),
-                  keyboardType: TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
                   onSaved: (value) => _perGramCost = int.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _bulkPricing.toString(),
                   decoration: const InputDecoration(labelText: 'Bulk Pricing'),
-                  keyboardType: TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
                   onSaved: (value) => _bulkPricing = int.parse(value!),
                 ),
@@ -311,7 +311,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   initialValue: _weightInGrams.toString(),
                   decoration: const InputDecoration(
                       labelText: 'Weight In Grams'),
-                  keyboardType: TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
                   onSaved: (value) => _weightInGrams = int.parse(value!),
                 ),
@@ -325,7 +325,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   initialValue: _packageWeight.toString(),
                   decoration: const InputDecoration(
                       labelText: 'Package Weight'),
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  keyboardType: const TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _packageWeight = int.parse(value!),
                 ),
               ],

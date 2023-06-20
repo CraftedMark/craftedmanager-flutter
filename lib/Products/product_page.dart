@@ -22,6 +22,8 @@ String indexToType(int index) {
 }
 
 class ProductListPage extends StatefulWidget {
+  const ProductListPage({super.key});
+
   @override
   _ProductListPageState createState() => _ProductListPageState();
 }
@@ -114,7 +116,7 @@ class _ProductListPageState extends State<ProductListPage> {
                         );
                       }
                     },
-                    underline: SizedBox.shrink(),
+                    underline: const SizedBox.shrink(),
                     dropdownColor: Colors.grey.shade800,
                     items: [
                       DropdownMenuItem(
@@ -151,7 +153,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       itemBuilder: (context, index) {
                         final product = snapshot.data![index];
                         return ListTile(
-                          tileColor: Color(0xFF2C2C2E),
+                          tileColor: const Color(0xFF2C2C2E),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),

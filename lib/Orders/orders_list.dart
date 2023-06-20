@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/people_model.dart';
-import '../Models/product_model.dart';
 import 'order_detail_screen.dart';
 import 'ordered_item_postgres.dart';
 

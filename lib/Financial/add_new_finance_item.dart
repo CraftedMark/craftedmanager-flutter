@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class AddNewFinanceItem extends StatefulWidget {
   final int itemType;
 
-  AddNewFinanceItem({required this.itemType});
+  const AddNewFinanceItem({super.key, required this.itemType});
 
   @override
   _AddNewFinanceItemState createState() => _AddNewFinanceItemState();

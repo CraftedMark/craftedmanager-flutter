@@ -140,7 +140,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             builder: (context) => EditOrderScreen(
               order: widget.order,
               customer: widget.customer,
-              products: [],
+              products: const [],
             ),
           ),
         );
@@ -172,11 +172,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 );
               }).toList(),
               cancelButton: CupertinoActionSheetAction(
-                child: const Text('Cancel'),
                 isDestructiveAction: true,
                 onPressed: () {
                   Navigator.pop(context);
                 },
+                child: const Text('Cancel'),
               ),
             );
           },

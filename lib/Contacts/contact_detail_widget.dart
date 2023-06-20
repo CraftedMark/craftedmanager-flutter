@@ -1,4 +1,3 @@
-// contact_detail_widget.dart
 import 'package:contacts_service/contacts_service.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
@@ -131,7 +130,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                         });
                       }
                     },
-                    child: Text('Load System Contacts'),
+                    child: const Text('Load System Contacts'),
                   ),
                 ],
               ),
@@ -192,7 +191,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
           label,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         isNewCustomer
             ? TextField(
           maxLength: maxLenght,
@@ -201,7 +200,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                 controller: TextEditingController(text: value ?? ''),
               )
             : Text(value ?? 'N/A'),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       ],
     );
   }

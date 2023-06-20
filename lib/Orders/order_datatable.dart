@@ -8,7 +8,7 @@ class OrderDataTable extends StatelessWidget {
     return Consumer<OrderProvider>(
       builder: (_, orderProvider, __) {
         return DataTable(
-          columns: [
+          columns: const [
             DataColumn(label: Text('Order ID')),
             DataColumn(label: Text('Customer Name')),
             DataColumn(label: Text('Order Status')),

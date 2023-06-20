@@ -1,7 +1,6 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
-import 'package:postgres/postgres.dart';
 
 class ProductionListDbManager {
 

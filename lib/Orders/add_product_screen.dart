@@ -3,13 +3,15 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:flutter/cupertino.dart';
 
 class AddProductScreen extends StatefulWidget {
+  const AddProductScreen({super.key});
+
   @override
   _AddProductScreenState createState() => _AddProductScreenState();
 }
 
 class _AddProductScreenState extends State<AddProductScreen> {
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _retailPriceController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _retailPriceController = TextEditingController();
 
   void _saveProduct() async {
     if (_descriptionController.text.isNotEmpty &&

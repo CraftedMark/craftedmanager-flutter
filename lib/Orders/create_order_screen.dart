@@ -6,16 +6,14 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
 
-  CreateOrderScreen({required this.client});
+  const CreateOrderScreen({super.key, required this.client});
 
   @override
   _CreateOrderScreenState createState() => _CreateOrderScreenState();
@@ -64,7 +62,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
         itemSource:
-            itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
+            itemSource.isNotEmpty ? itemSource : product.itemSource,
         packaging: packaging,
       ));
     });
@@ -93,7 +91,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       orderedItems: orderedItems,
     );
 
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     await OrderPostgres().createOrder(newOrder, orderedItems);
     sendNewOrderNotification();
   }
@@ -152,7 +149,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               child: ElevatedButton(
                 onPressed: () => addItemToOrder(),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
+                  backgroundColor: Colors.blue,
                 ),
                 child: const Text('Add Item'),
               ),
@@ -202,7 +199,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           border: OutlineInputBorder(),
                                         ),
                                       ),
-                                      SizedBox(height: 8),
+                                      const SizedBox(height: 8),
                                       TextFormField(
                                         controller: priceController,
                                         keyboardType: TextInputType.number,
@@ -211,7 +208,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                           border: OutlineInputBorder(),
                                         ),
                                       ),
-                                      SizedBox(height: 8),
+                                      const SizedBox(height: 8),
                                       TextFormField(
                                         controller: packagingController,
                                         decoration: const InputDecoration(
@@ -313,7 +310,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 children: [
                   TextField(
                     controller: searchController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Search",
                       hintText: "Search products",
                       prefixIcon: Icon(Icons.search),
@@ -331,7 +328,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       });
                     },
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                 ],
               ),
               children: filteredProducts.map((product) {
@@ -351,7 +348,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
       var itemSourceController =
-          TextEditingController(text: selectedProduct.itemSource ?? '');
+          TextEditingController(text: selectedProduct.itemSource);
       var packagingController = TextEditingController();
 
       final result = await showDialog<Map<String, dynamic>>(
@@ -370,7 +367,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: itemSourceController,
                   decoration: const InputDecoration(
@@ -378,7 +375,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: packagingController,
                   decoration: const InputDecoration(

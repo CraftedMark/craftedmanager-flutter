@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:postgres/postgres.dart';
 
 class CustomerBasedPricingDbManager {
@@ -8,31 +9,11 @@ class CustomerBasedPricingDbManager {
 
   CustomerBasedPricingDbManager._privateConstructor();
 
-  static Future<PostgreSQLConnection> openConnection() async {
-    print('Opening connection...');
-    final connection = PostgreSQLConnection(
-      'web.craftedsolutions.co', // Database host
-      5432, // Port number
-      'craftedmanager_db', // Database name
-      username: 'craftedmanager_dbuser', // Database username
-      password: '!!Laganga1983', // Database password
-    );
-    await connection.open();
-    print('Connection opened');
-    return connection;
-  }
-
-  static Future<void> closeConnection(PostgreSQLConnection connection) async {
-    print('Closing connection...');
-    await connection.close();
-    print('Connection closed');
-  }
-
   // CRUD Methods
 
   Future<void> updateCustomerBasedPricing(int customerId, bool value) async {
-    final connection = await openConnection();
-    final query =
+    final connection = PostgreSQLConnectionManager.connection;
+    const query =
         'UPDATE people SET customerbasedpricing = @value WHERE id = @customerId';
     await connection.execute(
       query,
@@ -41,60 +22,54 @@ class CustomerBasedPricingDbManager {
         'value': value,
       },
     );
-    await closeConnection(connection);
   }
 
   // Get all records from the specified table
   Future<List<Map<String, dynamic>>> getAll(String tableName) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query('SELECT * FROM $tableName');
-    await closeConnection(connection);
     return result.map((row) => row.toTableColumnMap()).toList();
   }
 
   // Add a record to the specified table
   Future<void> add(String tableName, Map<String, dynamic> data) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final columns = data.keys.join(', ');
     final values = data.keys.map((key) => '@${key}').join(', ');
     await connection.execute(
       'INSERT INTO $tableName ($columns) VALUES ($values)',
       substitutionValues: data,
     );
-    await closeConnection(connection);
   }
 
   // Update a record in the specified table with the provided updated data
   Future<void> update(
       String tableName, int id, Map<String, dynamic> updatedData) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final updates = updatedData.keys.map((key) => '$key = @${key}').join(', ');
     await connection.execute(
       'UPDATE $tableName SET $updates WHERE id = @id',
       substitutionValues: {'id': id, ...updatedData},
     );
-    await closeConnection(connection);
   }
 
   // Delete a record from the specified table with the provided id
   Future<void> delete(String tableName, int id) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     await connection.execute(
       'DELETE FROM $tableName WHERE id = @id',
       substitutionValues: {'id': id},
     );
-    await closeConnection(connection);
   }
 
   // Search records in the specified table using search query and substitution values
   Future<List<Map<String, dynamic>>> search(String tableName,
       String searchQuery, Map<String, dynamic> substitutionValues) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query(
       'SELECT * FROM $tableName WHERE $searchQuery',
       substitutionValues: substitutionValues,
     );
-    await closeConnection(connection);
     return result.map((row) => row.toTableColumnMap()).toList();
   }
 
@@ -170,7 +145,7 @@ class CustomerBasedPricingDbManager {
 
   // Get pricing list id by customer id
   Future<int?> getPricingListIdByCustomerId(int customerId) async {
-    final connection = await openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final PostgreSQLResult result = await connection.query(
       '''
     SELECT
@@ -182,13 +157,12 @@ class CustomerBasedPricingDbManager {
     ''',
       substitutionValues: {'customerId': customerId},
     );
-    await closeConnection(connection);
     return result.isNotEmpty ? result.first[0] : null;
   }
 
   // Get pricing list by customer id
   Future<int?> getPricingListByCustomerId(int customerId) async {
-    final connection = await CustomerBasedPricingDbManager.openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
     final PostgreSQLResult result = await connection.query(
       '''
     SELECT
@@ -200,7 +174,6 @@ class CustomerBasedPricingDbManager {
     ''',
       substitutionValues: {'customerId': customerId},
     );
-    await CustomerBasedPricingDbManager.closeConnection(connection);
     return result.isNotEmpty ? result.first[0] : null;
   }
 
@@ -253,8 +226,8 @@ class CustomerBasedPricingDbManager {
   Future<Map<String, dynamic>?> fetchCustomerBasedPricing(
       int customerId, int productId) async {
     try {
-      final connection = await openConnection();
-      final query =
+      final connection = PostgreSQLConnectionManager.connection;
+      const query =
           'SELECT * FROM customer_product_pricing WHERE customer_id = @customerId AND product_id = @productId';
       final result = await connection.mappedResultsQuery(
         query,
@@ -263,8 +236,6 @@ class CustomerBasedPricingDbManager {
           'productId': productId,
         },
       );
-      await closeConnection(connection);
-
       // Check if a custom price is found and return the entire row
       final customPriceRow = await CustomerBasedPricingDbManager.instance
           .fetchCustomerBasedPricing(customerId, productId);
@@ -311,13 +282,12 @@ class CustomerBasedPricingDbManager {
   Future<Map<String, dynamic>> addReturning(String tableName,
       Map<String, dynamic> data, String returningColumns) async {
     try {
-      final connection = await openConnection();
+      final connection = PostgreSQLConnectionManager.connection;
       final columns = data.keys.join(', ');
       final values = data.keys.map((key) => '@$key').join(', ');
       final query =
           'INSERT INTO $tableName ($columns) VALUES ($values) RETURNING $returningColumns';
       final result = await connection.query(query, substitutionValues: data);
-      await closeConnection(connection);
       return result.first.toTableColumnMap();
     } catch (e) {
       print("Error in addReturning function: $e");
@@ -336,8 +306,8 @@ class CustomerBasedPricingDbManager {
       print("Error: pricingListId is null. Skipping update.");
       return;
     }
-    final connection = await openConnection();
-    final query =
+    final connection = PostgreSQLConnectionManager.connection;
+    const query =
         'UPDATE people SET assigned_pricing_list_id = @pricingListId WHERE id = @customerId';
     await connection.execute(
       query,
@@ -346,6 +316,5 @@ class CustomerBasedPricingDbManager {
         'pricingListId': pricingListId,
       },
     );
-    await closeConnection(connection);
   }
 }
