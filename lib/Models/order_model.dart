@@ -1,7 +1,12 @@
+import 'package:uuid/uuid.dart';
+
 import 'ordered_item_model.dart';
 
+var uuid = Uuid();
+String newOrderId = uuid.v4();
+
 class Order {
-  int id;
+  String id;
   String customerId;
   DateTime orderDate;
   String shippingAddress;
@@ -29,7 +34,7 @@ class Order {
   });
 
   Order copyWith({
-    int? id,
+    String? id,
     String? customerId,
     DateTime? orderDate,
     String? shippingAddress,
@@ -70,7 +75,7 @@ class Order {
     }
 
     return Order(
-      id: int.parse(map['order_id'].toString()),
+      id: map['order_id'].toString(),
       customerId: map['people_id'].toString(),
       orderDate: parseOrderDate(map['order_date'].toString()),
       shippingAddress: map['shipping_address'] ?? '',
@@ -94,8 +99,8 @@ class Order {
       'order_id': id,
       'customerId': customerId,
       'orderDate': orderDate.toIso8601String(),
-      'shippingAddress': shippingAddress,
-      'billingAddress': billingAddress,
+      'shipping_address': shippingAddress,
+      'billing_address': billingAddress,
       'totalAmount': totalAmount,
       'orderStatus': orderStatus,
       'productName': productName,

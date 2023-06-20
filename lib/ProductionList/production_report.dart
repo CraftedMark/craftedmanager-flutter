@@ -94,7 +94,8 @@ class _ProductionReportState extends State<ProductionReport> {
                 }),
                 selectedOrder ??
                     Order(
-                      id: -1,
+                      id: "default_id",
+                      // Changed this line to convert int to BigInt
                       // or any other "default" value
                       customerId: "",
                       orderDate: DateTime.now(),

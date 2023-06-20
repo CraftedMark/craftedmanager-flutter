@@ -1,6 +1,6 @@
 class OrderedItem {
-  int id;
-  int orderId;
+  String id;
+  String orderId;
   String productName;
   int productId;
   String name;
@@ -30,8 +30,8 @@ class OrderedItem {
   });
 
   OrderedItem copyWith({
-    int? id,
-    int? orderId,
+    String? id,
+    String? orderId,
     String? productName,
     int? productId,
     String? name,
@@ -75,8 +75,8 @@ class OrderedItem {
     }
 
     return OrderedItem(
-      id: map['ordered_item_id'] as int,
-      orderId: map['order_id'] as int,
+      id: map['ordered_item_id'] as String,
+      orderId: map['order_id'] as String,
       productName: map['product_name'] as String? ?? 'Unknown',
       productId: map['product_id'] as int,
       name: map['name'] as String? ?? 'Unknown',

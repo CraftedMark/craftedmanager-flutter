@@ -22,7 +22,7 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
-  double shippingCost = 10.0;
+  double shippingCost = 10;
 
   Future<double?> getCustomProductPrice(int productId, int customerId) async {
     double? customPrice;
@@ -51,14 +51,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     setState(() {
       orderedItems.add(OrderedItem(
-        id: orderedItems.length + 1,
-        orderId: 0,
+        id: (orderedItems.length + 1).toString(),
+        // Convert the entire expression to a String
+        orderId: "0",
         productName: product.name,
         productId: product.id!,
         name: product.name,
         quantity: quantity,
         price: customPrice ?? product.retailPrice,
-        discount: 0,
+        discount: 0.0,
         productDescription: product.description,
         productRetailPrice: product.retailPrice,
         status: newOrderItemStatus,
@@ -77,8 +78,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     double totalAmount = subTotal + shippingCost;
 
     final newOrder = Order(
-      id: DateTime.now().millisecondsSinceEpoch,
       customerId: widget.client.id.toString(),
+      id: uuid.v4(),
       orderDate: DateTime.now(),
       shippingAddress:
           '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',

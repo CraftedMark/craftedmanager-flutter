@@ -7,6 +7,7 @@ import 'package:crafted_manager/Orders/orders_db_manager.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'ordered_item_postgres.dart';
 
@@ -41,7 +42,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
+    return OrderedItemPostgres.fetchOrderedItems(widget.order.id as int);
   }
 
   double calculateSubtotal() {
@@ -81,8 +82,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       });
     } else {
       setState(() {
+        var uuid = Uuid();
         _orderedItems.add(OrderedItem(
-          id: _orderedItems.length + 1,
+          id: uuid.v1(),
           orderId: widget.order.id,
           productName: product.name,
           productId: product.id!,
@@ -147,8 +149,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         builder: (context, orderProvider, child) {
           return FutureBuilder(
             future: getOrderedItemsByOrderId(),
-            builder: (_, snapshot){
-              if(snapshot.hasData){
+            builder: (_, snapshot) {
+              if (snapshot.hasData) {
                 _orderedItems = snapshot.data!;
                 return ListView(
                   children: [
@@ -184,20 +186,22 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           List<Product> products = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductSearchScreen(products: widget.products),
+                              builder: (context) => ProductSearchScreen(
+                                  products: widget.products),
                             ),
                           );
 
                           if (products != null && products.isNotEmpty) {
-                            final result = await showDialog<Map<String, dynamic>>(
+                            final result =
+                                await showDialog<Map<String, dynamic>>(
                               context: context,
                               builder: (BuildContext context) =>
                                   AddOrderedItemDialog(products: products),
                             );
 
                             if (result != null) {
-                              addOrderedItem(result['product'], result['quantity']);
+                              addOrderedItem(
+                                  result['product'], result['quantity']);
                             }
                           }
                         },
@@ -231,8 +235,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
-                                  initialValue:
-                                  _orderedItems[index].price.toStringAsFixed(2),
+                                  initialValue: _orderedItems[index]
+                                      .price
+                                      .toStringAsFixed(2),
                                   keyboardType: TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
@@ -253,7 +258,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                                 SizedBox(height: 8),
                                 TextFormField(
                                   initialValue:
-                                  _orderedItems[index].quantity.toString(),
+                                      _orderedItems[index].quantity.toString(),
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                     labelText: 'Quantity',
@@ -328,7 +333,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   ],
                 );
               }
-              return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary));
+              return Center(
+                  child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.secondary));
             },
           );
         },

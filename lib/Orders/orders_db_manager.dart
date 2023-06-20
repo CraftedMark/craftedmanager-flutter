@@ -2,8 +2,8 @@ import 'dart:core';
 
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:postgres/postgres.dart';
+import 'package:uuid/uuid.dart';
 
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
@@ -213,21 +213,26 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
   Future<void> createOrder(Order order, List<OrderedItem> orderedItems) async {
     PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
-        await connection.transaction((ctx) async {
+      await connection.transaction((ctx) async {
+        // Generate a UUID
+        Uuid uuid = Uuid();
+        String orderId = uuid.v4();
+
         // Insert order into orders table
         print('Inserting order into orders table...');
         print('Order data: ${order.toMap()}');
-        final resultOrder = await ctx.query('''
-INSERT INTO orders (order_id, people_id, order_date, shipping_address, billing_address, total_amount, order_status)
-VALUES (@order_id, @customerId, @orderDate, @shippingAddress, @billingAddress, @totalAmount, @orderStatus)
+        await ctx.query('''
+INSERT INTO orders (order_id, people_id, order_date, shipping_address, billing_address, total_amount, order_status) 
+VALUES (@order_id, @customerId, @orderDate, @shipping_address, @billing_address, @totalAmount, @orderStatus)
 ''', substitutionValues: order.toMap());
-        print('Order inserted into orders table. Result: $resultOrder');
+
+        print('Order inserted into orders table. Order ID: $orderId');
 
         // Insert ordered items into ordered_items table
         for (OrderedItem item in orderedItems) {
           print('Inserting ordered item with values: ${{
             ...item.toMap(),
-            'orderId': order.id,
+            'orderId': orderId
           }}');
           await ctx.query('''
 INSERT INTO ordered_items
@@ -235,21 +240,17 @@ INSERT INTO ordered_items
 VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
 ''', substitutionValues: {
             ...item.toMap(),
-            'orderId': order.id,
+            'orderId': orderId,
             'productId': item.productId,
             'productName': item.productName,
-            'itemSource': item.itemSource, // Include the item_source
+            'itemSource': item.itemSource,
           });
           print('Ordered item inserted');
         }
       });
-
-      // Adding order to the provider
-      // orderProvider.addOrder(order);
-
-      print('Order created.');
     } catch (e) {
-      print('Error creating order: ${e.toString()}');
+      print('Exception occurred while creating order: $e');
+      throw e;
     }
   }
 }

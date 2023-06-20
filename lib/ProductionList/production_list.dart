@@ -1,7 +1,6 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
-import 'package:crafted_manager/ProductionList/production_list_db_manager.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -35,15 +34,13 @@ class _ProductionListState extends State<ProductionList> {
       Provider.of<OrderProvider>(context, listen: false)
           .filterOrderedItems(widget.itemSource);
       updateLoadingState();
-
     });
-
   }
-  void updateLoadingState(){
+
+  void updateLoadingState() {
     isLoading = false;
     setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -72,36 +69,38 @@ class _ProductionListState extends State<ProductionList> {
           slider: SliderView(onItemClick: (title) {
             // Handle the menu item click as necessary
           }),
-          child:
-          isLoading?
-          Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary,)):
-          filteredItems.isNotEmpty
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    OrderedItem item = filteredItems[index];
-                    return ListTile(
-                      title: Text(
-                        item.productName,
-                        style: TextStyle(color: Colors.black),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.secondary,
+                ))
+              : filteredItems.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        OrderedItem item = filteredItems[index];
+                        return ListTile(
+                          title: Text(
+                            item.productName,
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          subtitle: Text(
+                            'Quantity: ${item.quantity}',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        'No items to show',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
                       ),
-                      subtitle: Text(
-                        'Quantity: ${item.quantity}',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    );
-                  },
-                )
-              : Center(
-                  child: Text(
-                    'No items to show',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
                     ),
-                  ),
-                ),
         ),
       ),
     );
