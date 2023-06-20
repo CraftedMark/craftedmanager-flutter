@@ -21,13 +21,19 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
   }
 
   Future<void> loadCustomers() async {
-    _peopleList = await WooSignalService.getCustomers();
+    // _peopleList = await WooSignalService.getCustomers();//TODO: enable WooSignal
+    _peopleList = await PeoplePostgres.refreshCustomerList();
+
     _searchResults = _peopleList;
     setState(() {});
   }
 
-  void findPeple(query){
-    var result = _peopleList.where((p) => p.firstName.contains(query)||  p.lastName.contains(query)|| p.phone.contains(query)).toList();
+  void findPeople(query){
+    var result = _peopleList.where(
+            (p) => p.firstName.contains(query) ||
+                   p.lastName.contains(query) ||
+                   p.phone.contains(query)
+    ).toList();
     _searchResults = result;
     setState(() {});
   }
@@ -89,7 +95,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: TextField(
-                  onChanged: findPeple,
+                  onChanged: findPeople,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),

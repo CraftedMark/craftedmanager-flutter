@@ -39,16 +39,14 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Future<void> _fetchProducts() async {
-    // print('Fetching products for type: ${indexToType(_currentSegmentIndex)}');
-    _products = WooSignalService.getProducts();
-    setState(() {});
-    // _products =  ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
-    // _products.then((value) {
-    //   print('Fetched products: $value');
-    //   setState(() {
-    //     _products = Future.value(value); // Update the products list.
-    //   });
-    // });
+    // _products = WooSignalService.getProducts();//TODO: enable WooSignal
+    // setState(() {});
+    _products = ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
+    _products.then((value) {
+      setState(() {
+        _products = Future.value(value); // Update the products list.
+      });
+    });
   }
 
   void createNewProduct() {

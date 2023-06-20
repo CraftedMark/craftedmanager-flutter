@@ -332,11 +332,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
 
     if (widget.isNewProduct) {
-      // await ProductPostgres.addProduct(updatedProduct);
-      await WooSignalService.createProduct(updatedProduct);
+      await ProductPostgres.addProduct(updatedProduct);
+      // await WooSignalService.createProduct(updatedProduct);//TODO: enable WooSignal
     } else {
-      // await ProductPostgres.updateProduct(updatedProduct);
-      await WooSignalService.updateProduct(updatedProduct);
+      await ProductPostgres.updateProduct(updatedProduct);
+      // await WooSignalService.updateProduct(updatedProduct);//TODO: enable WooSignal
     }
   }
 }

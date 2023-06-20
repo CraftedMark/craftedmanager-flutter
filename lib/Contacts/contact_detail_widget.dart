@@ -20,14 +20,14 @@ class ContactDetailWidget extends StatefulWidget {
 }
 
 class _ContactDetailWidgetState extends State<ContactDetailWidget> {
-  bool _editing = false;
+  bool isNewCustomer = false;
   late People newCustomer;
 
   @override
   void initState() {
     newCustomer = widget.contact;
     if (newCustomer.id <= 0) {
-      _editing = true;
+      isNewCustomer = true;
     }
     super.initState();
   }
@@ -59,7 +59,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
           actions: [
             TextButton(
               onPressed: onSaveEditButtonClick,
-              child: Text(_editing ? 'Save' : 'Edit'),
+              child: Text(isNewCustomer ? 'Save' : 'Edit'),
             ),
           ],
         ),
@@ -143,13 +143,15 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
   }
 
   Future<void> onSaveEditButtonClick() async {
-    setState(() => _editing = !_editing);
+    setState(() => isNewCustomer = !isNewCustomer);
 
     if (newCustomer.id <= 0) {
       print('try to create a customer name: ${newCustomer.firstName}');
 
-      var newId = await WooSignalService.createCustomer(newCustomer);
-      if(newId == -1 ){
+      // int wooSignalId = await WooSignalService.createCustomer(newCustomer);//TODO: enable WooSignal
+      int postgresID = await PeoplePostgres.createCustomer(newCustomer);
+
+      if(postgresID == -1 ){
         await showDialog(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
@@ -164,10 +166,12 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                 ),
               );
       }
-      newCustomer = newCustomer.copyWith(id: newId);
+      newCustomer = newCustomer.copyWith(id: postgresID);
     } else {
       print('try to update a customer id: ${newCustomer.id}');
-      await WooSignalService.updateCustomer(newCustomer);
+      // await WooSignalService.updateCustomer(newCustomer);//TODO: enable WooSignal
+      await PeoplePostgres.updateCustomer(newCustomer);
+
     }
     widget.refresh();
   }
@@ -189,7 +193,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
-        _editing
+        isNewCustomer
             ? TextField(
           maxLength: maxLenght,
           keyboardType: textInputType,
@@ -210,7 +214,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
           label,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        _editing
+        isNewCustomer
             ? Switch(
                 value: value,
                 onChanged: setter,

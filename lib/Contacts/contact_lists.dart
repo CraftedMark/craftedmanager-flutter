@@ -25,9 +25,9 @@ class ContactsListState extends State<ContactsList> {
   }
 
   Future<void> refreshContacts() async {
-    // final contacts = await PeoplePostgres.refreshCustomerList();
+    final contacts = await PeoplePostgres.refreshCustomerList();
 
-    final contacts = await WooSignalService.getCustomers();
+    // final contacts = await WooSignalService.getCustomers();//TODO: enable WooSignal
     setState(() {
       _contacts = contacts;
       _filteredContacts = contacts;
@@ -37,8 +37,8 @@ class ContactsListState extends State<ContactsList> {
   Future<void> deleteCustomer(People customer) async {
     _filteredContacts!.removeWhere((c) => c.id == customer.id);
     setState(() {});
-    // await PeoplePostgres.deleteCustomer(customer.id);
-    await WooSignalService.deleteCustomer(customer.id);
+    await PeoplePostgres.deleteCustomer(customer.id);
+    // await WooSignalService.deleteCustomer(customer.id); //TODO: enable WooSignal
     await refreshContacts();
   }
 
@@ -52,6 +52,7 @@ class ContactsListState extends State<ContactsList> {
             Expanded(
               child: TextField(
                 controller: _searchController,
+                onEditingComplete: ()=>print('tap completed'),//TODO: remove after check
                 onChanged: (value) {
                   setState(() {
                     _filteredContacts = _contacts!

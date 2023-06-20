@@ -36,7 +36,7 @@ void main() async {
     });
   }
 
-  WooSignalService.init();
+  // WooSignalService.init();//TODO: enable WooSignal
   runApp(
     ChangeNotifierProvider(
       create: (context) => provider,
