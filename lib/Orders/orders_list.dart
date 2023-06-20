@@ -209,7 +209,7 @@ class _OrderWidget extends StatelessWidget {
   final Order order;
   const _OrderWidget({Key? key, required this.order}) : super(key: key);
 
-  Future<List<OrderedItem>> fetchOrderedItems(int orderId) async {
+  Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
     return await OrderedItemPostgres.fetchOrderedItems(orderId);
   }
 

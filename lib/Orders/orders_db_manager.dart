@@ -214,10 +214,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
       await connection.transaction((ctx) async {
-        // Generate a UUID
-        Uuid uuid = Uuid();
-        String orderId = uuid.v4();
-
         // Insert order into orders table
         print('Inserting order into orders table...');
         print('Order data: ${order.toMap()}');
@@ -226,13 +222,13 @@ INSERT INTO orders (order_id, people_id, order_date, shipping_address, billing_a
 VALUES (@order_id, @customerId, @orderDate, @shipping_address, @billing_address, @totalAmount, @orderStatus)
 ''', substitutionValues: order.toMap());
 
-        print('Order inserted into orders table. Order ID: $orderId');
+        print('Order inserted into orders table. Order ID: ${order.id}');
 
         // Insert ordered items into ordered_items table
         for (OrderedItem item in orderedItems) {
           print('Inserting ordered item with values: ${{
             ...item.toMap(),
-            'orderId': orderId
+            'orderId': item.orderId
           }}');
           await ctx.query('''
 INSERT INTO ordered_items
@@ -240,7 +236,7 @@ INSERT INTO ordered_items
 VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
 ''', substitutionValues: {
             ...item.toMap(),
-            'orderId': orderId,
+            'orderId': item.orderId,
             'productId': item.productId,
             'productName': item.productName,
             'itemSource': item.itemSource,

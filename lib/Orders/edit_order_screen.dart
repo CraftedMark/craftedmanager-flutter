@@ -42,7 +42,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id as int);
+    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
   }
 
   double calculateSubtotal() {

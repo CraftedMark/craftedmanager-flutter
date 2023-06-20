@@ -75,7 +75,7 @@ class OrderedItem {
     }
 
     return OrderedItem(
-      id: map['ordered_item_id'] as String,
+      id: map['ordered_item_id'].toString(),
       orderId: map['order_id'] as String,
       productName: map['product_name'] as String? ?? 'Unknown',
       productId: map['product_id'] as int,

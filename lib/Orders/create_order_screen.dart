@@ -77,9 +77,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
     double totalAmount = subTotal + shippingCost;
 
+    final orderId = uuid.v4();
+
+    for(var item in orderedItems){
+      item.orderId = orderId;
+    }
+    print("new orderid = $orderId");
+
     final newOrder = Order(
       customerId: widget.client.id.toString(),
-      id: uuid.v4(),
+      id: orderId,
       orderDate: DateTime.now(),
       shippingAddress:
           '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
