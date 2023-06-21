@@ -179,7 +179,8 @@ class WooSignalService {
   }
 
 
-  static final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+
+
 
   static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items) async {
     final customer = await  WooSignal.instance.retrieveCustomer(id: int.parse(order.customerId));
@@ -208,7 +209,7 @@ class WooSignalService {
 
 
     bs.OrderWC orderForSend = bs.OrderWC(
-      status: orderStatuses[0],
+      status: WSOrderStatus.pending.toString(),
       billing: billing,
       shipping: shipping,
       customerNote: order.notes,
@@ -240,14 +241,13 @@ class WooSignalService {
     return null;
   }
 
-  static Future<void> updateOrder(Order order, List<OrderedItem> items) async {
-    print('try to update order id: ${order.id}');
-    final line =  [{"name":"Flutter", "product_id":"26", "variation_id":0, "quantity":1, "subtotal":"0.9","total":"0.9"}];
+  static Future<void> updateOrder(Order order, List<OrderedItem> items, WSOrderStatus newStatus) async {
+    final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 
-    var data = <String, dynamic>{"status": orderStatuses[1]};//TODO: CHANGE
+    var data = <String, dynamic>{"status": orderStatuses[newStatus.index]};
 
     List<Map<String, dynamic>> orderedItems = List.generate(
-      items.length, (index) => items[index].mapForUpdateOrder(),
+      items.length, (index) => items[index].toWSOrderedItemMap(),
     );
     data.addAll({"line_items": orderedItems});
     data.addAll({"customer_note":order.notes});
@@ -266,32 +266,15 @@ class WooSignalService {
   static Future<void> deleteOrder (int id) async {
     WooSignal.instance.deleteOrder(id);
   }
+}
 
-
-
-
-
-  //
-  // static Future< >  () async {
-  //   return WooSignal.instance.
-  // }
-  //
-  // static Future< >  () async {
-  //   return WooSignal.instance.
-  // }
-  //
-  // static Future< >  () async {
-  //   return WooSignal.instance.
-  // }
-  // static Future< >  () async {
-  //   return WooSignal.instance.
-  // }
-  //
-  // static Future< >  () async {
-  //   return WooSignal.instance.
-  // }
-  //
-
-
-
+enum WSOrderStatus{
+  pending,
+  processing,
+  onHold,
+  completed,
+  cancelled,
+  refunded,
+  failed,
+  trash
 }

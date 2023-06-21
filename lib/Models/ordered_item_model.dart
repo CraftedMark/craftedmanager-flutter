@@ -107,7 +107,7 @@ class OrderedItem {
       'packaging': packaging,
     };
   }
-  Map<String, dynamic> mapForUpdateOrder(){
+  Map<String, dynamic> toWSOrderedItemMap(){
     return {
       "name":name,
       "product_id":productId.toString(),

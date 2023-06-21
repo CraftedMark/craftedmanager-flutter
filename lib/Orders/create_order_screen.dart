@@ -90,7 +90,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       archived: false,
       orderedItems: orderedItems,
     );
-
+    // WooSignalService.createOrder(newOrder, orderedItems);//TODO: Enable WooSignal
     await OrderPostgres().createOrder(newOrder, orderedItems);
     sendNewOrderNotification();
   }
