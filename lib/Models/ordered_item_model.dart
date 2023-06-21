@@ -12,6 +12,8 @@ class OrderedItem {
   String status;
   String itemSource;
   String packaging;
+  String flavor;
+  double dose;
 
   OrderedItem({
     required this.id,
@@ -27,6 +29,8 @@ class OrderedItem {
     required this.status,
     required this.itemSource,
     required this.packaging,
+    this.flavor = '',
+    this.dose = 0.0,
   });
 
   OrderedItem copyWith({
@@ -43,6 +47,8 @@ class OrderedItem {
     String? status,
     String? itemSource,
     String? packaging,
+    String? flavor,
+    double? dose,
   }) {
     return OrderedItem(
       id: id ?? this.id,
@@ -58,6 +64,8 @@ class OrderedItem {
       status: status ?? this.status,
       itemSource: itemSource ?? this.itemSource,
       packaging: packaging ?? this.packaging,
+      flavor: flavor ?? this.flavor,
+      dose: dose ?? this.dose,
     );
   }
 
@@ -76,11 +84,11 @@ class OrderedItem {
 
     return OrderedItem(
       id: map['ordered_item_id'].toString(),
-      orderId: map['order_id'] as String,
+      orderId: map['order_id'].toString(),
       productName: map['product_name'] as String? ?? 'Unknown',
-      productId: map['product_id'] as int,
+      productId: int.tryParse(map['product_id'].toString()) ?? 0,
       name: map['name'] as String? ?? 'Unknown',
-      quantity: map['quantity'] as int,
+      quantity: int.tryParse(map['quantity'].toString()) ?? 0,
       price: parseNum(map['price']).toDouble(),
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
@@ -88,6 +96,8 @@ class OrderedItem {
       status: map['status'] ?? "Unknown",
       itemSource: map['item_source'] ?? "Unknown",
       packaging: map['packaging'] ?? "Unknown",
+      flavor: map['flavor'] ?? "Unknown",
+      dose: double.tryParse(map['dose'].toString()) ?? 0.0,
     );
   }
 
@@ -105,6 +115,8 @@ class OrderedItem {
       'status': status,
       'item_source': itemSource,
       'packaging': packaging,
+      'flavor': flavor,
+      'dose': dose,
     };
   }
 }

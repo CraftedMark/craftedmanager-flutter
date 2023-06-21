@@ -20,6 +20,7 @@ class EditOrderScreen extends StatefulWidget {
     required this.order,
     required this.customer,
     required this.products,
+    required VoidCallback onStateChanged,
   });
 
   @override

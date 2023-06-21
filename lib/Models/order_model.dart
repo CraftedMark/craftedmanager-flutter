@@ -62,6 +62,8 @@ class Order {
   }
 
   factory Order.fromMap(Map<String, dynamic> map) {
+    // Add log
+    print('Creating order from map: $map');
     DateTime parseOrderDate(String date) {
       try {
         return DateTime.parse(date);
@@ -97,15 +99,18 @@ class Order {
 
     return {
       'order_id': id,
-      'customerId': customerId,
-      'orderDate': orderDate.toIso8601String(),
+      'people_id': customerId,
+      'order_date': orderDate.toIso8601String(),
       'shipping_address': shippingAddress,
       'billing_address': billingAddress,
-      'totalAmount': totalAmount,
-      'orderStatus': orderStatus,
-      'productName': productName,
+      'total_amount': totalAmount,
+      'order_status': orderStatus,
+      'product_name': productName,
       'notes': notes,
       'ordered_items': orderedItemsToMap(),
+      'archived': archived
+          ? 1
+          : 0, // Assuming your backend expects a 1 for true and 0 for false.
     };
   }
 }

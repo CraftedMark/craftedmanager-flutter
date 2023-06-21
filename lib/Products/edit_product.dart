@@ -40,6 +40,9 @@ class _EditProductPageState extends State<EditProductPage> {
   late String _packageWeightMeasure;
   late int _packageWeight;
   late String _type;
+  late double _dose;
+  late String _packaging;
+  late String _flavor;
 
   @override
   void initState() {
@@ -69,6 +72,9 @@ class _EditProductPageState extends State<EditProductPage> {
     _packageWeightMeasure = widget.product.packageWeightMeasure;
     _packageWeight = widget.product.packageWeight;
     _type = widget.product.type;
+    _dose = widget.product.dose;
+    _packaging = widget.product.packaging;
+    _flavor = widget.product.flavor;
   }
 
   Future<void> _updateProduct() async {
@@ -102,6 +108,9 @@ class _EditProductPageState extends State<EditProductPage> {
         packageWeightMeasure: _packageWeightMeasure,
         packageWeight: _packageWeight,
         type: _type,
+        dose: _dose,
+        packaging: _packaging,
+        flavor: _flavor,
         assemblyItems: [],
       );
 
@@ -111,18 +120,17 @@ class _EditProductPageState extends State<EditProductPage> {
       } catch (e) {
         showDialog(
           context: context,
-          builder: (context) =>
-              AlertDialog(
-                title: const Text('Error'),
-                content:
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content:
                 const Text('An error occurred while updating the product.'),
-                actions: [
-                  TextButton(
-                    child: const Text('OK'),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.pop(context),
               ),
+            ],
+          ),
         );
       }
     }
@@ -186,38 +194,38 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _costOfGood.toString(),
                   decoration: const InputDecoration(labelText: 'Cost of Good'),
-                  keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: true, signed: false),
                   onSaved: (value) => _costOfGood = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _manufacturingPrice.toString(),
                   decoration:
-                  const InputDecoration(labelText: 'Manufacturing Price'),
-                  keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                      const InputDecoration(labelText: 'Manufacturing Price'),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: true, signed: false),
                   onSaved: (value) =>
-                  _manufacturingPrice = double.parse(value!),
+                      _manufacturingPrice = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _wholesalePrice.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Wholesale Price'),
-                  keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  decoration:
+                      const InputDecoration(labelText: 'Wholesale Price'),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: true, signed: false),
                   onSaved: (value) => _wholesalePrice = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _retailPrice,
                   decoration: const InputDecoration(labelText: 'Retail Price'),
-                  keyboardType:
-                  TextInputType.numberWithOptions(decimal: true, signed: false),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: true, signed: false),
                   onSaved: (value) => _retailPrice = value!,
                 ),
                 TextFormField(
                   initialValue: _stockQuantity.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Stock Quantity'),
+                  decoration:
+                      const InputDecoration(labelText: 'Stock Quantity'),
                   keyboardType: TextInputType.number,
                   onSaved: (value) => _stockQuantity = int.parse(value!),
                 ),
@@ -225,7 +233,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   initialValue: _backordered.toString(),
                   decoration: const InputDecoration(labelText: 'Backordered'),
                   onSaved: (value) =>
-                  _backordered = value == 'true' ? true : false,
+                      _backordered = value == 'true' ? true : false,
                 ),
                 TextFormField(
                   initialValue: _supplier,
@@ -240,8 +248,8 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 TextFormField(
                   initialValue: _manufacturerId.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Manufacturer ID'),
+                  decoration:
+                      const InputDecoration(labelText: 'Manufacturer ID'),
                   keyboardType: TextInputType.number,
                   onSaved: (value) => _manufacturerId = int.parse(value!),
                   validator: (value) {
@@ -254,7 +262,7 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _manufacturerName,
                   decoration:
-                  const InputDecoration(labelText: 'Manufacturer Name'),
+                      const InputDecoration(labelText: 'Manufacturer Name'),
                   onSaved: (value) => _manufacturerName = value!,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -275,6 +283,39 @@ class _EditProductPageState extends State<EditProductPage> {
                   },
                 ),
                 TextFormField(
+                  initialValue: _dose,
+                  decoration: const InputDecoration(labelText: 'Dose'),
+                  onSaved: (value) => _dose = value!,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an dose';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  initialValue: _flavor,
+                  decoration: const InputDecoration(labelText: 'Flavor'),
+                  onSaved: (value) => _flavor = value!,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an item source';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  initialValue: _packaging,
+                  decoration: const InputDecoration(labelText: 'Packaging'),
+                  onSaved: (value) => _packaging = value!,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an item source';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
                   initialValue: _quantitySold.toString(),
                   decoration: const InputDecoration(labelText: 'Quantity Sold'),
                   keyboardType: TextInputType.numberWithOptions(signed: false),
@@ -282,8 +323,8 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 TextFormField(
                   initialValue: _quantityInStock.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Quantity In Stock'),
+                  decoration:
+                      const InputDecoration(labelText: 'Quantity In Stock'),
                   keyboardType: TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _quantityInStock = int.parse(value!),
                 ),
@@ -309,8 +350,8 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 TextFormField(
                   initialValue: _weightInGrams.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Weight In Grams'),
+                  decoration:
+                      const InputDecoration(labelText: 'Weight In Grams'),
                   keyboardType: TextInputType.numberWithOptions(
                       decimal: true, signed: false),
                   onSaved: (value) => _weightInGrams = int.parse(value!),
@@ -323,8 +364,8 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 TextFormField(
                   initialValue: _packageWeight.toString(),
-                  decoration: const InputDecoration(
-                      labelText: 'Package Weight'),
+                  decoration:
+                      const InputDecoration(labelText: 'Package Weight'),
                   keyboardType: TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _packageWeight = int.parse(value!),
                 ),

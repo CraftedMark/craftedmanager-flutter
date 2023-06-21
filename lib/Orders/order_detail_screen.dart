@@ -2,30 +2,26 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
-import 'package:easy_refresh/easy_refresh.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'edit_order_screen.dart';
 
 class OrderDetailScreen extends StatefulWidget {
-  const OrderDetailScreen({
-    Key? key,
-    required this.order,
-    required this.customer,
-    required this.onStateChanged,
-  }) : super(key: key);
-
-  final People customer;
   final Order order;
+  final People customer;
   final VoidCallback onStateChanged;
+
+  OrderDetailScreen(
+      {required this.order,
+      required this.customer,
+      required this.onStateChanged});
 
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
-  late EasyRefreshController _controller;
   List<String> orderStatuses = [
     'Processing - Pending Payment',
     'Processing - Paid',
@@ -40,216 +36,151 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void onStatusChanged(String newStatus) {
     bool isArchived = (newStatus == 'Archived' || newStatus == 'Completed');
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    orderProvider.updateOrderStatus(widget.order.id, newStatus, isArchived);
+    orderProvider.updateOrderStatus(
+        widget.order.id.toString(), newStatus, isArchived);
   }
 
   @override
   Widget build(BuildContext context) {
     final orderProvider = Provider.of<OrderProvider>(context);
-    final order = orderProvider.getOrderedItemsForOrder(widget.order.id);
 
-    return CupertinoApp(
-      theme: const CupertinoThemeData(
-        brightness: Brightness.dark,
-      ),
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          backgroundColor: CupertinoColors.black,
-          leading: _topBarGoBack(),
-          middle: _topBarTittle(),
-          trailing: _topBarEditButton(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: CupertinoColors.black,
-        child: SafeArea(
-          child: CupertinoScrollbar(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              children: [
-                Text(
-                  'Order ID: ${order.id}',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: CupertinoColors.white,
+        title: Text('Order Details', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditOrderScreen(
+                    order: widget.order,
+                    customer: widget.customer,
+                    products: [],
+                    onStateChanged: widget.onStateChanged,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Customer: ${widget.customer.firstName} ${widget.customer.lastName}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: CupertinoColors.white,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Total Amount: \$${order.totalAmount}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: CupertinoColors.white,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Order Status: ${order.orderStatus}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: CupertinoColors.activeBlue,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                _changeStateButton(),
-                const SizedBox(height: 24),
-                _orderedItemsList(),
-                const SizedBox(height: 16),
-              ],
-            ),
+              );
+            },
           ),
-        ),
+        ],
       ),
-    );
-  }
-
-  Widget _topBarGoBack() {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: const Icon(
-        CupertinoIcons.back,
-        color: CupertinoColors.activeBlue,
-      ),
-    );
-  }
-
-  Widget _topBarTittle() {
-    return const Text(
-      'Order Details',
-      style: TextStyle(color: CupertinoColors.white),
-    );
-  }
-
-  Widget _topBarEditButton() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => EditOrderScreen(
-              order: widget.order,
-              customer: widget.customer,
-              products: [],
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          children: [
+            Text(
+              'Order ID: ${widget.order.id}',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
-          ),
-        );
-      },
-      child: const Icon(
-        CupertinoIcons.pencil,
-        color: CupertinoColors.activeBlue,
-      ),
-    );
-  }
-
-  Widget _changeStateButton() {
-    return CupertinoButton(
-      child: const Text('Change Order Status'),
-      onPressed: () {
-        showCupertinoModalPopup<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoActionSheet(
-              title: const Text('Select Order Status'),
-              actions: orderStatuses.map((status) {
-                return CupertinoActionSheetAction(
-                  child: Text(status),
-                  onPressed: () {
-                    onStatusChanged(status);
-                    // widget.onStateChanged();
-                    Navigator.pop(context);
+            SizedBox(height: 16),
+            Text(
+              'Customer: ${widget.customer.firstName} ${widget.customer.lastName}',
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Total Amount: \$${widget.order.totalAmount}',
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Order Status: ${widget.order.orderStatus}',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue),
+            ),
+            SizedBox(height: 4),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue,
+              ),
+              child: Text('Change Order Status'),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Container(
+                      color: Colors.black,
+                      child: ListView.builder(
+                        itemCount: orderStatuses.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(orderStatuses[index],
+                                style: TextStyle(color: Colors.white)),
+                            onTap: () {
+                              onStatusChanged(orderStatuses[index]);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    );
                   },
                 );
-              }).toList(),
-              cancelButton: CupertinoActionSheetAction(
-                child: const Text('Cancel'),
-                isDestructiveAction: true,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+              },
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Products:',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            for (OrderedItem orderedItem in widget.order.orderedItems)
+              Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade900,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Product Name: ${orderedItem.productName}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Quantity: ${orderedItem.quantity}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Price: \$${orderedItem.price}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      Text(
+                        'Status: ${orderedItem.status}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      Text(
+                        'Packaging: ${orderedItem.packaging}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            );
-          },
-        );
-      },
+          ],
+        ),
+      ),
     );
-  }
-
-  Widget _orderedItemsList() {
-    return Consumer<OrderProvider>(builder: (context, orderProvider, child) {
-      final order = orderProvider.getOrderedItemsForOrder(widget.order.id);
-      final orderedItems = order.orderedItems;
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Ordered Items:',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: CupertinoColors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          for (OrderedItem orderedItem in orderedItems)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: CupertinoColors.black,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Product Name: ${orderedItem.productName}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Quantity: ${orderedItem.quantity}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Price: \$${orderedItem.price}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                    Text(
-                      'Item status: ${orderedItem.status}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      );
-    });
   }
 }
