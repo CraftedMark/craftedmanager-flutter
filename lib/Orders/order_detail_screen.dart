@@ -171,6 +171,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       Text(
+                        'Dose: ${orderedItem.dose}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      Text(
                         'Packaging: ${orderedItem.packaging}',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
