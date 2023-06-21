@@ -66,22 +66,25 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
       Order order, List<OrderedItem> orderedItems) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;
-
       await connection.transaction((ctx) async {
-        print('Updating order with values: ${order.toMap()}');
-        // Update order in orders table
-        await ctx.query('''
-        UPDATE orders
-        SET people_id = @people_id, order_date = @orderDate, shipping_address = @shippingAddress, billing_address = @billingAddress, total_amount = @totalAmount, order_status = @orderStatus
-        WHERE order_id = @order_id
-      ''', substitutionValues: {
-          ...order.toMap(),
-          'people_id': order.customerId,
-        });
-        print('Order updated');
+        // Print the order details
+        print('Order details: ${order.toMap()}');
+
+        try {
+          await ctx.query('''
+    UPDATE orders
+    SET people_id = @people_id, order_date = @order_date, shipping_address = @shipping_address, billing_address = @billing_address, total_amount = @total_amount, order_status = @order_status
+    WHERE order_id = @order_id
+  ''', substitutionValues: {
+            ...order.toMap(),
+            'people_id': order.customerId,
+          });
+          print('Order updated');
+        } catch (e) {
+          print('Error updating order: $e');
+        }
 
         print('Deleting existing ordered items with orderId: ${order.id}');
-        // Delete existing ordered items for this order
         await ctx.query('''
         DELETE FROM ordered_items WHERE order_id = @orderId
       ''', substitutionValues: {
@@ -89,7 +92,6 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         });
         print('Existing ordered items deleted');
 
-        // Insert updated ordered items into ordered_items table
         for (OrderedItem item in orderedItems) {
           print('Inserting updated ordered item with values: ${{
             ...item.toMap(),
@@ -104,7 +106,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
             'orderId': order.id,
             'productId': item.productId,
             'productName': item.productName,
-            'itemSource': item.itemSource, // Include the item_source
+            'itemSource': item.itemSource,
             'flavor': item.flavor,
             'dose': item.dose,
             'packaging': item.packaging,

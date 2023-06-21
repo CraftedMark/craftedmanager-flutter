@@ -167,6 +167,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       Text(
+                        'Flavor: ${orderedItem.flavor}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      Text(
                         'Status: ${orderedItem.status}',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),

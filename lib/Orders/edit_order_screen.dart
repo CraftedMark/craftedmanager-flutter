@@ -3,7 +3,6 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
-import 'package:crafted_manager/Orders/orders_db_manager.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +42,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
+    return OrderedItemPostgres.fetchOrderedItems(widget.order.id.toString());
   }
 
   double calculateSubtotal() {
@@ -98,31 +97,38 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           status: 'Processing',
           itemSource: '',
           packaging: '',
+          dose: 0.0,
+          flavor: '',
         ));
         _subTotal = calculateSubtotal();
       });
     }
   }
 
-  void updateOrderedItem(int index, String name, double price, int quantity) {
+  void updateOrderedItem(int index, String name, double price, int quantity,
+      String itemSource, String packaging, double dose, String flavor) {
     setState(() {
       _orderedItems[index] = _orderedItems[index].copyWith(
         productName: name,
         price: price,
         quantity: quantity,
+        itemSource: itemSource,
+        packaging: packaging,
+        dose: dose,
+        flavor: flavor,
       );
       _subTotal = calculateSubtotal();
     });
   }
 
-  Future<void> updateOrder(OrderProvider orderProvider) async {
+  void updateOrder(OrderProvider orderProvider) async {
     Order updatedOrder = widget.order.copyWith(
       totalAmount: _subTotal,
       orderStatus: _status,
       orderedItems: _orderedItems,
     );
 
-    bool result = await OrderPostgres.updateOrder(updatedOrder, _orderedItems);
+    bool result = await orderProvider.updateOrder(updatedOrder, _orderedItems);
 
     if (result) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -217,52 +223,33 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                       itemBuilder: (context, index) {
                         return Card(
                           child: ListTile(
-                            title: TextFormField(
-                              initialValue: _orderedItems[index].productName,
-                              decoration: InputDecoration(
-                                labelText: 'Product Name',
-                                border: OutlineInputBorder(),
-                              ),
-                              onChanged: (value) {
-                                updateOrderedItem(
-                                  index,
-                                  value,
-                                  _orderedItems[index].price,
-                                  _orderedItems[index].quantity,
-                                );
-                              },
-                            ),
-                            subtitle: Column(
+                            title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextFormField(
-                                  initialValue: _orderedItems[index]
-                                      .price
-                                      .toStringAsFixed(2),
-                                  keyboardType: TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                  initialValue:
+                                      _orderedItems[index].productName,
                                   decoration: InputDecoration(
-                                    labelText: 'Price',
+                                    labelText: 'Product Name',
                                     border: OutlineInputBorder(),
                                   ),
                                   onChanged: (value) {
                                     updateOrderedItem(
                                       index,
-                                      _orderedItems[index].productName,
-                                      double.tryParse(value) ??
-                                          _orderedItems[index].price,
+                                      value,
+                                      _orderedItems[index].price,
                                       _orderedItems[index].quantity,
+                                      _orderedItems[index].itemSource,
+                                      _orderedItems[index].packaging,
+                                      _orderedItems[index].dose,
+                                      _orderedItems[index].flavor,
                                     );
                                   },
                                 ),
-                                SizedBox(height: 8),
                                 TextFormField(
-                                  initialValue:
-                                      _orderedItems[index].quantity.toString(),
-                                  keyboardType: TextInputType.number,
+                                  initialValue: _orderedItems[index].itemSource,
                                   decoration: InputDecoration(
-                                    labelText: 'Quantity',
+                                    labelText: 'Item Source',
                                     border: OutlineInputBorder(),
                                   ),
                                   onChanged: (value) {
@@ -270,8 +257,71 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                                       index,
                                       _orderedItems[index].productName,
                                       _orderedItems[index].price,
-                                      int.tryParse(value) ??
-                                          _orderedItems[index].quantity,
+                                      _orderedItems[index].quantity,
+                                      value,
+                                      _orderedItems[index].packaging,
+                                      _orderedItems[index].dose,
+                                      _orderedItems[index].flavor,
+                                    );
+                                  },
+                                ),
+                                TextFormField(
+                                  initialValue: _orderedItems[index].flavor,
+                                  decoration: InputDecoration(
+                                    labelText: 'Flavor',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (value) {
+                                    updateOrderedItem(
+                                      index,
+                                      _orderedItems[index].productName,
+                                      _orderedItems[index].price,
+                                      _orderedItems[index].quantity,
+                                      _orderedItems[index].itemSource,
+                                      _orderedItems[index].packaging,
+                                      _orderedItems[index].dose,
+                                      value,
+                                    );
+                                  },
+                                ),
+                                TextFormField(
+                                  initialValue:
+                                      _orderedItems[index].dose.toString(),
+                                  decoration: InputDecoration(
+                                    labelText: 'Dose',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    updateOrderedItem(
+                                      index,
+                                      _orderedItems[index].productName,
+                                      _orderedItems[index].price,
+                                      _orderedItems[index].quantity,
+                                      _orderedItems[index].itemSource,
+                                      _orderedItems[index].packaging,
+                                      double.tryParse(value) ??
+                                          _orderedItems[index].dose,
+                                      _orderedItems[index].flavor,
+                                    );
+                                  },
+                                ),
+                                TextFormField(
+                                  initialValue: _orderedItems[index].packaging,
+                                  decoration: InputDecoration(
+                                    labelText: 'Packaging',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (value) {
+                                    updateOrderedItem(
+                                      index,
+                                      _orderedItems[index].productName,
+                                      _orderedItems[index].price,
+                                      _orderedItems[index].quantity,
+                                      _orderedItems[index].itemSource,
+                                      value,
+                                      _orderedItems[index].dose,
+                                      _orderedItems[index].flavor,
                                     );
                                   },
                                 ),
@@ -285,7 +335,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                         );
                       },
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: TextFormField(

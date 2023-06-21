@@ -6,6 +6,7 @@ import '../Models/employee_model.dart';
 import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
+import '../Orders/orders_db_manager.dart';
 import '../ProductionList/production_list_db_manager.dart';
 
 class FullOrder {
@@ -49,12 +50,29 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  void updateOrder(Order updatedOrder) {
+  Future<bool> updateOrder(
+      Order updatedOrder, List<OrderedItem> updatedOrderedItems) async {
+    // Find the index of the order in the list
     final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
+
+    // Check if the order exists in the list
     if (index != -1) {
+      // Update the order in the list
       _orders[index] = updatedOrder;
-      notifyListeners();
+
+      // Update the order in the database
+      final result =
+          await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
+
+      // If the update was successful, notify listeners
+      if (result) {
+        notifyListeners();
+      }
+
+      return result;
     }
+
+    return false;
   }
 
   void deleteOrder(Order order) {
