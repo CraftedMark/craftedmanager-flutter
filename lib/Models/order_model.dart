@@ -1,5 +1,4 @@
-import 'package:woosignal/models/response/order.dart'as wsOrder;
-
+import 'package:woosignal/models/response/order.dart' as wsOrder;
 
 import 'ordered_item_model.dart';
 
@@ -14,7 +13,6 @@ class Order {
   String productName;
   String notes;
   bool archived;
-  bool isArchived = false;
   List<OrderedItem> orderedItems;
 
   Order({
@@ -88,25 +86,23 @@ class Order {
     );
   }
 
-  factory Order.fromOrderWS(wsOrder.Order order){
-
+  factory Order.fromOrderWS(wsOrder.Order order) {
     final orderedItems = List.generate(order.lineItems!.length, (index) {
       final currentItem = order.lineItems![index];
       var item = OrderedItem(
-        id: currentItem.id??-1,
-        name: currentItem.name??"",
-       productId:currentItem.id??-1,
-       productName: currentItem.name??"",
-       quantity: currentItem.quantity??0,
-        status: "",//TODO:CHANGE,
-        discount: 0,
-        orderId: order.id ??-1,
-        price: double.parse(currentItem.price??'0'),
-        packaging: '',
-        itemSource: '',
-        productDescription: '',
-        productRetailPrice: double.parse(currentItem.price??'0')
-      );
+          id: currentItem.id ?? -1,
+          name: currentItem.name ?? "",
+          productId: currentItem.id ?? -1,
+          productName: currentItem.name ?? "",
+          quantity: currentItem.quantity ?? 0,
+          status: "", //TODO:CHANGE,
+          discount: 0,
+          orderId: order.id ?? -1,
+          price: double.parse(currentItem.price ?? '0'),
+          packaging: '',
+          itemSource: '',
+          productDescription: '',
+          productRetailPrice: double.parse(currentItem.price ?? '0'));
       return item;
     });
 
@@ -115,7 +111,7 @@ class Order {
       archived: false,
       id: order.id!,
       notes: order.customerNote ?? '',
-      orderDate: DateTime.parse(order.dateCreated??''),
+      orderDate: DateTime.parse(order.dateCreated ?? ''),
       orderStatus: order.status!,
       billingAddress: order.billing!.address1!,
       productName: "Test fetch product from WooCommerce order_model.dart",
@@ -144,4 +140,3 @@ class Order {
     };
   }
 }
-
