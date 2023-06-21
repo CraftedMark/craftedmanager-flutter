@@ -59,7 +59,7 @@ class OrderProvider with ChangeNotifier {
     if (index != -1) {
       // Update the order in the list
       _orders[index] = updatedOrder;
-
+      print(updatedOrderedItems.first.flavor);
       // Update the order in the database
       final result =
           await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
