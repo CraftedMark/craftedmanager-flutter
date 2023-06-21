@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../Models/people_model.dart';
 import '../WooCommerce/woosignal-service.dart';
+import '../config.dart';
 import 'contact_detail_widget.dart';
 
 class ContactsList extends StatefulWidget {
@@ -24,9 +25,13 @@ class ContactsListState extends State<ContactsList> {
   }
 
   Future<void> refreshContacts() async {
-    final contacts = await PeoplePostgres.refreshCustomerList();
+    var contacts = <People>[];
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      final contacts = await WooSignalService.getCustomers();
+    }else{
+      contacts = await PeoplePostgres.refreshCustomerList();
+    }
 
-    // final contacts = await WooSignalService.getCustomers();//TODO: enable WooSignal
     setState(() {
       _contacts = contacts;
       _filteredContacts = contacts;
@@ -36,8 +41,12 @@ class ContactsListState extends State<ContactsList> {
   Future<void> deleteCustomer(People customer) async {
     _filteredContacts!.removeWhere((c) => c.id == customer.id);
     setState(() {});
-    await PeoplePostgres.deleteCustomer(customer.id);
-    // await WooSignalService.deleteCustomer(customer.id); //TODO: enable WooSignal
+
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      await WooSignalService.deleteCustomer(customer.id);
+    }else{
+      await PeoplePostgres.deleteCustomer(customer.id);
+    }
     await refreshContacts();
   }
 
@@ -51,7 +60,6 @@ class ContactsListState extends State<ContactsList> {
             Expanded(
               child: TextField(
                 controller: _searchController,
-                onEditingComplete: ()=>print('tap completed'),//TODO: remove after check
                 onChanged: (value) {
                   setState(() {
                     _filteredContacts = _contacts!

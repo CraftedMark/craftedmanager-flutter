@@ -4,6 +4,8 @@ import 'package:crafted_manager/Orders/create_order_screen.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 
+import '../config.dart';
+
 class SearchPeopleScreen extends StatefulWidget {
   const SearchPeopleScreen({super.key});
 
@@ -23,8 +25,12 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
   }
 
   Future<void> loadCustomers() async {
-    // _peopleList = await WooSignalService.getCustomers();//TODO: enable WooSignal
-    _peopleList = await PeoplePostgres.refreshCustomerList();
+
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      _peopleList = await WooSignalService.getCustomers();
+    }else{
+      _peopleList = await PeoplePostgres.refreshCustomerList();
+    }
 
     _searchResults = _peopleList;
     setState(() {});
@@ -39,37 +45,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
     _searchResults = result;
     setState(() {});
   }
-
-  // Future<void> _fetchPeople(String query) async {
-  //   // Define the details you want to search customers by
-  //   String firstName = query;
-  //   String lastName = query;
-  //   String phone = query;
-  //
-  //   // Call the fetchCustomersByDetails function
-  //   List<People> customers = await PeoplePostgres.fetchCustomersByDetails(
-  //       firstName, lastName, phone);
-  //   if (customers.isNotEmpty) {
-  //     setState(() {
-  //       _peopleList = customers;
-  //     });
-  //   }
-  // }
-
-  // void _search(String query) {
-  //   if (query.isEmpty) {
-  //     setState(() {
-  //       _searchResults = [];
-  //     });
-  //   } else {
-  //     _fetchPeople(query).then((_) {
-  //       setState(() {
-  //         _searchResults = _peopleList;
-  //       });
-  //     });
-  //   }
-  // }
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -120,7 +120,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       orderedItems: _orderedItems,
     );
 
-    var result = await orderProvider.updateOrder(updatedOrder);
+    var result = await orderProvider.updateOrder(updatedOrder, newItems: _orderedItems);
 
     if (result) {
       ScaffoldMessenger.of(context).showSnackBar(

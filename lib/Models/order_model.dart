@@ -95,7 +95,7 @@ class Order {
           productId: currentItem.id ?? -1,
           productName: currentItem.name ?? "",
           quantity: currentItem.quantity ?? 0,
-          status: "", //TODO:CHANGE,
+          status: order.status ?? "pending", //TODO:CHANGE,
           discount: 0,
           orderId: order.id ?? -1,
           price: double.parse(currentItem.price ?? '0'),

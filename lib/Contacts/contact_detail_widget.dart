@@ -1,6 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
+import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 
 import '../WooCommerce/woosignal-service.dart';
@@ -147,10 +148,15 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     if (newCustomer.id <= 0) {
       print('try to create a customer name: ${newCustomer.firstName}');
 
-      // int wooSignalId = await WooSignalService.createCustomer(newCustomer);//TODO: enable WooSignal
-      int postgresID = await PeoplePostgres.createCustomer(newCustomer);
+      int newId = 0;
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        newId = await WooSignalService.createCustomer(newCustomer);
+      }else{
+        newId = await PeoplePostgres.createCustomer(newCustomer);
 
-      if(postgresID == -1 ){
+      }
+
+      if(newId == -1 ){
         await showDialog(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
@@ -165,11 +171,15 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                 ),
               );
       }
-      newCustomer = newCustomer.copyWith(id: postgresID);
+      newCustomer = newCustomer.copyWith(id: newId);
     } else {
       print('try to update a customer id: ${newCustomer.id}');
-      // await WooSignalService.updateCustomer(newCustomer);//TODO: enable WooSignal
-      await PeoplePostgres.updateCustomer(newCustomer);
+
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        await WooSignalService.updateCustomer(newCustomer);
+      }else{
+        await PeoplePostgres.updateCustomer(newCustomer);
+      }
 
     }
     widget.refresh();

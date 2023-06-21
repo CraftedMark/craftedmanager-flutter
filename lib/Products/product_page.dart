@@ -4,6 +4,7 @@ import 'package:crafted_manager/Products/product_detail.dart';
 import 'package:flutter/material.dart';
 
 import '../WooCommerce/woosignal-service.dart';
+import '../config.dart';
 
 // Add this function right below import statements
 String indexToType(int index) {
@@ -41,14 +42,17 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Future<void> _fetchProducts() async {
-    // _products = WooSignalService.getProducts();//TODO: enable WooSignal
-    // setState(() {});
-    _products = ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
-    _products.then((value) {
-      setState(() {
-        _products = Future.value(value); // Update the products list.
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      _products = WooSignalService.getProducts();
+      setState(() {});
+    }else{
+      _products = ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
+      _products.then((value) {
+        setState(() {
+          _products = Future.value(value);
+        });
       });
-    });
+    }
   }
 
   void createNewProduct() {

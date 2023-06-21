@@ -2,10 +2,13 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config.dart';
 import 'edit_order_screen.dart';
 
 class OrderDetailScreen extends StatefulWidget {
@@ -26,27 +29,44 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late EasyRefreshController _controller;
-  List<String> orderStatuses = [
-    'Processing - Pending Payment',
-    'Processing - Paid',
-    'In Production',
-    'Ready to Pickup/ Ship',
-    'Delivered / Shipped',
-    'Completed',
-    'Archived',
-    'Cancelled'
-  ];
+  late OrderProvider _provider;
+  List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
+      ? [
+          'pending',
+          'processing',
+          'on-hold',
+          'completed',
+          'cancelled',
+          'refunded',
+          'failed',
+          'trash'
+        ]
+      : [
+          'Processing - Pending Payment',
+          'Processing - Paid',
+          'In Production',
+          'Ready to Pickup/ Ship',
+          'Delivered / Shipped',
+          'Completed',
+          'Archived',
+          'Cancelled'
+        ];
 
-  void onStatusChanged(String newStatus) {
-    bool isArchived = (newStatus == 'Archived' || newStatus == 'Completed');
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    orderProvider.updateOrderStatus(widget.order.id, newStatus, isArchived);
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void updateOrderStatusInUI(String newStatus) {
+    widget.order.orderStatus = newStatus;
+    setState(() {});
+    // _provider.updateOrder(widget.order);
   }
 
   @override
   Widget build(BuildContext context) {
-    final orderProvider = Provider.of<OrderProvider>(context);
-    final order = orderProvider.getOrderedItemsForOrder(widget.order.id);
+    _provider = Provider.of<OrderProvider>(context);
+    final order = _provider.getOrderedItemsForOrder(widget.order.id);
 
     return CupertinoApp(
       theme: const CupertinoThemeData(
@@ -153,6 +173,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _changeStateButton() {
+
+    final statusesForWooSignal = List.generate(
+        WSOrderStatus.values.length,
+        (index) {
+          var status = WSOrderStatus.values[index];
+          return CupertinoActionSheetAction(
+              onPressed: () async {
+                Navigator.pop(context);
+                displayLoading();
+                final result = await _provider.updateOrder(widget.order, status: status);
+                Navigator.pop(context);
+                if(result){
+                  updateOrderStatusInUI(status.name);
+                }
+                },
+              child: Text(status.name),
+          );
+    });
+
+    final statusesForPostgres = orderStatuses.map((status) {
+        return CupertinoActionSheetAction(
+          child: Text(status),
+          onPressed: () {
+            _provider.updateOrder(widget.order);
+            // widget.onStateChanged();
+            Navigator.pop(context);
+          },
+        );
+      }).toList();
+
     return CupertinoButton(
       child: const Text('Change Order Status'),
       onPressed: () {
@@ -161,16 +211,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           builder: (BuildContext context) {
             return CupertinoActionSheet(
               title: const Text('Select Order Status'),
-              actions: orderStatuses.map((status) {
-                return CupertinoActionSheetAction(
-                  child: Text(status),
-                  onPressed: () {
-                    onStatusChanged(status);
-                    // widget.onStateChanged();
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
+              actions: AppConfig.ENABLE_WOOSIGNAL?statusesForWooSignal:statusesForPostgres,
               cancelButton: CupertinoActionSheetAction(
                 isDestructiveAction: true,
                 onPressed: () {
@@ -182,6 +223,22 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           },
         );
       },
+    );
+
+  }
+
+  void displayLoading(){
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context)=> const AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.symmetric(horizontal: 120),
+        content: AspectRatio(
+          aspectRatio: 1/1,
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 

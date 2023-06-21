@@ -5,6 +5,7 @@ import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/config.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -287,8 +288,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   void addItemToOrder() async {
-    final products = await ProductPostgres.getAllProductsExceptIngredients();
+    var products = <Product>[];
 
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      products = await WooSignalService.getProducts();
+    }else {
+      products = await ProductPostgres.getAllProductsExceptIngredients();
+    }
 
     final selectedProduct = await showDialog<Product>(
       context: context,

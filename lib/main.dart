@@ -10,6 +10,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'WooCommerce/woosignal-service.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -34,8 +36,10 @@ void main() async {
       provider.fetchOrders();
     });
   }
+  if(AppConfig.ENABLE_WOOSIGNAL){
+    await WooSignalService.init();//TODO: enable WooSignal
 
-  // WooSignalService.init();//TODO: enable WooSignal
+  }
   runApp(
     ChangeNotifierProvider(
       create: (context) => provider,

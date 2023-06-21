@@ -178,10 +178,6 @@ class WooSignalService {
     await WooSignal.instance.deleteCustomer(id, force: true);
   }
 
-
-
-
-
   static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items) async {
     final customer = await  WooSignal.instance.retrieveCustomer(id: int.parse(order.customerId));
 
@@ -207,9 +203,8 @@ class WooSignalService {
     var customerShipping = customer?.shipping;
     var shipping = bs.Shipping.fromJson(customerShipping!.toJson());
 
-
     bs.OrderWC orderForSend = bs.OrderWC(
-      status: WSOrderStatus.pending.toString(),
+      status: WSOrderStatus.Pending.name,
       billing: billing,
       shipping: shipping,
       customerNote: order.notes,
@@ -241,13 +236,14 @@ class WooSignalService {
     return null;
   }
 
-  static Future<void> updateOrder(Order order, List<OrderedItem> items, WSOrderStatus newStatus) async {
+  static Future<bool> updateOrder(Order order, WSOrderStatus newStatus, List<OrderedItem> newItems) async {
+    print('order updated, new status ${newStatus.name}');
     final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 
     var data = <String, dynamic>{"status": orderStatuses[newStatus.index]};
 
     final orderedItems = List.generate(
-      items.length, (index) => items[index].toWSOrderedItemMap(),
+      newItems.length, (index) => newItems[index].toWSOrderedItemMap(),
     );
     data.addAll({"line_items": orderedItems});
     data.addAll({"customer_note":order.notes});
@@ -256,8 +252,8 @@ class WooSignalService {
     // fee_lines
     // coupon_lines
     // set_paid
-    await WooSignal.instance.updateOrder(order.id, data: data);
-
+    final res = await WooSignal.instance.updateOrder(order.id, data: data);
+    return res != null;
   }
 
   ///Delete an order
@@ -269,12 +265,12 @@ class WooSignalService {
 }
 
 enum WSOrderStatus{
-  pending,
-  processing,
-  onHold,
-  completed,
-  cancelled,
-  refunded,
-  failed,
-  trash
+  Pending,
+  Processing,
+  OnHold,
+  Completed,
+  Cancelled,
+  Refunded,
+  Failed,
+  Trash
 }

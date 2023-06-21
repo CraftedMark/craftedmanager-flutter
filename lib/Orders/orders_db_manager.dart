@@ -62,8 +62,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
     }
   }
 
-  static Future<bool> updateOrder(
-      Order order, List<OrderedItem> orderedItems) async {
+  static Future<bool> updateOrder(Order order) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;
 
@@ -90,7 +89,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         print('Existing ordered items deleted');
 
         // Insert updated ordered items into ordered_items table
-        for (OrderedItem item in orderedItems) {
+        for (OrderedItem item in order.orderedItems) {
           print('Inserting updated ordered item with values: ${{
             ...item.toMap(),
             'orderId': order.id,

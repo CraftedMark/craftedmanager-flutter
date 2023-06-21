@@ -1,3 +1,4 @@
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/foundation.dart';
 
 import '../Contacts/people_db_manager.dart';
@@ -5,6 +6,7 @@ import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
 import '../ProductionList/production_list_db_manager.dart';
+import '../config.dart';
 import '../services/one_signal_api.dart';
 import 'orders_db_manager.dart';
 
@@ -29,8 +31,12 @@ class OrderProvider with ChangeNotifier {
 
   Future<void> fetchOrders() async {
     try {
-      _orders =
-          await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        _orders = await WooSignalService.getOrders();
+      }else{
+        _orders =
+            await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
+      }
       notifyListeners();
     } catch (e) {
       print('Error fetching orders: $e');
@@ -62,16 +68,33 @@ class OrderProvider with ChangeNotifier {
   }
 
   Future<void> createOrder(Order newOrder, People customer) async {
-    await OrderPostgres().createOrder(newOrder, newOrder.orderedItems);
-    // WooSignalService.createOrder(newOrder, orderedItems);//TODO: Enable WooSignal
+
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      var result = await WooSignalService.createOrder(newOrder, newOrder.orderedItems);
+      print(result);
+    }else{
+      await OrderPostgres().createOrder(newOrder, newOrder.orderedItems);
+    }
 
     var customerFullName = "${customer.firstName} ${customer.lastName}";
     var payload = "New order from: $customerFullName";
     _sendPushNotification(payload);
   }
 
-  Future<bool> updateOrder(Order updatedOrder) async {
-    return OrderPostgres.updateOrder(updatedOrder, updatedOrder.orderedItems);
+  Future<bool> updateOrder(
+      Order updatedOrder, {
+      WSOrderStatus status = WSOrderStatus.Processing,
+      List<OrderedItem> newItems = const []}
+    ) async {
+
+    var result = false;
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      result = await WooSignalService.updateOrder(updatedOrder, status, newItems);//TODO:FIX
+    }else{
+      result = await OrderPostgres.updateOrder(updatedOrder);
+    }
+    notifyListeners();
+    return result;
   }
 
   void deleteOrder(Order order) {
@@ -101,14 +124,6 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateOrderStatus(int orderId, String newStatus, bool isArchived) {
-    final order = _orders.firstWhere((order) => order.id == orderId);
-    order.orderStatus = newStatus;
-    if (isArchived) {
-      order.archived = true;
-    }
-    notifyListeners();
-  }
 
   Future<List<FullOrder>> getFullOrders() async {
     if(_orders.isEmpty){

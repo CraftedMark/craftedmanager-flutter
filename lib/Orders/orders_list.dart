@@ -55,7 +55,7 @@ class _OrdersListState extends State<OrdersList> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SearchPeopleScreen(),
+                  builder: (context) => const SearchPeopleScreen(),
                 ),
               );
             },

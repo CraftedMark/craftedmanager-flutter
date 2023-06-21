@@ -3,6 +3,8 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 
+import '../config.dart';
+
 class ProductDetailPage extends StatefulWidget {
   final Product product;
   final bool isNewProduct;
@@ -332,11 +334,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
 
     if (widget.isNewProduct) {
-      await ProductPostgres.addProduct(updatedProduct);
-      // await WooSignalService.createProduct(updatedProduct);//TODO: enable WooSignal
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        await WooSignalService.createProduct(updatedProduct);
+      }else{
+        await ProductPostgres.addProduct(updatedProduct);
+      }
     } else {
-      await ProductPostgres.updateProduct(updatedProduct);
-      // await WooSignalService.updateProduct(updatedProduct);//TODO: enable WooSignal
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        await WooSignalService.updateProduct(updatedProduct);
+      }else{
+        await ProductPostgres.updateProduct(updatedProduct);
+      }
     }
   }
 }
