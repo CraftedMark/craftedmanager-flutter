@@ -89,7 +89,7 @@ class OrderProvider with ChangeNotifier {
 
     var result = false;
     if(AppConfig.ENABLE_WOOSIGNAL){
-      result = await WooSignalService.updateOrder(updatedOrder, status, newItems);//TODO:FIX
+      result = await WooSignalService.updateOrder(updatedOrder, status, newItems);
     }else{
       result = await OrderPostgres.updateOrder(updatedOrder);
     }

@@ -5,9 +5,11 @@ import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Orders/orders_db_manager.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config.dart';
 import 'ordered_item_postgres.dart';
 
 class EditOrderScreen extends StatefulWidget {
@@ -26,6 +28,7 @@ class EditOrderScreen extends StatefulWidget {
 }
 
 class _EditOrderScreenState extends State<EditOrderScreen> {
+  late OrderProvider _provider;
   List<OrderedItem> _orderedItems = [];
   double _subTotal = 0.0;
   String _status = '';
@@ -41,7 +44,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
+    return _provider.orders.where((o) => o.id == widget.order.id).first.orderedItems;
   }
 
   double calculateSubtotal() {
@@ -112,7 +115,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     });
   }
 
-  Future<void> updateOrder(OrderProvider orderProvider) async {
+  Future<void> updateOrder() async {
 
     Order updatedOrder = widget.order.copyWith(
       totalAmount: _subTotal,
@@ -120,7 +123,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       orderedItems: _orderedItems,
     );
 
-    var result = await orderProvider.updateOrder(updatedOrder, newItems: _orderedItems);
+    var result = await _provider.updateOrder(updatedOrder, newItems: _orderedItems);
 
     if (result) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,19 +143,16 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _provider = Provider.of<OrderProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Order'),
       ),
       body: Consumer<OrderProvider>(
         builder: (context, orderProvider, child) {
-          return FutureBuilder(
-            future: getOrderedItemsByOrderId(),
-            builder: (_, snapshot){
-              if(snapshot.hasData){
-                _orderedItems = snapshot.data!;
-                return ListView(
-                  children: [
+          _orderedItems = widget.order.orderedItems;
+          return ListView(
+            children: [
                     const SizedBox(height: 12.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -317,18 +317,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: ElevatedButton(
-                        onPressed: () {
-                          updateOrder(orderProvider);
+                        onPressed: () async {
+                          await updateOrder();
                           Navigator.pop(context);
                         },
                         child: const Text('Save'),
                       ),
                     ),
                   ],
-                );
-              }
-              return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary));
-            },
           );
         },
       ),
