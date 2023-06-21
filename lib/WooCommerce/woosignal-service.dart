@@ -246,7 +246,7 @@ class WooSignalService {
 
     var data = <String, dynamic>{"status": orderStatuses[newStatus.index]};
 
-    List<Map<String, dynamic>> orderedItems = List.generate(
+    final orderedItems = List.generate(
       items.length, (index) => items[index].toWSOrderedItemMap(),
     );
     data.addAll({"line_items": orderedItems});

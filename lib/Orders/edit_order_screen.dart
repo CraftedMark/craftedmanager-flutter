@@ -113,13 +113,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<void> updateOrder(OrderProvider orderProvider) async {
+
     Order updatedOrder = widget.order.copyWith(
       totalAmount: _subTotal,
       orderStatus: _status,
       orderedItems: _orderedItems,
     );
 
-    bool result = await OrderPostgres.updateOrder(updatedOrder, _orderedItems);
+    var result = await orderProvider.updateOrder(updatedOrder);
 
     if (result) {
       ScaffoldMessenger.of(context).showSnackBar(

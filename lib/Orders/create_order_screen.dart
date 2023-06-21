@@ -2,10 +2,12 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
@@ -90,18 +92,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       archived: false,
       orderedItems: orderedItems,
     );
-    // WooSignalService.createOrder(newOrder, orderedItems);//TODO: Enable WooSignal
-    await OrderPostgres().createOrder(newOrder, orderedItems);
-    sendNewOrderNotification();
+    Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
   }
 
-  Future<void> sendNewOrderNotification() async {
-    var customerFullName =
-        "${widget.client.firstName} ${widget.client.lastName}";
-    var payload = "New order from: $customerFullName";
-
-    await OneSignalAPI.sendNotification(payload);
-  }
 
   @override
   Widget build(BuildContext context) {

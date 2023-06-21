@@ -5,6 +5,8 @@ import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
 import '../ProductionList/production_list_db_manager.dart';
+import '../services/one_signal_api.dart';
+import 'orders_db_manager.dart';
 
 class FullOrder {
   final Order order;
@@ -59,12 +61,17 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateOrder(Order updatedOrder) {
-    final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
-    if (index != -1) {
-      _orders[index] = updatedOrder;
-      notifyListeners();
-    }
+  Future<void> createOrder(Order newOrder, People customer) async {
+    await OrderPostgres().createOrder(newOrder, newOrder.orderedItems);
+    // WooSignalService.createOrder(newOrder, orderedItems);//TODO: Enable WooSignal
+
+    var customerFullName = "${customer.firstName} ${customer.lastName}";
+    var payload = "New order from: $customerFullName";
+    _sendPushNotification(payload);
+  }
+
+  Future<bool> updateOrder(Order updatedOrder) async {
+    return OrderPostgres.updateOrder(updatedOrder, updatedOrder.orderedItems);
   }
 
   void deleteOrder(Order order) {
@@ -98,7 +105,7 @@ class OrderProvider with ChangeNotifier {
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderStatus = newStatus;
     if (isArchived) {
-      order.isArchived = true;
+      order.archived = true;
     }
     notifyListeners();
   }
@@ -132,4 +139,9 @@ class OrderProvider with ChangeNotifier {
 
     return customer;
   }
+
+  Future<void> _sendPushNotification(String payload) async {
+    await OneSignalAPI.sendNotification(payload);
+  }
+
 }
