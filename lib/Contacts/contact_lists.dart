@@ -14,8 +14,8 @@ class ContactsList extends StatefulWidget {
 }
 
 class ContactsListState extends State<ContactsList> {
-  List<People>? _contacts;
-  List<People>? _filteredContacts;
+  List<People> _contacts = [];
+  List<People> _filteredContacts = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -27,7 +27,7 @@ class ContactsListState extends State<ContactsList> {
   Future<void> refreshContacts() async {
     var contacts = <People>[];
     if(AppConfig.ENABLE_WOOSIGNAL){
-      final contacts = await WooSignalService.getCustomers();
+      contacts = await WooSignalService.getCustomers();
     }else{
       contacts = await PeoplePostgres.refreshCustomerList();
     }
@@ -62,7 +62,7 @@ class ContactsListState extends State<ContactsList> {
                 controller: _searchController,
                 onChanged: (value) {
                   setState(() {
-                    _filteredContacts = _contacts!
+                    _filteredContacts = _contacts
                         .where((contact) =>
                             contact.firstName
                                 .toLowerCase()
@@ -98,14 +98,13 @@ class ContactsListState extends State<ContactsList> {
         ],
         backgroundColor: Colors.black,
       ),
-      body: _filteredContacts == null
+      body: _filteredContacts.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _filteredContacts!.length,
               itemBuilder: (BuildContext context, int index) {
                 final contact = _filteredContacts![index];
                 return Dismissible(
-
                   key: Key(contact.id.toString()),
                   background: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -113,8 +112,8 @@ class ContactsListState extends State<ContactsList> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.delete_forever),
-                        Icon(Icons.delete_forever),
+                        Icon(Icons.delete_forever, color: Colors.white),
+                        Icon(Icons.delete_forever, color: Colors.white),
                       ],
                     ),),
                   onDismissed: (direction) {
@@ -133,9 +132,7 @@ class ContactsListState extends State<ContactsList> {
                       );
                     },
                     child: ListTile(
-                      title: _filteredContacts != null
-                          ? Text('${contact.firstName} ${contact.lastName}')
-                          : const CircularProgressIndicator(),
+                      title: Text('${contact.firstName} ${contact.lastName}'),
                       subtitle: Text(contact.phone),
                     ),
                   ),
