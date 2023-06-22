@@ -1,6 +1,8 @@
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:flutter/material.dart';
 
+import '../Products/product_db_manager.dart';
+
 class ProductSearchScreen extends StatefulWidget {
   final List<Product> products;
 
@@ -19,6 +21,13 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   void initState() {
     super.initState();
     filteredProducts = widget.products;
+    loadProducts();
+  }
+
+  Future<void> loadProducts() async {
+    var products = await ProductPostgres.getAllProducts('Product');
+    widget.products.addAll(products);
+    setState(() {});
   }
 
   void _filterProducts(String query) {
