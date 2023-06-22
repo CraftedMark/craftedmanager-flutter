@@ -38,9 +38,9 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
 
   void findPeople(query){
     var result = _peopleList.where(
-            (p) => p.firstName.contains(query) ||
-                   p.lastName.contains(query) ||
-                   p.phone.contains(query)
+            (p) => p.firstName.toLowerCase().contains(query) ||
+                   p.lastName.toLowerCase().contains(query) ||
+                   p.phone.toLowerCase().contains(query)
     ).toList();
     _searchResults = result;
     setState(() {});
