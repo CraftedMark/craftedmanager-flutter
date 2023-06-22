@@ -53,7 +53,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     setState(() {
       orderedItems.add(OrderedItem(
-          id: (orderedItems.length + 1).toString(),
+          // id: (orderedItems.length + 1).toString(),
           // Convert the entire expression to a String
           orderId: "0",
           productName: product.name,

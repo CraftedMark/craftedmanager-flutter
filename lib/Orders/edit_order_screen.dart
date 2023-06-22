@@ -85,9 +85,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       });
     } else {
       setState(() {
-        var uuid = Uuid();
         _orderedItems.add(OrderedItem(
-          id: uuid.v1(),
           orderId: widget.order.id,
           productName: product.name,
           productId: product.id!,

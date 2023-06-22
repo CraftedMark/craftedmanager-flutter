@@ -1,5 +1,4 @@
 class OrderedItem {
-  String id;
   String orderId;
   String productName;
   int productId;
@@ -16,7 +15,6 @@ class OrderedItem {
   double dose;
 
   OrderedItem({
-    required this.id,
     required this.orderId,
     required this.productName,
     required this.productId,
@@ -34,7 +32,6 @@ class OrderedItem {
   });
 
   OrderedItem copyWith({
-    String? id,
     String? orderId,
     String? productName,
     int? productId,
@@ -51,7 +48,6 @@ class OrderedItem {
     double? dose,
   }) {
     return OrderedItem(
-      id: id ?? this.id,
       orderId: orderId ?? this.orderId,
       productName: productName ?? this.productName,
       productId: productId ?? this.productId,
@@ -83,7 +79,6 @@ class OrderedItem {
     }
 
     return OrderedItem(
-      id: map['ordered_item_id'].toString(),
       orderId: map['order_id'].toString(),
       productName: map['product_name'] as String? ?? 'Unknown',
       productId: int.tryParse(map['product_id'].toString()) ?? 0,
@@ -103,7 +98,6 @@ class OrderedItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'ordered_item_id': id,
       'order_id': orderId,
       'product_id': productId,
       'product_name': name,
