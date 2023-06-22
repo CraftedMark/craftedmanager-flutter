@@ -18,7 +18,7 @@ class OrderDataTable extends StatelessWidget {
               .map(
                 (order) => DataRow(cells: [
                   DataCell(Text(order.id.toString())),
-                  DataCell(Text(order.customerName)),
+                  // DataCell(Text(order.customerName)),
                   DataCell(Text(order.orderStatus)),
                   // Add more cells as needed
                 ]),

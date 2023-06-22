@@ -379,7 +379,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 padding: const EdgeInsets.all(8),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await updateOrder(orderProvider);
+                    await updateOrder();
                     // Navigator.pop(context);
                   },
                   child: Text('Save'),

@@ -71,8 +71,8 @@ class _EditProductPageState extends State<EditProductPage> {
     _packageWeightMeasure = widget.product.packageWeightMeasure;
     _packageWeight = widget.product.packageWeight;
     _type = widget.product.type;
-    _dose = widget.product.dose;
-    _packaging = widget.product.packaging;
+    _dose = widget.product.dose ?? 0.5;
+    _packaging = widget.product.packaging ?? 'OEM';
     _flavor = widget.product.flavor;
   }
 
@@ -85,7 +85,6 @@ class _EditProductPageState extends State<EditProductPage> {
         category: _category,
         subCategory: _subCategory,
         subcat2: _subcat2,
-        flavor: _flavor,
         description: _description,
         costOfGood: _costOfGood,
         manufacturingPrice: _manufacturingPrice,
@@ -282,9 +281,9 @@ class _EditProductPageState extends State<EditProductPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: _dose,
+                  initialValue: _dose.toString(),
                   decoration: const InputDecoration(labelText: 'Dose'),
-                  onSaved: (value) => _dose = value!,
+                  onSaved: (value) => _dose = double.parse(value??'0.5'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an dose';

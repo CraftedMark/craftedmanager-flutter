@@ -252,7 +252,7 @@ class WooSignalService {
     // fee_lines
     // coupon_lines
     // set_paid
-    final res = await WooSignal.instance.updateOrder(order.id, data: data);
+    final res = await WooSignal.instance.updateOrder(order.wooSignalId!, data: data);
     return res != null;
   }
 
