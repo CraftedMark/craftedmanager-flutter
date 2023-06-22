@@ -2,9 +2,11 @@ import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/foundation.dart';
 
 import '../Contacts/people_db_manager.dart';
+import '../Models/employee_model.dart';
 import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
+import '../Orders/orders_db_manager.dart';
 import '../ProductionList/production_list_db_manager.dart';
 import '../config.dart';
 import '../services/one_signal_api.dart';
@@ -13,8 +15,9 @@ import 'orders_db_manager.dart';
 class FullOrder {
   final Order order;
   final People person;
+  final List<Employee> employees;
 
-  FullOrder(this.order, this.person);
+  FullOrder(this.order, this.person, this.employees);
 }
 
 class OrderProvider with ChangeNotifier {
@@ -23,11 +26,22 @@ class OrderProvider with ChangeNotifier {
 
   List<Order> get orders => _orders;
 
-  Order getOrderedItemsForOrder(int orderId) {
-    return _orders.firstWhere((order) => order.id == orderId);
+  // Define the filteredItems getter
+  List<OrderedItem> get filteredItems => _filteredItems;
+
+  // Define the filterOrderedItems method
+  void filterOrderedItems(String itemSource) {
+    // Assuming that your Order object has an 'itemSource' property
+    _filteredItems = _orders
+        .expand((order) => order.orderedItems)
+        .where((item) => item.itemSource == itemSource)
+        .toList();
+    notifyListeners();
   }
 
-  List<OrderedItem> get filteredItems => _filteredItems;
+  Order getOrderedItemsForOrder(String orderId) {
+    return _orders.firstWhere((order) => order.id == orderId);
+  }
 
   Future<void> fetchOrders() async {
     try {
@@ -43,29 +57,27 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  void filterOrderedItems(String itemSource) {
-    _filteredItems = [];
-    for (var order in _orders) {
-      for (var item in order.orderedItems) {
-        if (item.itemSource == itemSource) {
-          _filteredItems.add(item);
-        }
-      }
-    }
+  Future<bool> updateOrder(
+      Order updatedOrder, List<OrderedItem> updatedOrderedItems) async {
+    // Find the index of the order in the list
+    final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
 
-    _filteredItems.sort((a, b) => a.productId.compareTo(b.productId));
+    // Check if the order exists in the list
+    if (index != -1) {
+      // Update the order in the list
+      _orders[index] = updatedOrder;
+      print(updatedOrderedItems.first.flavor);
+      // Update the order in the database
+      final result =
+          await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
 
-    for (var i = 1; i < _filteredItems.length; i++) {
-      var prev = _filteredItems[i - 1];
-      var current = _filteredItems[i];
-      if (prev.productId == current.productId) {
-        prev.quantity += current.quantity;
-        _filteredItems.removeAt(i);
-        i--;
+      // If the update was successful, notify listeners
+      if (result) {
+        notifyListeners();
       }
+
+      return result;
     }
-    notifyListeners();
-  }
 
   Future<void> createOrder(Order newOrder, People customer) async {
 
@@ -102,13 +114,13 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addOrderedItem(int orderId, OrderedItem orderedItem) {
+  void addOrderedItem(String orderId, OrderedItem orderedItem) {
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderedItems.add(orderedItem);
     notifyListeners();
   }
 
-  void updateOrderedItem(int orderId, OrderedItem updatedItem) {
+  void updateOrderStatus(String orderId, String newStatus, bool isArchived) {
     final order = _orders.firstWhere((order) => order.id == orderId);
     final index =
         order.orderedItems.indexWhere((item) => item.id == updatedItem.id);
@@ -125,28 +137,66 @@ class OrderProvider with ChangeNotifier {
   }
 
 
+  Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
+    final connection = await PostgreSQLConnectionManager.connection;
+
+    final query = '''
+    SELECT * 
+    FROM tasks 
+    WHERE order_id = @orderId;
+  ''';
+
+    final results = await connection
+        .mappedResultsQuery(query, substitutionValues: {'orderId': orderId});
+
+    List<Employee> employees = [];
+
+    for (final row in results) {
+      final employeeQuery = '''
+      SELECT * 
+      FROM employee 
+      WHERE id = @employeeId;
+    ''';
+
+      final employeeResults = await connection.mappedResultsQuery(employeeQuery,
+          substitutionValues: {'employeeId': row['tasks']?['employee_id']});
+
+      if (employeeResults.isNotEmpty) {
+        final employeeMap = employeeResults.first['employees'];
+        final employee = Employee.fromMap(employeeMap!);
+        employees.add(employee);
+      }
+    }
+
+    return employees;
+  }
+
   Future<List<FullOrder>> getFullOrders() async {
-    if(_orders.isEmpty){
+    if (_orders.isEmpty) {
       await fetchOrders();
     }
 
     Set<People> customers = {};
     List<FullOrder> full = [];
-    for(final o in _orders){
-      if(customers.where((c) => c.id.toString() == o.customerId).isEmpty){
-        final customer = await fetchCustomerById(int.parse(o.customerId));
+    for (final o in _orders) {
+      if (customers.where((c) => c.id.toString() == o.customerId).isEmpty) {
+        final customer = await fetchCustomerById(o.customerId);
         customers.add(customer);
       }
-      full.add(FullOrder(o, customers.firstWhere((c) => c.id.toString() == o.customerId)));
+
+      final employees = await fetchEmployeesByOrderId(o.id);
+
+      full.add(FullOrder(
+          o,
+          customers.firstWhere((c) => c.id.toString() == o.customerId),
+          employees));
     }
 
     return full;
   }
 
-  // Fetch People data by their id
-  Future<People> fetchCustomerById(int id) async {
-    // Fetch customer's data using fetchCustomer from PeoplePostgres
-    People? customer = await PeoplePostgres.fetchCustomer(id);
+  Future<People> fetchCustomerById(String id) async {
+    People? customer = await PeoplePostgres.fetchCustomer(int.parse(id));
 
     if (customer == null) {
       throw Exception('No customer data found with ID: $id');

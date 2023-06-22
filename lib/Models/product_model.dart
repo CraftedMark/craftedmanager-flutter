@@ -30,6 +30,8 @@ class Product {
   final int bulkPricing;
   final int perGramCost;
   final bool isAssemblyItem;
+  final double? dose;
+  final String? packaging;
 
   Product({
     this.id,
@@ -60,6 +62,8 @@ class Product {
     this.bulkPricing = 0,
     this.perGramCost = 0,
     this.isAssemblyItem = false,
+    this.dose = 0.0,
+    this.packaging = '',
   });
 
   static Product empty = Product(
@@ -108,6 +112,8 @@ class Product {
       weightInGrams: map['weight_in_grams'] ?? 0,
       bulkPricing: map['bulk_pricing'] ?? 0,
       perGramCost: map['per_gram_cost'] ?? 0,
+      dose: map['dose'] != null ? double.parse(map['dose']) : 0.0,
+      packaging: map['packaging'] ?? '',
       isAssemblyItem: map['isAssemblyItem'] ?? false,
       assemblyItems: map['assembly_items'] != null
           ? List<AssemblyItem>.from(
@@ -211,6 +217,23 @@ class Product {
       'bulkPricing': bulkPricing,
       'perGramCost': perGramCost,
       'isassembly': isAssemblyItem,
+      'dose': dose,
+      'packaging': packaging,
+      'category': category,
+      'subCategory': subCategory,
+      'subcat2': subcat2,
+      'flavor': flavor,
+      'costOfGood': costOfGood,
+      'manufacturingPrice': manufacturingPrice,
+      'wholesalePrice': wholesalePrice,
+      'stockQuantity': stockQuantity,
+      'backordered': backordered,
+      'supplier': supplier,
+      'manufacturerId': manufacturerId,
+      'manufacturerName': manufacturerName,
+      'itemSource': itemSource,
+      'quantitySold': quantitySold,
+      'quantityInStock': quantityInStock,
       'assemblyItems': assemblyItems.map((x) => x.toMap()).toList(),
       'type': type
     };

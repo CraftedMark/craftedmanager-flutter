@@ -86,7 +86,8 @@ class _OrdersListState extends State<OrdersList> {
                 },
               ),
               onRefresh: () async {
-                await orderProvider.fetchOrders(); // Refresh the orders from the provider
+                await orderProvider
+                    .fetchOrders(); // Refresh the orders from the provider
                 _refreshOrdersList();
               },
             );
@@ -144,10 +145,9 @@ class _OrderWidget extends StatelessWidget {
   final Order order;
   const _OrderWidget({Key? key, required this.order}) : super(key: key);
 
-  Future<List<OrderedItem>> fetchOrderedItems(int orderId) async {
+  Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
     return await OrderedItemPostgres.fetchOrderedItems(orderId);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -223,4 +223,3 @@ class _OrderWidget extends StatelessWidget {
     );
   }
 }
-

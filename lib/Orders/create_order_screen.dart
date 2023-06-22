@@ -24,7 +24,7 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
-  double shippingCost = 10.0;
+  double shippingCost = 10;
 
   Future<double?> getCustomProductPrice(int productId, int customerId) async {
     double? customPrice;
@@ -45,7 +45,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   Future<void> addOrderedItem(Product product, int quantity, String itemSource,
-      String packaging) async {
+      String flavor, double dose, String packaging) async {
     double? customPrice =
         await getCustomProductPrice(product.id!, widget.client.id);
 
@@ -53,21 +53,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     setState(() {
       orderedItems.add(OrderedItem(
-        id: orderedItems.length + 1,
-        orderId: 0,
-        productName: product.name,
-        productId: product.id!,
-        name: product.name,
-        quantity: quantity,
-        price: customPrice ?? product.retailPrice,
-        discount: 0,
-        productDescription: product.description,
-        productRetailPrice: product.retailPrice,
-        status: newOrderItemStatus,
-        itemSource:
-            itemSource.isNotEmpty ? itemSource : product.itemSource,
-        packaging: packaging,
-      ));
+          id: (orderedItems.length + 1).toString(),
+          // Convert the entire expression to a String
+          orderId: "0",
+          productName: product.name,
+          productId: product.id!,
+          name: product.name,
+          quantity: quantity,
+          price: customPrice ?? product.retailPrice,
+          discount: 0.0,
+          productDescription: product.description,
+          productRetailPrice: product.retailPrice,
+          status: newOrderItemStatus,
+          itemSource:
+              itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
+          packaging: packaging,
+          flavor: flavor,
+          dose: dose));
     });
   }
 
@@ -78,9 +80,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
     double totalAmount = subTotal + shippingCost;
 
+    final orderId = uuid.v4();
+
+    for (var item in orderedItems) {
+      item.orderId = orderId;
+    }
+    print("new orderid = $orderId");
+
     final newOrder = Order(
-      id: DateTime.now().millisecondsSinceEpoch,
       customerId: widget.client.id.toString(),
+      id: orderId,
       orderDate: DateTime.now(),
       shippingAddress:
           '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
@@ -155,33 +164,39 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   return ListTile(
                     title: Text(orderedItems[index].productName),
                     trailing: Text('\$${orderedItems[index].price}'),
-                    subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Qty: ${orderedItems[index].quantity}'),
+                        Text(
+                            'Qty: ${orderedItems[index].quantity}, Flavor: ${orderedItems[index].flavor}, Dosage: ${orderedItems[index].dose}, Packaging: ${orderedItems[index].packaging}'),
                         TextButton(
                           onPressed: () {
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
-                                int updatedQuantity =
+                                var updatedQuantity =
                                     orderedItems[index].quantity;
-                                TextEditingController quantityController =
-                                    TextEditingController(
-                                        text: orderedItems[index]
-                                            .quantity
-                                            .toString());
-                                TextEditingController priceController =
-                                    TextEditingController(
-                                        text: orderedItems[index]
-                                            .price
-                                            .toString());
-                                TextEditingController packagingController =
-                                    TextEditingController(
-                                        text: orderedItems[index].packaging);
+                                var quantityController = TextEditingController(
+                                    text: orderedItems[index]
+                                        .quantity
+                                        .toString());
+
+                                var priceController = TextEditingController(
+                                    text: orderedItems[index].price.toString());
+
+                                var packagingController = TextEditingController(
+                                    text: orderedItems[index].packaging);
+
+                                var flavorController = TextEditingController(
+                                    text: orderedItems[index].flavor);
+
+                                var dosageController = TextEditingController(
+                                    text: orderedItems[index].dose.toString() ??
+                                        '');
+
                                 return AlertDialog(
                                   title: const Text(
-                                      'Edit Quantity, Price, and Packaging'),
+                                      'Edit Quantity, Price, Flavor, Dosage and Packaging'),
                                   content: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -203,6 +218,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: flavorController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Flavor',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: dosageController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Dosage',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
                                       TextFormField(
                                         controller: packagingController,
                                         decoration: const InputDecoration(
@@ -230,6 +262,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                                                   priceController.text);
                                           orderedItems[index].packaging =
                                               packagingController.text;
+                                          orderedItems[index].flavor =
+                                              flavorController.text;
+                                          orderedItems[index].dose =
+                                              double.parse(
+                                                  dosageController.text);
                                         });
                                         Navigator.pop(context);
                                       },
@@ -347,14 +384,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
       var itemSourceController =
-          TextEditingController(text: selectedProduct.itemSource);
-      var packagingController = TextEditingController();
+          TextEditingController(text: selectedProduct.itemSource ?? '');
+      var flavorController =
+          TextEditingController(text: selectedProduct.flavor ?? '');
+      var dosageController =
+          TextEditingController(text: (selectedProduct.dose?.toString() ?? ''));
+      var packagingController = TextEditingController(
+          text: (selectedProduct.packaging?.toString() ?? ''));
 
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Enter Quantity, Item Source, and Packaging'),
+            title: const Text(
+                'Enter Quantity, Item Source, Flavor, Dosage and Packaging'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -374,7 +417,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 8),
+                TextFormField(
+                  controller: flavorController, // Added flavor input
+                  decoration: const InputDecoration(
+                    labelText: 'Flavor',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextFormField(
+                  controller: dosageController, // Added dosage input
+                  decoration: const InputDecoration(
+                    labelText: 'Dosage',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 8),
                 TextFormField(
                   controller: packagingController,
                   decoration: const InputDecoration(
@@ -399,6 +456,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       'quantity': int.parse(quantityController.text),
                       'itemSource': itemSourceController.text,
                       'packaging': packagingController.text,
+                      'dosage': dosageController.text, // Added this
+                      'flavor': flavorController.text, // Added this
                     },
                   );
                 },
@@ -412,8 +471,18 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       if (result != null) {
         int quantity = result['quantity'];
         String itemSource = result['itemSource'];
-        String packaging = result['packaging'];
-        await addOrderedItem(selectedProduct, quantity, itemSource, packaging);
+        String packaging = result['packaging'] ?? '';
+        double dose = double.tryParse(result['dosage'] ?? '') ?? 0.0;
+        String flavor = result['flavor'] ?? '';
+
+        await addOrderedItem(
+            selectedProduct, // First argument
+            quantity, // Second argument
+            itemSource, // Third argument
+            flavor, // Fourth argument
+            dose, // Fifth argument
+            packaging // Sixth argument
+            );
       }
     }
   }

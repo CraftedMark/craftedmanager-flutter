@@ -4,7 +4,7 @@ import '../PostresqlConnection/postqresql_connection_manager.dart';
 
 class OrderedItemPostgres {
   // Fetch ordered items by orderId
-  static Future<List<OrderedItem>> fetchOrderedItems(int orderId) async {
+  static Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
     final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query(
         'SELECT * FROM ordered_items WHERE order_id = @orderId',

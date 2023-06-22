@@ -66,6 +66,9 @@ class ProductPostgres {
           'package_weight': product.packageWeight,
           'type': product.type,
           'is_assembly': product.isAssemblyItem,
+          'packaging': product.packaging,
+          'flavor': product.flavor,
+          'dose': product.dose,
         },
       );
       print('Product added successfully');
@@ -131,6 +134,9 @@ class ProductPostgres {
         'package_weight': product.packageWeight,
         'type': product.type,
         'is_assembly': product.isAssemblyItem,
+        'packaging': product.packaging,
+        'flavor': product.flavor,
+        'dose': product.dose,
       },
     );
   }

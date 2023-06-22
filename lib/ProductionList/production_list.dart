@@ -34,15 +34,13 @@ class _ProductionListState extends State<ProductionList> {
       Provider.of<OrderProvider>(context, listen: false)
           .filterOrderedItems(widget.itemSource);
       updateLoadingState();
-
     });
-
   }
-  void updateLoadingState(){
+
+  void updateLoadingState() {
     isLoading = false;
     setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -71,36 +69,38 @@ class _ProductionListState extends State<ProductionList> {
           slider: SliderView(onItemClick: (title) {
             // Handle the menu item click as necessary
           }),
-          child:
-          isLoading?
-          Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary,)):
-          filteredItems.isNotEmpty
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    OrderedItem item = filteredItems[index];
-                    return ListTile(
-                      title: Text(
-                        item.productName,
-                        style: const TextStyle(color: Colors.black),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.secondary,
+                ))
+              : filteredItems.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        OrderedItem item = filteredItems[index];
+                        return ListTile(
+                          title: Text(
+                            item.productName,
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          subtitle: Text(
+                            'Quantity: ${item.quantity}',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        'No items to show',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
                       ),
-                      subtitle: Text(
-                        'Quantity: ${item.quantity}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                    );
-                  },
-                )
-              : const Center(
-                  child: Text(
-                    'No items to show',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
                     ),
-                  ),
-                ),
         ),
       ),
     );

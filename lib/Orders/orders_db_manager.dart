@@ -65,22 +65,25 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
   static Future<bool> updateOrder(Order order) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;
-
       await connection.transaction((ctx) async {
-        print('Updating order with values: ${order.toMap()}');
-        // Update order in orders table
-        await ctx.query('''
-        UPDATE orders
-        SET people_id = @people_id, order_date = @orderDate, shipping_address = @shippingAddress, billing_address = @billingAddress, total_amount = @totalAmount, order_status = @orderStatus
-        WHERE order_id = @order_id
-      ''', substitutionValues: {
-          ...order.toMap(),
-          'people_id': order.customerId,
-        });
-        print('Order updated');
+        // Print the order details
+        print('Order details: ${order.toMap()}');
+
+        try {
+          await ctx.query('''
+    UPDATE orders
+    SET people_id = @people_id, order_date = @order_date, shipping_address = @shipping_address, billing_address = @billing_address, total_amount = @total_amount, order_status = @order_status
+    WHERE order_id = @order_id
+  ''', substitutionValues: {
+            ...order.toMap(),
+            'people_id': order.customerId,
+          });
+          print('Order updated');
+        } catch (e) {
+          print('Error updating order: $e');
+        }
 
         print('Deleting existing ordered items with orderId: ${order.id}');
-        // Delete existing ordered items for this order
         await ctx.query('''
         DELETE FROM ordered_items WHERE order_id = @orderId
       ''', substitutionValues: {
@@ -88,22 +91,24 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         });
         print('Existing ordered items deleted');
 
-        // Insert updated ordered items into ordered_items table
-        for (OrderedItem item in order.orderedItems) {
+        for (OrderedItem item in orderedItems) {
           print('Inserting updated ordered item with values: ${{
             ...item.toMap(),
             'orderId': order.id,
           }}');
           await ctx.query('''
 INSERT INTO ordered_items 
-  (order_id, product_id, product_name, quantity, price, discount, description, item_source)
-VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
+  (order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging)
+VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource, @flavor, @dose, @packaging)
 ''', substitutionValues: {
             ...item.toMap(),
             'orderId': order.id,
             'productId': item.productId,
             'productName': item.productName,
-            'itemSource': item.itemSource, // Include the item_source
+            'itemSource': item.itemSource,
+            'flavor': item.flavor,
+            'dose': item.dose,
+            'packaging': item.packaging,
           });
           print('Updated ordered item inserted');
         }
@@ -211,43 +216,43 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
   Future<void> createOrder(Order order, List<OrderedItem> orderedItems) async {
     PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
-        await connection.transaction((ctx) async {
+      await connection.transaction((ctx) async {
         // Insert order into orders table
         print('Inserting order into orders table...');
         print('Order data: ${order.toMap()}');
-        final resultOrder = await ctx.query('''
-INSERT INTO orders (order_id, people_id, order_date, shipping_address, billing_address, total_amount, order_status)
-VALUES (@order_id, @customerId, @orderDate, @shippingAddress, @billingAddress, @totalAmount, @orderStatus)
+        await ctx.query('''
+INSERT INTO orders (order_id, people_id, order_date, shipping_address, billing_address, total_amount, order_status, notes, archived) 
+VALUES (@order_id, @people_id, @order_date, @shipping_address, @billing_address, @total_amount, @order_status, @notes, @archived)
 ''', substitutionValues: order.toMap());
-        print('Order inserted into orders table. Result: $resultOrder');
+
+        print('Order inserted into orders table. Order ID: ${order.id}');
 
         // Insert ordered items into ordered_items table
         for (OrderedItem item in orderedItems) {
           print('Inserting ordered item with values: ${{
             ...item.toMap(),
-            'orderId': order.id,
+            'orderId': item.orderId
           }}');
           await ctx.query('''
 INSERT INTO ordered_items
-  (order_id, product_id, product_name, quantity, price, discount, description, item_source)
-VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource)
+  (order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging)
+VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource, @flavor, @dose, @packaging)
 ''', substitutionValues: {
             ...item.toMap(),
-            'orderId': order.id,
+            'orderId': item.orderId,
             'productId': item.productId,
             'productName': item.productName,
-            'itemSource': item.itemSource, // Include the item_source
+            'itemSource': item.itemSource,
+            'flavor': item.flavor,
+            'dose': item.dose,
+            'packaging': item.packaging,
           });
           print('Ordered item inserted');
         }
       });
-
-      // Adding order to the provider
-      // orderProvider.addOrder(order);
-
-      print('Order created.');
     } catch (e) {
-      print('Error creating order: ${e.toString()}');
+      print('Exception occurred while creating order: $e');
+      throw e;
     }
   }
 }

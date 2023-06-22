@@ -1,9 +1,14 @@
 import 'package:woosignal/models/response/order.dart' as wsOrder;
 
+import 'package:uuid/uuid.dart';
+
 import 'ordered_item_model.dart';
 
+var uuid = Uuid();
+String newOrderId = uuid.v4();
+
 class Order {
-  int id;
+  String id;
   String customerId;
   DateTime orderDate;
   String shippingAddress;
@@ -30,7 +35,7 @@ class Order {
   });
 
   Order copyWith({
-    int? id,
+    String? id,
     String? customerId,
     DateTime? orderDate,
     String? shippingAddress,
@@ -58,6 +63,8 @@ class Order {
   }
 
   factory Order.fromMap(Map<String, dynamic> map) {
+    // Add log
+    print('Creating order from map: $map');
     DateTime parseOrderDate(String date) {
       try {
         return DateTime.parse(date);
@@ -71,7 +78,7 @@ class Order {
     }
 
     return Order(
-      id: int.parse(map['order_id'].toString()),
+      id: map['order_id'].toString(),
       customerId: map['people_id'].toString(),
       orderDate: parseOrderDate(map['order_date'].toString()),
       shippingAddress: map['shipping_address'] ?? '',
@@ -128,15 +135,18 @@ class Order {
 
     return {
       'order_id': id,
-      'customerId': customerId,
-      'orderDate': orderDate.toIso8601String(),
-      'shippingAddress': shippingAddress,
-      'billingAddress': billingAddress,
-      'totalAmount': totalAmount,
-      'orderStatus': orderStatus,
-      'productName': productName,
+      'people_id': customerId,
+      'order_date': orderDate.toIso8601String(),
+      'shipping_address': shippingAddress,
+      'billing_address': billingAddress,
+      'total_amount': totalAmount,
+      'order_status': orderStatus,
+      'product_name': productName,
       'notes': notes,
       'ordered_items': orderedItemsToMap(),
+      'archived': archived
+          ? 1
+          : 0, // Assuming your backend expects a 1 for true and 0 for false.
     };
   }
 }
