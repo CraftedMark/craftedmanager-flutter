@@ -9,6 +9,7 @@ String newOrderId = uuid.v4();
 
 class Order {
   String id;
+  int? wooSignalId;
   String customerId;
   DateTime orderDate;
   String shippingAddress;
@@ -22,6 +23,7 @@ class Order {
 
   Order({
     required this.id,
+    this.wooSignalId,
     required this.customerId,
     required this.orderDate,
     required this.shippingAddress,
@@ -36,6 +38,7 @@ class Order {
 
   Order copyWith({
     String? id,
+    int? wooSignalId,
     String? customerId,
     DateTime? orderDate,
     String? shippingAddress,
@@ -49,6 +52,7 @@ class Order {
   }) {
     return Order(
       id: id ?? this.id,
+      wooSignalId: wooSignalId ?? this.wooSignalId,
       customerId: customerId ?? this.customerId,
       orderDate: orderDate ?? this.orderDate,
       shippingAddress: shippingAddress ?? this.shippingAddress,
@@ -97,14 +101,14 @@ class Order {
     final orderedItems = List.generate(order.lineItems!.length, (index) {
       final currentItem = order.lineItems![index];
       var item = OrderedItem(
-          id: currentItem.id ?? -1,
-          name: currentItem.name ?? "",
+          id: '0',
           productId: currentItem.id ?? -1,
+          orderId: '0',
+          name: currentItem.name ?? "",
           productName: currentItem.name ?? "",
           quantity: currentItem.quantity ?? 0,
           status: order.status ?? "pending", //TODO:CHANGE,
           discount: 0,
-          orderId: order.id ?? -1,
           price: double.parse(currentItem.price ?? '0'),
           packaging: '',
           itemSource: '',
@@ -116,7 +120,8 @@ class Order {
     return Order(
       customerId: order.customerId.toString(),
       archived: false,
-      id: order.id!,
+      id: '0',
+      wooSignalId: order.id,
       notes: order.customerNote ?? '',
       orderDate: DateTime.parse(order.dateCreated ?? ''),
       orderStatus: order.status!,
