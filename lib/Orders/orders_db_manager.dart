@@ -91,7 +91,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
         });
         print('Existing ordered items deleted');
 
-        for (OrderedItem item in orderedItems) {
+        for (OrderedItem item in order.orderedItems) {
           print('Inserting updated ordered item with values: ${{
             ...item.toMap(),
             'orderId': order.id,
