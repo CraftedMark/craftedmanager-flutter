@@ -16,7 +16,6 @@ class _EditProductPageState extends State<EditProductPage> {
   late String _category;
   late double _costOfGood;
   late String _description;
-  late String _flavor;
   final _formKey = GlobalKey<FormState>();
   late String _itemSource;
   late int _manufacturerId;

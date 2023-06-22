@@ -34,7 +34,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         itemSource: _itemSourceController.text,
         packaging: _packagingController.text,
         flavor: _flavorController.text,
-        dose: _dosageController.text,
+        dose: double.parse(_dosageController.text),
         assemblyItems: [],
       );
       await ProductPostgres.saveProduct(newProduct);
