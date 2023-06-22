@@ -7,6 +7,7 @@ import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
 import '../Orders/orders_db_manager.dart';
+import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../ProductionList/production_list_db_manager.dart';
 import '../config.dart';
 import '../services/one_signal_api.dart';
@@ -57,28 +58,6 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> updateOrder(
-      Order updatedOrder, List<OrderedItem> updatedOrderedItems) async {
-    // Find the index of the order in the list
-    final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
-
-    // Check if the order exists in the list
-    if (index != -1) {
-      // Update the order in the list
-      _orders[index] = updatedOrder;
-      print(updatedOrderedItems.first.flavor);
-      // Update the order in the database
-      final result =
-          await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
-
-      // If the update was successful, notify listeners
-      if (result) {
-        notifyListeners();
-      }
-
-      return result;
-    }
-
   Future<void> createOrder(Order newOrder, People customer) async {
 
     if(AppConfig.ENABLE_WOOSIGNAL){
@@ -118,16 +97,6 @@ class OrderProvider with ChangeNotifier {
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderedItems.add(orderedItem);
     notifyListeners();
-  }
-
-  void updateOrderStatus(String orderId, String newStatus, bool isArchived) {
-    final order = _orders.firstWhere((order) => order.id == orderId);
-    final index =
-        order.orderedItems.indexWhere((item) => item.id == updatedItem.id);
-    if (index != -1) {
-      order.orderedItems[index] = updatedItem;
-      notifyListeners();
-    }
   }
 
   void deleteOrderedItem(int orderId, OrderedItem item) {
