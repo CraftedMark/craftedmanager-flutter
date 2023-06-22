@@ -254,7 +254,7 @@ class OrderDataTable extends StatelessWidget {
                         ],
                         rows: snapshot.data!
                             .map((fullOrder) => DataRow(cells: [
-                                  DataCell(Text(fullOrder.order.id.toString())),
+                                  DataCell(Text(fullOrder.order.id)),
                                   DataCell(Text(
                                       fullOrder.order.customerId.toString())),
                                   DataCell(Text(fullOrder.employees

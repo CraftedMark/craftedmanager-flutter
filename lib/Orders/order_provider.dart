@@ -107,7 +107,7 @@ class OrderProvider with ChangeNotifier {
 
 
   Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
-    final connection = await PostgreSQLConnectionManager.connection;
+    final connection = PostgreSQLConnectionManager.connection;
 
     final query = '''
     SELECT * 

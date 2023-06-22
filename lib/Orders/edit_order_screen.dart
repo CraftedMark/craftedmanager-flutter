@@ -198,7 +198,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                       ),
                     );
 
-                    if (products != null && products.isNotEmpty) {
+                    if ( products.isNotEmpty) {
                       final result =
                       await showDialog<Map<String, dynamic>>(
                         context: context,
