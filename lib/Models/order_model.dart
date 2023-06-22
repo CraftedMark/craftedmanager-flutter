@@ -101,7 +101,6 @@ class Order {
     final orderedItems = List.generate(order.lineItems!.length, (index) {
       final currentItem = order.lineItems![index];
       var item = OrderedItem(
-          id: '0',
           productId: currentItem.id ?? -1,
           orderId: '0',
           name: currentItem.name ?? "",
