@@ -12,12 +12,11 @@ import 'edit_order_screen.dart';
 class OrderDetailScreen extends StatefulWidget {
   final Order order;
   final People customer;
-  final VoidCallback onStateChanged;
 
   OrderDetailScreen(
       {required this.order,
       required this.customer,
-      required this.onStateChanged});
+      });
 
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
@@ -82,7 +81,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     order: widget.order,
                     customer: widget.customer,
                     products: [],
-                    onStateChanged: widget.onStateChanged,
                   ),
                 ),
               );
@@ -144,7 +142,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               // displayLoading();
                               final result = await _provider.updateOrder(orderForSend, status: WSOrderStatus.values[index]);
                               // Navigator.pop(context);
-                              print(result);
                               if(result){
                                 updateOrderStatusInUI(orderStatuses[index]);
                               }

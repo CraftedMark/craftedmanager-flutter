@@ -82,7 +82,11 @@ class _OrdersListState extends State<OrdersList> {
                 cacheExtent: 10000,//for cache more orders in one time(UI)
                 itemCount: sortedOrders.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return _OrderWidget(order: sortedOrders[index]);
+                  return _OrderWidget(order: sortedOrders[index], onStateChanged: () async {
+                    await orderProvider
+                        .fetchOrders(); // Refresh the orders from the provider
+                    _refreshOrdersList();
+                  },);
                 },
               ),
               onRefresh: () async {
@@ -143,7 +147,8 @@ Future<People> _getCustomerById(int customerId) async {
 
 class _OrderWidget extends StatelessWidget {
   final Order order;
-  const _OrderWidget({Key? key, required this.order}) : super(key: key);
+  final VoidCallback onStateChanged;
+  const _OrderWidget({Key? key, required this.order, required this.onStateChanged}) : super(key: key);
 
   Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
     return await OrderedItemPostgres.fetchOrderedItems(orderId);
@@ -174,9 +179,6 @@ class _OrderWidget extends StatelessWidget {
                       builder: (context) => OrderDetailScreen(
                         order: order,
                         customer: customer,
-                        onStateChanged: () {
-                          // Handle state change if needed
-                        },
                       ),
                     ),
                   );

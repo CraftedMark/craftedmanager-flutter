@@ -84,7 +84,7 @@ class OrderProvider with ChangeNotifier {
     }else{
       result = await OrderPostgres.updateOrder(updatedOrder);
     }
-    // notifyListeners();
+    fetchOrders();
     return result;
   }
 
