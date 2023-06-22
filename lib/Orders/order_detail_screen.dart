@@ -24,7 +24,6 @@ class OrderDetailScreen extends StatefulWidget {
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
-  late EasyRefreshController _controller;
   late OrderProvider _provider;
   List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
       ? [
@@ -139,9 +138,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           return ListTile(
                             title: Text(orderStatuses[index],
                                 style: TextStyle(color: Colors.white)),
-                            onTap: () {
-                              onStatusChanged(orderStatuses[index]);
+                            onTap: () async {
                               Navigator.pop(context);
+                              displayLoading();
+                              final result = await _provider.updateOrder(widget.order, status: WSOrderStatus.values[index]);
+                              Navigator.pop(context);
+                              if(result){
+                                updateOrderStatusInUI(orderStatuses[index]);
+                              }
                             },
                           );
                         },
@@ -211,4 +215,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ),
     );
   }
+  void displayLoading(){
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context)=> const AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.symmetric(horizontal: 120),
+        content: AspectRatio(
+          aspectRatio: 1/1,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
 }
