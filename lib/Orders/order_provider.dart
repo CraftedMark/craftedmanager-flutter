@@ -84,7 +84,7 @@ class OrderProvider with ChangeNotifier {
     }else{
       result = await OrderPostgres.updateOrder(updatedOrder);
     }
-    notifyListeners();
+    // notifyListeners();
     return result;
   }
 
@@ -99,11 +99,11 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteOrderedItem(int orderId, OrderedItem item) {
-    final order = _orders.firstWhere((order) => order.id == orderId);
-    order.orderedItems.removeWhere((i) => i.id == item.id);
-    notifyListeners();
-  }
+  // void deleteOrderedItem(int orderId, OrderedItem item) {
+  //   final order = _orders.firstWhere((order) => order.id == orderId);
+  //   order.orderedItems.removeWhere((i) => i.id == item.id);
+  //   notifyListeners();
+  // }
 
 
   Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {

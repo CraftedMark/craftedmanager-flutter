@@ -139,10 +139,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             title: Text(orderStatuses[index],
                                 style: TextStyle(color: Colors.white)),
                             onTap: () async {
+                              final orderForSend = widget.order.copyWith(orderStatus:  orderStatuses[index]);
                               Navigator.pop(context);
-                              displayLoading();
-                              final result = await _provider.updateOrder(widget.order, status: WSOrderStatus.values[index]);
-                              Navigator.pop(context);
+                              // displayLoading();
+                              final result = await _provider.updateOrder(orderForSend, status: WSOrderStatus.values[index]);
+                              // Navigator.pop(context);
+                              print(result);
                               if(result){
                                 updateOrderStatusInUI(orderStatuses[index]);
                               }

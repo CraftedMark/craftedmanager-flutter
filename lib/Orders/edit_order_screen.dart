@@ -108,7 +108,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   void updateOrderedItem(int index, String name, double price, int quantity,
       String itemSource, String packaging, double dose, String flavor) {
-    print(flavor);
     setState(() {
       _orderedItems[index] = _orderedItems[index].copyWith(
         productName: name,
@@ -147,6 +146,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         ),
       );
     }
+
   }
 
   @override
