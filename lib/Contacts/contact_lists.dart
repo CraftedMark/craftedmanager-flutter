@@ -115,7 +115,14 @@ class ContactsListState extends State<ContactsList> {
                       title: _filteredContacts != null
                           ? Text('${contact.firstName} ${contact.lastName}')
                           : CircularProgressIndicator(),
-                      subtitle: Text(contact.phone),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Phone: ${contact.phone}'),
+                          Text('Email: ${contact.email}'), // Included email
+                          Text('Brand: ${contact.brand}'), // Included brand
+                        ],
+                      ),
                     ),
                   ),
                 );

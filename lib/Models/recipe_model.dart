@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:uuid/uuid.dart';
+
 class Recipe {
-  int id;
+  String id;
   String name;
   List<String> ingredients;
   List<double> amounts;
@@ -19,7 +21,10 @@ class Recipe {
     this.pieces,
     this.steps,
     this.stepImages,
-  });
+  }) {
+    var uuid = Uuid();
+    id = uuid.v4();
+  }
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
