@@ -1,8 +1,8 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -117,10 +117,10 @@ class _OrdersListState extends State<OrdersList> {
   }
 }
 
-Future<People> _getCustomerById(int customerId) async {
+Future<People> _getCustomerById(String customerId) async {
   //TODO: find out why the customer can be null
   People fakeCustomer = People(
-    id: 1,
+    id: '1',
     firstName: 'Fake',
     lastName: "Customer",
     phone: '123',
@@ -148,7 +148,7 @@ class _OrderWidget extends StatelessWidget {
         ),
       ),
       child: FutureBuilder<People>(
-        future: _getCustomerById(int.parse(order.customerId)),
+        future: _getCustomerById(order.customerId),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             var customer = snapshot.data!;

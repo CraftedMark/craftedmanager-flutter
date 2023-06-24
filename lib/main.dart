@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:crafted_manager/Menu/menu_item.dart';
-import 'package:crafted_manager/Orders/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
+import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,8 @@ void main() async {
   PostgreSQLConnectionManager.init();
   await PostgreSQLConnectionManager.open();
 
-  OrderProvider provider = OrderProvider();
+  // Here we're initializing the provider before runApp is called.
+  final OrderProvider provider = OrderProvider();
 
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
@@ -31,9 +32,10 @@ void main() async {
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
       print("new notification + ${result}");
     });
-    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) {
+
+    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
       print('___________update orders___________');
-      provider.fetchOrders();
+      await provider.fetchOrders;
     });
   }
 
@@ -54,11 +56,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
   }
 
   @override
@@ -67,19 +69,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async  {
-
-    if(state == AppLifecycleState.paused){
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
       await PostgreSQLConnectionManager.close();
     }
-    if(state == AppLifecycleState.resumed){
+    if (state == AppLifecycleState.resumed) {
       PostgreSQLConnectionManager.init();
       await PostgreSQLConnectionManager.open();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

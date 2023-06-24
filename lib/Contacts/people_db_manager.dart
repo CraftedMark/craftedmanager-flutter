@@ -1,21 +1,13 @@
-import 'dart:math';
-
 import 'package:crafted_manager/Models/people_model.dart';
-import 'package:crafted_manager/Orders/database_functions.dart';
+import 'package:uuid/uuid.dart';
 
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
 class PeoplePostgres {
-  // Fetch a customer by customerId
-  static Future<People?> fetchCustomer(int customerId) async {
-    // Change the argument type to int
-    if (customerId <= 0) {
-      throw Exception('Invalid ID: Customer ID must be a positive integer');
-    }
-
+  static Future<People?> fetchCustomer(String customerId) async {
     final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query(
-        'SELECT * FROM people WHERE id = @customerId',
+        "SELECT * FROM people WHERE id = @customerId",
         substitutionValues: {'customerId': customerId});
 
     return result.isNotEmpty
@@ -23,7 +15,6 @@ class PeoplePostgres {
         : null;
   }
 
-  // Refresh the customer list
   static Future<List<People>> refreshCustomerList() async {
     final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query('SELECT * FROM people');
@@ -32,15 +23,14 @@ class PeoplePostgres {
   }
 
   static Future<People?> updateCustomer(People customer) async {
-    if (customer.id <= 0) {
-      throw Exception('Invalid ID: Customer ID must be a positive integer');
+    if (customer.id == null || customer.id.isEmpty) {
+      throw Exception('Invalid ID: Customer ID is null or empty');
     }
 
     final connection = PostgreSQLConnectionManager.connection;
     final map = customer.toMap();
     final values = <String>[];
     map.forEach((key, value) {
-      // Skip updating createdby, updatedby, and null timestamp columns
       if (key != "createdby" &&
           key != "updatedby" &&
           !(value == null && (key == "created" || key == "updated"))) {
@@ -48,11 +38,11 @@ class PeoplePostgres {
       }
     });
     final allValues = values.join(",\n");
+
     await connection.execute(
         "UPDATE people SET $allValues WHERE id = @customerId",
         substitutionValues: {'customerId': customer.id});
 
-    // Fetch the updated customer data
     final result = await connection.query(
         'SELECT * FROM people WHERE id = @customerId',
         substitutionValues: {'customerId': customer.id});
@@ -62,15 +52,14 @@ class PeoplePostgres {
         : null;
   }
 
-  static Future<void> deleteCustomer(int customerId) async {
-    if (customerId <= 0) {
-      throw Exception('Invalid ID: Customer ID must be a positive integer');
+  static Future<void> deleteCustomer(String customerId) async {
+    if (customerId == null || customerId.isEmpty) {
+      throw Exception('Invalid ID: Customer ID is null or empty');
     }
 
     final connection = PostgreSQLConnectionManager.connection;
     await connection.execute('DELETE FROM people WHERE id = @customerId',
         substitutionValues: {'customerId': customerId});
-
   }
 
   static Future<List<People>> fetchCustomersByDetails(
@@ -98,24 +87,22 @@ class PeoplePostgres {
     return customers;
   }
 
-  static Future<int> createCustomer(People customer) async {
+  static Future<String> createCustomer(People customer) async {
     final connection = PostgreSQLConnectionManager.connection;
-    final random = Random(); // Create a Random instance
-    final newId = random.nextInt(1 << 32); // Generate a random 32-bit integer
+    final newId = Uuid().v4(); // Generate new UUID
 
     final map = customer.toMap()
-      ..['id'] = newId; // Update the id field with the new integer ID
+      ..['id'] = newId; // Update the id field with the new UUID
 
     final columns = map.keys.join(', ');
     final values = map.values
-        .map((value) => value == null ? 'NULL' : "'${value}'")
+        .map((value) => value == null ? 'NULL' : "'$value'")
         .join(', ');
 
     await connection.execute(
       "INSERT INTO people ($columns) VALUES ($values)",
     );
 
-
-    return newId; // Return the new contact ID
+    return newId; // Return the new contact UUID
   }
 }

@@ -2,7 +2,7 @@ import 'package:crafted_manager/CBP/cbp_db_manager.dart';
 import 'package:flutter/material.dart';
 
 class CustomerPricingListScreen extends StatefulWidget {
-  final int customerId;
+  final String customerId;
 
   CustomerPricingListScreen({required this.customerId});
 
@@ -20,8 +20,8 @@ class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      _pricingListId = await CustomerBasedPricingDbManager.instance
-          .getPricingListIdByCustomerId(widget.customerId);
+      _pricingListId = (await CustomerBasedPricingDbManager.instance
+          .getPricingListIdByCustomerId(widget.customerId)) as int?;
     });
   }
 

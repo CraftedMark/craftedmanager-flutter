@@ -7,9 +7,9 @@ import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
+import '../Providers/order_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
@@ -24,15 +24,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
   double shippingCost = 10;
 
-  Future<double?> getCustomProductPrice(int productId, int customerId) async {
+  Future<double?> getCustomProductPrice(
+      int productId, String customerId) async {
     double? customPrice;
-    int? pricingListId = await CustomerBasedPricingDbManager.instance
-        .getPricingListByCustomerId(customerId);
+    String? pricingListId = (await CustomerBasedPricingDbManager.instance
+        .getPricingListByCustomerId(customerId)) as String?;
 
     if (pricingListId != null) {
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
-          .getCustomerProductPricing(productId, pricingListId);
+          .getCustomerProductPricing(productId, pricingListId as int);
 
       if (pricingData != null) {
         customPrice = pricingData['price'];

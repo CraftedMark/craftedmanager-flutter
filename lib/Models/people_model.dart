@@ -1,5 +1,7 @@
+import 'package:uuid/uuid.dart';
+
 class People {
-  final int id;
+  final String id;
   final String firstName;
   final String lastName;
   final String phone;
@@ -43,8 +45,7 @@ class People {
 
   factory People.empty() {
     return People(
-      id: 0,
-      // Fix the id type here
+      id: Uuid().v4(),
       firstName: '',
       lastName: '',
       phone: '',
@@ -88,7 +89,7 @@ class People {
 
   factory People.fromMap(Map<String, dynamic> map) {
     return People(
-      id: map['id'] as int,
+      id: map['id'].toString(),
       firstName: map['firstname'],
       lastName: map['lastname'],
       phone: map['phone'],
@@ -111,7 +112,7 @@ class People {
   }
 
   People copyWith({
-    int? id,
+    String? id,
     String? firstName,
     String? lastName,
     String? phone,
@@ -133,7 +134,6 @@ class People {
   }) {
     return People(
       id: id ?? this.id,
-      // Make sure this line assigns an int value
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,

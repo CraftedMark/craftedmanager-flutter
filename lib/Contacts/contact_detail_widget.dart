@@ -25,7 +25,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
   @override
   void initState() {
     value = widget.contact;
-    if (value.id <= 0) {
+    if (value.id.isEmpty) {
       _editing = true;
     }
     super.initState();
@@ -63,17 +63,17 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                 } else {
                   People? updatedContact;
 
-                  if (value.id <= 0) {
-                    int newId = await PeoplePostgres.createCustomer(value);
+                  if (value.id.isEmpty) {
+                    String newId = await PeoplePostgres.createCustomer(value);
                     updatedContact = await PeoplePostgres.fetchCustomer(newId);
                   } else {
                     updatedContact = await PeoplePostgres.updateCustomer(value);
                   }
 
-                  if (updatedContact != null && updatedContact.id > 0) {
+                  if (updatedContact != null && updatedContact.id.isNotEmpty) {
                     setState(() {
                       _editing = false;
-                      value = updatedContact ?? value;
+                      value = updatedContact!;
                     });
                     widget.refresh();
                   } else {

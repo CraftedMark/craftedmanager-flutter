@@ -1,71 +1,146 @@
 import 'package:crafted_manager/CBP/cbp_db_manager.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CustomerPricingScreen extends StatefulWidget {
-  final int customerId;
+class CustomerPricingListScreen extends StatefulWidget {
+  final String customerId;
 
-  CustomerPricingScreen({required this.customerId});
+  CustomerPricingListScreen({required this.customerId});
 
   @override
-  _CustomerPricingScreenState createState() => _CustomerPricingScreenState();
+  _CustomerPricingListScreenState createState() =>
+      _CustomerPricingListScreenState();
 }
 
-class _CustomerPricingScreenState extends State<CustomerPricingScreen> {
-  late List<Map<String, dynamic>> _productPrices = [];
+class _CustomerPricingListScreenState extends State<CustomerPricingListScreen> {
+  TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+  String? _pricingListId;
 
   @override
   void initState() {
     super.initState();
-    _fetchCustomPricing();
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      _pricingListId = await CustomerBasedPricingDbManager.instance
+          .getPricingListIdByCustomerId(widget.customerId);
+    });
   }
 
-  void _fetchCustomPricing() async {
-    List<Map<String, dynamic>> results = await CustomerBasedPricingDbManager
-        .instance
-        .fetchCustomerBasedPricing(widget.customerId);
+  void _searchProducts() async {
+    List<Map<String, dynamic>> results =
+        await CustomerBasedPricingDbManager.instance.search(
+            'products',
+            'product_name ILIKE @searchText',
+            {'searchText': '%${_searchController.text}%'});
+
     setState(() {
-      _productPrices = results;
+      _searchResults = results.map((result) {
+        Map<String, dynamic> product = result['products'];
+        return {
+          'id': product['product_id'],
+          'product_name': product['product_name'],
+          'retail_price': product['retail_price'],
+        };
+      }).toList();
     });
+  }
+
+  Future<void> _showPriceInputDialog(
+      BuildContext context, int productId) async {
+    TextEditingController _priceController = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter New Price'),
+          content: TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'Price'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Save'),
+              onPressed: () async {
+                double newPrice = double.tryParse(_priceController.text) ?? 0;
+                if (newPrice > 0) {
+                  print(
+                      'Saving new price: $newPrice for product: $productId and customer: ${widget.customerId}');
+                  await CustomerBasedPricingDbManager.instance
+                      .addOrUpdateCustomerProductPricing(
+                    productId: productId,
+                    customerId: widget.customerId,
+                    price: newPrice,
+                  );
+                  setState(() {
+                    _searchProducts();
+                  });
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    bool darkModeOn = brightness == Brightness.dark;
-
     return MaterialApp(
-      theme: ThemeData(
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
+      theme: ThemeData.dark().copyWith(
+        appBarTheme: AppBarTheme(color: Colors.black),
+        scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.black,
-          title: const Text('Customer Based Pricing'),
+          title: Text('Customer Pricing List'),
         ),
-        body: ListView.builder(
-          itemCount: _productPrices.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(
-                '${_productPrices[index]['product_name']}',
-                style: TextStyle(
-                    color: darkModeOn
-                        ? CupertinoColors.white
-                        : CupertinoColors.black),
+        body: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (_) => _searchProducts(),
+                decoration: InputDecoration(
+                  labelText: 'Search Product',
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
-              subtitle: Text(
-                'Original Price: \$${_productPrices[index]['original_price']}, Custom Price: \$${_productPrices[index]['custom_price'] ?? 'N/A'}',
-                style: TextStyle(
-                    color: darkModeOn
-                        ? CupertinoColors.systemGrey
-                        : CupertinoColors.systemGrey3),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Map<String, dynamic> product = _searchResults[index];
+                  String productName =
+                      product['product_name'] ?? 'Unknown Product';
+                  String? retailPriceStr = product['retail_price'];
+                  double? originalPrice = retailPriceStr != null
+                      ? double.tryParse(retailPriceStr)
+                      : null;
+
+                  return ListTile(
+                    title: Text(productName),
+                    subtitle: Text('Original Price: ${originalPrice ?? 'N/A'}'),
+                    onTap: () {
+                      int? productId = product['id'];
+                      if (productId != null) {
+                        _showPriceInputDialog(context, productId);
+                      }
+                    },
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

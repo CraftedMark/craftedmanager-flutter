@@ -1,7 +1,7 @@
 import 'package:crafted_manager/Models/employee_model.dart';
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/task_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +32,7 @@ class _ProductionReportState extends State<ProductionReport> {
 
   Future<void> fetchOpenOrders() async {
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    await orderProvider.fetchOrders(); // Add this line
     var allOrders = orderProvider.orders;
     setState(() {
       openOrders =
@@ -41,7 +42,6 @@ class _ProductionReportState extends State<ProductionReport> {
 
   Future<void> searchOrders(String query) async {
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    await orderProvider.fetchOrders();
     List<Order> allOrders = orderProvider.orders;
     List<Order> results = allOrders
         .where((order) => order.id.toString().contains(query))

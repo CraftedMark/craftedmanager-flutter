@@ -1,5 +1,4 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
-import 'package:crafted_manager/postgres.dart';
 import 'package:flutter/material.dart';
 
 import '../Models/people_model.dart';
@@ -72,7 +71,7 @@ class ContactsListState extends State<ContactsList> {
             onPressed: () {
               // Create a new contact with default values
               People newContact = People(
-                  id: 0, firstName: '', lastName: '', phone: '', email: '');
+                  id: '', firstName: '', lastName: '', phone: '', email: '');
 
               Navigator.push(
                 context,
@@ -95,7 +94,7 @@ class ContactsListState extends State<ContactsList> {
               itemBuilder: (BuildContext context, int index) {
                 final contact = _filteredContacts![index];
                 return Dismissible(
-                  key: Key(contact.id.toString()),
+                  key: Key(contact.id),
                   background: Container(color: Colors.red),
                   onDismissed: (direction) {
                     deleteCustomer(contact);

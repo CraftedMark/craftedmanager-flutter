@@ -20,8 +20,11 @@ class FullOrder {
 class OrderProvider with ChangeNotifier {
   List<Order> _orders = [];
   List<OrderedItem> _filteredItems = [];
+  bool _isLoading = true; // Define a loading state variable
 
   List<Order> get orders => _orders;
+
+  bool get isLoading => _isLoading; // Getter to access loading state
 
   // Define the filteredItems getter
   List<OrderedItem> get filteredItems => _filteredItems;
@@ -36,18 +39,12 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Order getOrderedItemsForOrder(String orderId) {
-    return _orders.firstWhere((order) => order.id == orderId);
-  }
-
-  Future<void> fetchOrders() async {
-    try {
+  Future<List<Order>> fetchOrders() async {
+    if (_orders.isEmpty) {
       _orders =
           await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
-      notifyListeners();
-    } catch (e) {
-      print('Error fetching orders: $e');
     }
+    return _orders;
   }
 
   Future<bool> updateOrder(
@@ -100,8 +97,8 @@ class OrderProvider with ChangeNotifier {
 
     final query = '''
     SELECT * 
-    FROM tasks 
-    WHERE order_id = @orderId;
+FROM tasks 
+WHERE order_id = '$orderId'
   ''';
 
     final results = await connection
@@ -153,8 +150,9 @@ class OrderProvider with ChangeNotifier {
     return full;
   }
 
+  // No need to parse string to int
   Future<People> fetchCustomerById(String id) async {
-    People? customer = await PeoplePostgres.fetchCustomer(int.parse(id));
+    People? customer = await PeoplePostgres.fetchCustomer(id);
 
     if (customer == null) {
       throw Exception('No customer data found with ID: $id');
