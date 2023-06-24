@@ -4,6 +4,8 @@ import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
+import 'package:crafted_manager/Providers/people_provider.dart';
+import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +20,14 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize the database
   PostgreSQLConnectionManager.init();
   await PostgreSQLConnectionManager.open();
 
-  // Here we're initializing the provider before runApp is called.
-  final OrderProvider provider = OrderProvider();
+  // Initialize the providers before runApp is called.
+  final OrderProvider orderProvider = OrderProvider();
+  final PeopleProvider peopleProvider = PeopleProvider();
+  final ProductProvider productProvider = ProductProvider();
 
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
@@ -35,14 +40,21 @@ void main() async {
 
     OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
       print('___________update orders___________');
-      await provider.fetchOrders;
+      await orderProvider.fetchOrders();
     });
   }
 
   WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => provider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<OrderProvider>(
+            create: (context) => orderProvider),
+        ChangeNotifierProvider<PeopleProvider>(
+            create: (context) => peopleProvider),
+        ChangeNotifierProvider<ProductProvider>(
+            create: (context) => productProvider),
+      ],
       child: MyApp(),
     ),
   );
@@ -61,6 +73,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+    Provider.of<PeopleProvider>(context, listen: false).fetchPeople();
+    Provider.of<ProductProvider>(context, listen: false).fetchProducts();
   }
 
   @override

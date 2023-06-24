@@ -1,6 +1,7 @@
 import 'package:crafted_manager/Models/product_model.dart';
-import 'package:crafted_manager/Products/product_db_manager.dart';
+import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -83,9 +84,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ChangeNotifierProvider(
+      create: (context) => ProductProvider(),
+      child: MaterialApp(
         theme: ThemeData.dark(),
         home: Scaffold(
           appBar: AppBar(
@@ -258,36 +260,47 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           });
                         },
                       ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            try {
-                              await saveProduct();
-                              widget.onProductSaved();
-                              Navigator.pop(context);
-                            } catch (e) {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Error'),
-                                    content: const Text(
-                                        'An error occurred while saving the product.'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: const Text('OK'),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
+                      Builder(
+                        builder: (context) {
+                          final productProvider = Provider.of<ProductProvider>(
+                              context,
+                              listen: false);
+                          return ElevatedButton(
+                            onPressed: () async {
+                              print('Save button pressed');
+                              if (_formKey.currentState!.validate()) {
+                                print('Form validated');
+                                try {
+                                  await saveProduct(productProvider);
+                                  print('Product saved');
+                                  widget.onProductSaved();
+                                  Navigator.pop(context);
+                                } catch (e) {
+                                  print('Error saving product: $e');
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Error'),
+                                        content: const Text(
+                                            'An error occurred while saving the product.'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('OK'),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
-                                },
-                              );
-                            }
-                          }
+                                }
+                              }
+                            },
+                            child: const Text('Save'),
+                          );
                         },
-                        child: const Text('Save'),
                       ),
                     ],
                   ),
@@ -295,10 +308,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
-  Future<void> saveProduct() async {
+  // Inside the saveProduct function
+  Future<void> saveProduct(ProductProvider productProvider) async {
+    print('Inside saveProduct function');
     Product updatedProduct = Product(
       id: widget.product.id,
       name: _nameController.text,
@@ -321,8 +338,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       quantityInStock: widget.product.quantityInStock,
       assemblyItems: [],
       imageUrl: _imageUrlController.text,
-      perGramCost: int.parse(_perGramCostController.text),
-      bulkPricing: int.parse(_bulkPricingController.text),
+      perGramCost: double.parse(_perGramCostController.text),
+      bulkPricing: double.parse(_bulkPricingController.text),
       weightInGrams: int.parse(_weightInGramsController.text),
       packageWeightMeasure: _packageWeightMeasureController.text,
       packageWeight: int.parse(_packageWeightController.text),
@@ -330,10 +347,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       isAssemblyItem: _isAssemblyItemValue == "true",
     );
 
+    final productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
+
     if (widget.isNewProduct) {
-      await ProductPostgres.addProduct(updatedProduct);
+      print('Adding new product');
+      productProvider.addProduct(updatedProduct);
     } else {
-      await ProductPostgres.updateProduct(updatedProduct);
+      print('Updating existing product');
+      productProvider.updateProduct(updatedProduct);
     }
   }
 }

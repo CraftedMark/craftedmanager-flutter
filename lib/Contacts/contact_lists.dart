@@ -1,5 +1,6 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../Models/people_model.dart';
 import 'contact_detail_widget.dart';
@@ -15,6 +16,15 @@ class ContactsListState extends State<ContactsList> {
   List<People>? _contacts;
   List<People>? _filteredContacts;
   TextEditingController _searchController = TextEditingController();
+
+  String parsePhoneNumber(String number) {
+    try {
+      final phoneNumber = PhoneNumber(isoCode: 'US', phoneNumber: number);
+      return phoneNumber.parseNumber();
+    } catch (e) {
+      return number; // If the phone number cannot be parsed, return it as-is
+    }
+  }
 
   @override
   void initState() {
@@ -118,9 +128,12 @@ class ContactsListState extends State<ContactsList> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Phone: ${contact.phone}'),
-                          Text('Email: ${contact.email}'), // Included email
-                          Text('Brand: ${contact.brand}'), // Included brand
+                          Text('Phone: ${parsePhoneNumber(contact.phone)}'),
+                          // Apply parsing
+                          Text('Email: ${contact.email}'),
+                          // Included email
+                          Text('Brand: ${contact.brand}'),
+                          // Included brand
                         ],
                       ),
                     ),

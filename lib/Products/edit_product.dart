@@ -34,8 +34,8 @@ class _EditProductPageState extends State<EditProductPage> {
 
   // New fields
   late String _imageUrl;
-  late int _perGramCost;
-  late int _bulkPricing;
+  late double _perGramCost;
+  late double _bulkPricing;
   late int _weightInGrams;
   late String _packageWeightMeasure;
   late int _packageWeight;
