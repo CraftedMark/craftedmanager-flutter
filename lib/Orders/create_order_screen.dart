@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
+import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../Providers/order_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -86,25 +87,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
     print("new orderid = $orderId");
 
-    final newOrder = Order(
-      customerId: widget.client.id.toString(),
-      id: orderId,
-      orderDate: DateTime.now(),
-      shippingAddress:
-          '${widget.client.address1 ?? ""}, ${widget.client.city ?? ""},${widget.client.state ?? ""},${widget.client.zip ?? ""}',
-      billingAddress:
-          '${widget.client.address1 ?? ""},${widget.client.city ?? ""},${widget.client.state ?? ""},${widget.client.zip ?? ""}',
-      productName: orderedItems.map((e) => e.productName).toList().join(','),
-      totalAmount: totalAmount,
-      orderStatus: 'Pending',
-      notes: '',
-      archived: false,
-      orderedItems: orderedItems,
-    );
+    // Fetch address fields from the database
+    Map<String, dynamic>? addressFields = await OrderPostgres.getAddressFields(
+        PostgreSQLConnectionManager.connection, widget.client.id);
 
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    await OrderPostgres().createOrder(newOrder, orderedItems);
-    sendNewOrderNotification();
+    if (addressFields != null) {
+      final newOrder = Order(
+        customerId: widget.client.id.toString(),
+        id: orderId,
+        orderDate: DateTime.now(),
+        shippingAddress:
+            '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        billingAddress:
+            '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        productName: orderedItems.map((e) => e.productName).toList().join(','),
+        totalAmount: totalAmount,
+        orderStatus: 'Pending',
+        notes: '',
+        archived: false,
+        orderedItems: orderedItems,
+      );
+
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      await OrderPostgres().createOrder(newOrder, orderedItems);
+      sendNewOrderNotification();
+    } else {
+      // Handle the case when addressFields are null
+      print("Error: Address fields are null.");
+    }
   }
 
   Future<void> sendNewOrderNotification() async {
