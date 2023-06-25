@@ -72,10 +72,10 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
 
         try {
           await ctx.query('''
-    UPDATE orders
-    SET people_id = @people_id, order_date = @order_date, shipping_address = @shipping_address, billing_address = @billing_address, total_amount = @total_amount, order_status = @order_status
-    WHERE order_id = @order_id
-  ''', substitutionValues: {
+  UPDATE orders
+  SET people_id = @people_id, order_date = @order_date, shipping_address = @shipping_address, billing_address = @billing_address, total_amount = @total_amount, order_status = @order_status
+  WHERE order_id = @order_id
+''', substitutionValues: {
             ...order.toMap(),
             'people_id': order.customerId,
           });
@@ -86,8 +86,8 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
 
         print('Deleting existing ordered items with orderId: ${order.id}');
         await ctx.query('''
-        DELETE FROM ordered_items WHERE order_id = @orderId
-      ''', substitutionValues: {
+      DELETE FROM ordered_items WHERE order_id = @orderId
+    ''', substitutionValues: {
           'orderId': order.id,
         });
         print('Existing ordered items deleted');
@@ -99,7 +99,7 @@ SELECT address1, city, state, zip FROM people WHERE id = @customer_id
           }}');
           await ctx.query('''
 INSERT INTO ordered_items 
-  (order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging)
+(order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging)
 VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource, @flavor, @dose, @packaging)
 ''', substitutionValues: {
             ...item.toMap(),
@@ -120,54 +120,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
       print('Error: ${e.toString()}');
       return false;
     }
-  }
-
-  Future<bool> updateOrderStatusAndArchived(Order updatedOrder) async {
-    try {
-      final connection = PostgreSQLConnectionManager.connection;
-
-      await connection.transaction((ctx) async {
-        print(
-            'Updating order status and archived with values: ${updatedOrder.toMap()}');
-        // Update order in orders table
-        await ctx.query('''
-        UPDATE orders
-        SET order_status = @orderStatus, archived = @archived
-        WHERE order_id = @order_id
-      ''', substitutionValues: {
-          'order_id': updatedOrder.id,
-          'orderStatus': updatedOrder.orderStatus,
-          'archived': updatedOrder.archived,
-        });
-        print('Order status and archived updated');
-      });
-      return true;
-    } catch (e) {
-      print('Error: ${e.toString()}');
-      return false;
-    }
-  }
-
-  static Future<List<Order>> getAllOrders() async {
-    final orders = <Order>[];
-    try {
-      final connection = PostgreSQLConnectionManager.connection;
-      List<Map<String, Map<String, dynamic>>> results =
-          await connection.mappedResultsQuery('''
-    SELECT * FROM orders
-    ORDER BY order_date DESC
-  ''');
-
-      for (var row in results) {
-        orders.add(Order.fromMap(row.values.first));
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-
-    orders.sort((a, b) => a.orderDate.compareTo(b.orderDate));
-
-    return orders;
   }
 
   static Future<Order?> getOrderById(String id) async {
@@ -214,7 +166,22 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     }
   }
 
-  Future<void> createOrder(Order order, List<OrderedItem> orderedItems) async {
+  static Future<List<Order>> getOrders() async {
+    try {
+      final connection = PostgreSQLConnectionManager.connection;
+      List<Map<String, Map<String, dynamic>>> results =
+          await connection.mappedResultsQuery('''
+    SELECT * FROM orders
+  ''');
+
+      return results.map((e) => Order.fromMap(e.values.first)).toList();
+    } catch (e) {
+      print(e.toString());
+      return [];
+    }
+  }
+
+  Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
     PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
       await connection.transaction((ctx) async {
@@ -251,9 +218,10 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
           print('Ordered item inserted');
         }
       });
+      return true; // Return true if operation is successful
     } catch (e) {
       print('Exception occurred while creating order: $e');
-      throw e;
+      return false; // Return false if operation fails
     }
   }
 }

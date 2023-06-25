@@ -4,15 +4,25 @@ import 'package:uuid/uuid.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
 class PeoplePostgres {
-  static Future<People?> fetchCustomer(String customerId) async {
+  static Future<People> fetchCustomer(String id) async {
     final connection = PostgreSQLConnectionManager.connection;
-    final result = await connection.query(
-        "SELECT * FROM people WHERE id = @customerId",
-        substitutionValues: {'customerId': customerId});
 
-    return result.isNotEmpty
-        ? People.fromMap(result.first.toColumnMap())
-        : null;
+    List<Map<String, Map<String, dynamic>>> results = await connection
+        .mappedResultsQuery('SELECT * FROM people WHERE id = @id',
+            substitutionValues: {'id': id});
+
+    if (results.isNotEmpty) {
+      return People.fromMap(results.first['people']!);
+    } else {
+      throw Exception('No customer data found with ID: $id');
+    }
+  }
+
+  static Future<List<People>> fetchCustomers() async {
+    final connection = PostgreSQLConnectionManager.connection;
+    final result = await connection.query('SELECT * FROM people');
+
+    return result.map((row) => People.fromMap(row.toColumnMap())).toList();
   }
 
   static Future<List<People>> refreshCustomerList() async {

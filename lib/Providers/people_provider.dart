@@ -2,6 +2,8 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../PostresqlConnection/postqresql_connection_manager.dart';
+
 class PeopleProvider with ChangeNotifier {
   List<People> _people = [];
   People? _activePerson;
@@ -13,6 +15,13 @@ class PeopleProvider with ChangeNotifier {
   void setActivePerson(People person) {
     _activePerson = person;
     notifyListeners();
+  }
+
+  static Future<List<People>> refreshCustomerList() async {
+    final connection = PostgreSQLConnectionManager.connection;
+    final result = await connection.query('SELECT * FROM people');
+
+    return result.map((row) => People.fromMap(row.toColumnMap())).toList();
   }
 
   Future<void> fetchPeople() async {

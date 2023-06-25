@@ -42,8 +42,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final orderProvider = Provider.of<OrderProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -140,52 +138,65 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   color: Colors.white),
             ),
             SizedBox(height: 16),
-            for (OrderedItem orderedItem in widget.order.orderedItems)
-              Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade900,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Product Name: ${orderedItem.productName}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+            Consumer<OrderProvider>(
+              builder: (context, orderProvider, child) => Column(
+                children: [
+                  for (OrderedItem orderedItem in widget.order.orderedItems)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade900,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Product Name: ${orderedItem.productName}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Quantity: ${orderedItem.quantity}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Price: \$${orderedItem.price}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            Text(
+                              'Flavor: ${orderedItem.flavor}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            Text(
+                              'Status: ${orderedItem.status}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            Text(
+                              'Dose: ${orderedItem.dose}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                            Text(
+                              'Packaging: ${orderedItem.packaging}',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Quantity: ${orderedItem.quantity}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Price: \$${orderedItem.price}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Flavor: ${orderedItem.flavor}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Status: ${orderedItem.status}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Dose: ${orderedItem.dose}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Packaging: ${orderedItem.packaging}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               ),
+            ),
           ],
         ),
       ),

@@ -20,23 +20,67 @@ class FullOrder {
 class OrderProvider with ChangeNotifier {
   List<Order> _orders = [];
   List<OrderedItem> _filteredItems = [];
-  bool _isLoading = true; // Define a loading state variable
+  bool _isLoading = true;
 
   List<Order> get orders => _orders;
 
-  bool get isLoading => _isLoading; // Getter to access loading state
+  bool get isLoading => _isLoading;
 
-  // Define the filteredItems getter
   List<OrderedItem> get filteredItems => _filteredItems;
 
-  // Define the filterOrderedItems method
+  void addOrderedItem(String orderId, OrderedItem item) {
+    // Find the order by id
+    int orderIndex = _orders.indexWhere((o) => o.id == orderId);
+
+    if (orderIndex != -1) {
+      // Add the item to the order
+      _orders[orderIndex].orderedItems.add(item);
+
+      // Notify listeners to update UI
+      notifyListeners();
+    } else {
+      print('Order not found: $orderId');
+    }
+  }
+
   void filterOrderedItems(String itemSource) {
-    // Assuming that your Order object has an 'itemSource' property
     _filteredItems = _orders
         .expand((order) => order.orderedItems)
         .where((item) => item.itemSource == itemSource)
         .toList();
     notifyListeners();
+  }
+
+  Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
+    bool result = await OrderPostgres().createOrder(order, orderedItems);
+    if (result) {
+      _orders.add(order);
+      notifyListeners();
+    }
+    return result;
+  }
+
+  Future<bool> updateOrder(
+      Order updatedOrder, List<OrderedItem> updatedOrderedItems) async {
+    bool result =
+        await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
+    if (result) {
+      final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
+      _orders[index] = updatedOrder;
+      notifyListeners();
+    }
+    return result;
+  }
+
+  Future<void> deleteOrder(Order order) async {
+    await OrderPostgres.deleteOrder(order.id);
+    _orders.removeWhere((o) => o.id == order.id);
+    notifyListeners();
+  }
+
+  Future<Order?> searchOrderById(String id) async {
+    Order? result = await OrderPostgres.getOrderById(id);
+    return result;
   }
 
   Future<List<Order>> fetchOrders() async {
@@ -47,42 +91,6 @@ class OrderProvider with ChangeNotifier {
     return _orders;
   }
 
-  Future<bool> updateOrder(
-      Order updatedOrder, List<OrderedItem> updatedOrderedItems) async {
-    // Find the index of the order in the list
-    final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
-
-    // Check if the order exists in the list
-    if (index != -1) {
-      // Update the order in the list
-      _orders[index] = updatedOrder;
-      print(updatedOrderedItems.first.flavor);
-      // Update the order in the database
-      final result =
-          await OrderPostgres.updateOrder(updatedOrder, updatedOrderedItems);
-
-      // If the update was successful, notify listeners
-      if (result) {
-        notifyListeners();
-      }
-
-      return result;
-    }
-
-    return false;
-  }
-
-  void deleteOrder(Order order) {
-    _orders.removeWhere((o) => o.id == order.id);
-    notifyListeners();
-  }
-
-  void addOrderedItem(String orderId, OrderedItem orderedItem) {
-    final order = _orders.firstWhere((order) => order.id == orderId);
-    order.orderedItems.add(orderedItem);
-    notifyListeners();
-  }
-
   void updateOrderStatus(String orderId, String newStatus, bool isArchived) {
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderStatus = newStatus;
@@ -90,40 +98,6 @@ class OrderProvider with ChangeNotifier {
       order.isArchived = true;
     }
     notifyListeners();
-  }
-
-  Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
-    final connection = await PostgreSQLConnectionManager.connection;
-
-    final query = '''
-    SELECT * 
-FROM tasks 
-WHERE order_id = '$orderId'
-  ''';
-
-    final results = await connection
-        .mappedResultsQuery(query, substitutionValues: {'orderId': orderId});
-
-    List<Employee> employees = [];
-
-    for (final row in results) {
-      final employeeQuery = '''
-      SELECT * 
-      FROM employee 
-      WHERE id = @employeeId;
-    ''';
-
-      final employeeResults = await connection.mappedResultsQuery(employeeQuery,
-          substitutionValues: {'employeeId': row['tasks']?['employee_id']});
-
-      if (employeeResults.isNotEmpty) {
-        final employeeMap = employeeResults.first['employees'];
-        final employee = Employee.fromMap(employeeMap!);
-        employees.add(employee);
-      }
-    }
-
-    return employees;
   }
 
   Future<List<FullOrder>> getFullOrders() async {
@@ -150,7 +124,6 @@ WHERE order_id = '$orderId'
     return full;
   }
 
-  // No need to parse string to int
   Future<People> fetchCustomerById(String id) async {
     People? customer = await PeoplePostgres.fetchCustomer(id);
 
@@ -160,4 +133,37 @@ WHERE order_id = '$orderId'
 
     return customer;
   }
+}
+
+Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
+  try {
+    final connection = PostgreSQLConnectionManager.connection;
+
+// insert order and orderedItems into database
+
+    return true;
+  } catch (e) {
+    print('Error creating order: ${e.toString()}');
+    return false;
+  }
+}
+
+Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
+  List<Employee> employees = [];
+  try {
+    final connection = PostgreSQLConnectionManager.connection;
+    final result = await connection.query(
+      'SELECT * FROM employees WHERE order_id = @orderId',
+      substitutionValues: {
+        'orderId': orderId,
+      },
+    );
+
+    for (var row in result) {
+      employees.add(Employee.fromMap(row.toColumnMap()));
+    }
+  } catch (e) {
+    print('Error fetching employees by order id: ${e.toString()}');
+  }
+  return employees;
 }

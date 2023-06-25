@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
+import 'package:crafted_manager/Providers/employee_provider.dart';
 import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
@@ -49,11 +50,13 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<OrderProvider>(
-            create: (context) => orderProvider),
+            create: (context) => OrderProvider()),
         ChangeNotifierProvider<PeopleProvider>(
-            create: (context) => peopleProvider),
+            create: (context) => PeopleProvider()),
         ChangeNotifierProvider<ProductProvider>(
-            create: (context) => productProvider),
+            create: (context) => ProductProvider()),
+        ChangeNotifierProvider<EmployeeProvider>(
+            create: (context) => EmployeeProvider()),
       ],
       child: MyApp(),
     ),
@@ -75,6 +78,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     Provider.of<OrderProvider>(context, listen: false).fetchOrders();
     Provider.of<PeopleProvider>(context, listen: false).fetchPeople();
     Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+    //Provider.of<EmployeeProvider>(context, listen: false).fetchEmployees();
   }
 
   @override
