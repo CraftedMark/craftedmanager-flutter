@@ -34,6 +34,12 @@ class OrdersList extends StatefulWidget {
 class _OrdersListState extends State<OrdersList> {
   var cachedCustomers = <People>{};
 
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+  }
+
   Future<void> _refreshOrdersList() async {
     setState(() {});
   }
@@ -61,8 +67,22 @@ class _OrdersListState extends State<OrdersList> {
       ),
       body: SafeArea(
         child: Consumer<OrderProvider>(
-          builder: (context, orderProvider, _) {
+          builder: (ctx, orderProvider, _) {
+            if (orderProvider == null) {
+              print('OrderProvider is null');
+              return Center(child: CircularProgressIndicator());
+            }
+
             final orders = orderProvider.orders;
+            if (orders == null) {
+              print('Orders are null');
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (orders.isEmpty) {
+              print('No orders found');
+              return Center(child: Text('No orders found'));
+            }
 
             var sortedOrders = <Order>[];
             if (widget.listType == OrderListType.archived) {

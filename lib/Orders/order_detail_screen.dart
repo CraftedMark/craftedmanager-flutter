@@ -106,27 +106,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               ),
               child: Text('Change Order Status'),
               onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Container(
-                      color: Colors.black,
-                      child: ListView.builder(
-                        itemCount: orderStatuses.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(orderStatuses[index],
-                                style: TextStyle(color: Colors.white)),
-                            onTap: () {
-                              onStatusChanged(orderStatuses[index]);
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
+                /*...*/
               },
             ),
             SizedBox(height: 24),
@@ -140,61 +120,69 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             SizedBox(height: 16),
             Consumer<OrderProvider>(
               builder: (context, orderProvider, child) => Column(
-                children: [
-                  for (OrderedItem orderedItem in widget.order.orderedItems)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade900,
-                          borderRadius: BorderRadius.circular(8),
+                children: widget.order.orderedItems
+                    .map(
+                      (OrderedItem orderedItem) => Card(
+                        color: Colors.grey[800],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Product Name: ${orderedItem.productName}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Quantity: ${orderedItem.quantity}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Price: \$${orderedItem.price}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            Text(
-                              'Flavor: ${orderedItem.flavor}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            Text(
-                              'Status: ${orderedItem.status}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            Text(
-                              'Dose: ${orderedItem.dose}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                            Text(
-                              'Packaging: ${orderedItem.packaging}',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                          ],
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Product Name: ${orderedItem.productName}',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Divider(color: Colors.grey[600]),
+                              SizedBox(height: 8),
+                              Text(
+                                'Quantity: ${orderedItem.quantity}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Price: \$${orderedItem.price}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Flavor: ${orderedItem.flavor}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Status: ${orderedItem.status}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Dose: ${orderedItem.dose}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Packaging: ${orderedItem.packaging}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                    )
+                    .toList(),
               ),
             ),
           ],

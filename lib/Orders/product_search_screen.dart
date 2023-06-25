@@ -136,25 +136,29 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                     id: DateTime.now().toString(),
                                     orderId: 'order_id',
                                     // Replace with the actual order ID
+                                    product: filteredProducts[index],
+                                    // this is the required product object
                                     productName: filteredProducts[index].name,
                                     productId: filteredProducts[index].id ?? 0,
                                     name: filteredProducts[index].name,
                                     quantity: selectedQuantity,
                                     price: filteredProducts[index].retailPrice,
-                                    discount: 0,
+                                    discount: 0.0,
                                     productDescription:
                                         filteredProducts[index].description,
                                     productRetailPrice:
                                         filteredProducts[index].retailPrice,
                                     status: 'status',
+                                    // replace this with your actual status
                                     itemSource: itemSourceController.text,
                                     packaging: packagingController.text,
+                                    flavor: '',
+                                    // replace this with your actual flavor
                                     dose: double.parse(doseController.text),
                                   );
                                   Provider.of<OrderProvider>(context,
                                           listen: false)
-                                      .addOrderedItem('order_id',
-                                          orderedItem); // Replace with the actual order ID
+                                      .addOrderedItem(orderedItem);
                                   Navigator.pop(context);
                                   Navigator.pop(
                                     context,

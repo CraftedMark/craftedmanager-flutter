@@ -2,24 +2,24 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/Orders/ordered_item_postgres.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-import 'ordered_item_postgres.dart';
-
 class EditOrderScreen extends StatefulWidget {
   final Order order;
   final People customer;
   final List<Product> products;
+  final VoidCallback onStateChanged;
 
   const EditOrderScreen({
     required this.order,
     required this.customer,
     required this.products,
-    required VoidCallback onStateChanged,
+    required this.onStateChanged,
   });
 
   @override
@@ -40,7 +40,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   @override
   void initState() {
     super.initState();
-    _setInitialOrderedItems(); // Add this line
+    _setInitialOrderedItems();
     _subTotal = calculateSubtotal();
     _status = widget.order.orderStatus;
     if (!['Pending', 'In-Progress', 'Completed'].contains(_status)) {
@@ -49,7 +49,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id.toString());
+    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
   }
 
   double calculateSubtotal() {
@@ -77,40 +77,37 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   void addOrderedItem(Product product, int quantity) {
-    int existingIndex = _orderedItems
+    final existingIndex = _orderedItems
         .indexWhere((orderedItem) => orderedItem.productId == product.id);
 
     if (existingIndex != -1) {
-      setState(() {
-        _orderedItems[existingIndex] = _orderedItems[existingIndex].copyWith(
-          quantity: _orderedItems[existingIndex].quantity + quantity,
-        );
-        _subTotal = calculateSubtotal();
-      });
+      _orderedItems[existingIndex] = _orderedItems[existingIndex].copyWith(
+        quantity: _orderedItems[existingIndex].quantity + quantity,
+      );
+      _subTotal = calculateSubtotal();
     } else {
-      setState(() {
-        var uuid = Uuid();
-        _orderedItems.add(OrderedItem(
-          id: uuid.v1(),
-          orderId: widget.order.id,
-          productName: product.name,
-          productId: product.id!,
-          name: product.name,
-          quantity: quantity,
-          price: product.retailPrice,
-          discount: 0,
-          productDescription: product.description,
-          productRetailPrice: product.retailPrice,
-          status: 'Processing',
-          itemSource: '',
-          packaging: '',
-          dose: 0.0,
-          flavor: '',
-        ));
-        _subTotal = calculateSubtotal();
-      });
+      var uuid = Uuid();
+      _orderedItems.add(OrderedItem(
+        id: uuid.v1(),
+        orderId: widget.order.id,
+        product: product,
+        productName: product.name,
+        productId: product.id!,
+        name: product.name,
+        quantity: quantity,
+        price: product.retailPrice,
+        discount: 0,
+        productDescription: product.description,
+        productRetailPrice: product.retailPrice,
+        status: 'Processing',
+        itemSource: '',
+        packaging: '',
+        dose: 0.0,
+        flavor: '',
+      ));
+      _subTotal = calculateSubtotal();
     }
-    print('_orderedItems: $_orderedItems'); // Add this line
+    print('_orderedItems: $_orderedItems');
   }
 
   void updateOrderedItem({
@@ -134,11 +131,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         flavor: flavor,
       );
       _subTotal = calculateSubtotal();
-      print('_orderedItems after update: $_orderedItems'); // Add this line
     });
   }
 
-  Future<void> updateOrder(OrderProvider orderProvider) async {
+  Future<void> updateOrder() async {
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     Order updatedOrder = widget.order.copyWith(
       totalAmount: _subTotal,
       orderStatus: _status,
@@ -236,8 +233,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               itemCount: _orderedItems.length,
               itemBuilder: (context, index) {
                 return Card(
-                  child: ListTile(
-                    title: Column(
+                  color: Colors.grey[800],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextFormField(
@@ -245,7 +248,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           decoration: InputDecoration(
                             labelText: 'Product Name',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
+                          style: TextStyle(color: Colors.white),
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
@@ -264,14 +269,16 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           decoration: InputDecoration(
                             labelText: 'Item Source',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
+                          style: TextStyle(color: Colors.white),
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: value,
+                              name: _orderedItems[index].productName,
                               price: _orderedItems[index].price,
                               quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
+                              itemSource: value,
                               packaging: _orderedItems[index].packaging,
                               dose: _orderedItems[index].dose,
                               flavor: _orderedItems[index].flavor,
@@ -283,17 +290,19 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           decoration: InputDecoration(
                             labelText: 'Flavor',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
+                          style: TextStyle(color: Colors.white),
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: value,
+                              name: _orderedItems[index].productName,
                               price: _orderedItems[index].price,
                               quantity: _orderedItems[index].quantity,
                               itemSource: _orderedItems[index].itemSource,
                               packaging: _orderedItems[index].packaging,
                               dose: _orderedItems[index].dose,
-                              flavor: _orderedItems[index].flavor,
+                              flavor: value,
                             );
                           },
                         ),
@@ -302,17 +311,19 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           decoration: InputDecoration(
                             labelText: 'Dose',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
                           keyboardType: TextInputType.number,
+                          style: TextStyle(color: Colors.white),
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: value,
+                              name: _orderedItems[index].productName,
                               price: _orderedItems[index].price,
                               quantity: _orderedItems[index].quantity,
                               itemSource: _orderedItems[index].itemSource,
                               packaging: _orderedItems[index].packaging,
-                              dose: _orderedItems[index].dose,
+                              dose: double.parse(value),
                               flavor: _orderedItems[index].flavor,
                             );
                           },
@@ -322,12 +333,36 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           decoration: InputDecoration(
                             labelText: 'Packaging',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
                           ),
+                          style: TextStyle(color: Colors.white),
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: value,
+                              name: _orderedItems[index].productName,
                               price: _orderedItems[index].price,
+                              quantity: _orderedItems[index].quantity,
+                              itemSource: _orderedItems[index].itemSource,
+                              packaging: value,
+                              dose: _orderedItems[index].dose,
+                              flavor: _orderedItems[index].flavor,
+                            );
+                          },
+                        ),
+                        TextFormField(
+                          initialValue: _orderedItems[index].price.toString(),
+                          decoration: InputDecoration(
+                            labelText: 'Price',
+                            border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.white),
+                          ),
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(color: Colors.white),
+                          onChanged: (value) {
+                            updateOrderedItem(
+                              index: index,
+                              name: _orderedItems[index].productName,
+                              price: double.parse(value),
                               quantity: _orderedItems[index].quantity,
                               itemSource: _orderedItems[index].itemSource,
                               packaging: _orderedItems[index].packaging,
@@ -336,11 +371,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             );
                           },
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconButton(
+                            icon: Icon(Icons.remove_circle_outline),
+                            onPressed: () => editOrderedItem(index),
+                          ),
+                        ),
                       ],
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.remove_circle_outline),
-                      onPressed: () => editOrderedItem(index),
                     ),
                   ),
                 );
@@ -386,7 +424,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               padding: const EdgeInsets.all(8),
               child: ElevatedButton(
                 onPressed: () async {
-                  await updateOrder(orderProvider);
+                  await updateOrder();
                   // Navigator.pop(context);
                 },
                 child: Text('Save'),

@@ -7,7 +7,6 @@ import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../Providers/order_provider.dart';
@@ -69,7 +68,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
           packaging: packaging,
           flavor: flavor,
-          dose: dose));
+          dose: dose,
+          product: product)); // Pass an actual product instance instead of null
     });
   }
 
@@ -88,7 +88,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     print("new orderid = $orderId");
 
     // Fetch address fields from the database
-    Map<String, dynamic>? addressFields = await OrderPostgres.getAddressFields(
+    Map<String, dynamic>? addressFields = await getAddressFields(
         PostgreSQLConnectionManager.connection, widget.client.id);
 
     if (addressFields != null) {
@@ -109,7 +109,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       );
 
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-      await OrderPostgres().createOrder(newOrder, orderedItems);
+      await OrderProvider().createOrder(newOrder, orderedItems);
       sendNewOrderNotification();
     } else {
       // Handle the case when addressFields are null
