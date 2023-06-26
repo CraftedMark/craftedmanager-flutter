@@ -6,6 +6,7 @@ final DateTime _defaultDate = DateTime.parse('2000-00-00');
 
 class People {
   final int id;
+  final int wooSignalId;
   final String firstName;
   final String lastName;
   final String phone;
@@ -27,6 +28,7 @@ class People {
 
   People({
     required this.id,
+    required this.wooSignalId,
     required this.firstName,
     required this.lastName,
     required this.phone,
@@ -50,6 +52,7 @@ class People {
   factory People.empty() {
     return People(
       id: 0,
+      wooSignalId: 0,
       // Fix the id type here
       firstName: '',
       lastName: '',
@@ -130,7 +133,7 @@ class People {
     );
 
     return Customers(
-      id: id,
+      id: 0,
       firstName: firstName,
       lastName: lastName,
       username: firstName,
@@ -151,7 +154,8 @@ class People {
 
   factory People.fromWSCustomerS( Customers customer){
     return People(
-        id: customer.id ?? 1,
+        id: 0,
+        wooSignalId: customer.id ?? 0,
         firstName: customer.firstName ?? "Unknown",
         lastName: customer.lastName ?? "Unknown",
         phone: customer.billing?.phone ?? "Unknown",
@@ -168,7 +172,8 @@ class People {
 
   factory People.fromWSCustomer( wsCustomer.Customer customer) {
     return People(
-      id: customer.id ?? 1,
+      id: 0,
+      wooSignalId: customer.id ?? 1,
       firstName: customer.firstName ?? "Unknown",
       lastName: customer.lastName ?? "Unknown",
       phone: customer.billing?.phone ?? "Unknown",
@@ -187,6 +192,7 @@ class People {
   factory People.fromMap(Map<String, dynamic> map) {
     return People(
       id: map['id'] as int,
+      wooSignalId: 0,
       firstName: map['firstname'],
       lastName: map['lastname'],
       phone: map['phone'],
@@ -210,6 +216,7 @@ class People {
 
   People copyWith({
     int? id,
+    int? woosignalId,
     String? firstName,
     String? lastName,
     String? phone,
@@ -231,6 +238,7 @@ class People {
   }) {
     return People(
       id: id ?? this.id,
+      wooSignalId: woosignalId ?? wooSignalId,
       // Make sure this line assigns an int value
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,

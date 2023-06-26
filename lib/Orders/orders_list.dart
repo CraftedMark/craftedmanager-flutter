@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/people_model.dart';
+import '../config.dart';
 import 'order_detail_screen.dart';
 import 'ordered_item_postgres.dart';
 
@@ -128,6 +129,7 @@ Future<People> _getCustomerById(int customerId) async {
   //TODO: find out why the customer can be null
   People fakeCustomer = People(
     id: 1,
+    wooSignalId: 1,
     firstName: 'Fake',
     lastName: "Customer",
     phone: '123',
@@ -138,7 +140,13 @@ Future<People> _getCustomerById(int customerId) async {
 
   var cachedUser = _cachedCustomers.where((c) => c.id == customerId);
   if(cachedUser.isEmpty){
-    var newUser = await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+    var newUser = People.empty();
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
+    }
+    else {
+      newUser = await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+    }
     _cachedCustomers.addAll([newUser]);
     return newUser;
   }
@@ -163,7 +171,7 @@ class _OrderWidget extends StatelessWidget {
         ),
       ),
       child: FutureBuilder<People>(
-        future: _getCustomerById(int.parse(order.customerId)),
+        future: _getCustomerById(order.customerId),
         builder: (context, snapshot) {
           const height = 90.0;
           if (snapshot.hasData) {
