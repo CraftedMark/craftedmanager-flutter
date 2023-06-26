@@ -55,7 +55,7 @@ class _ProductionListState extends State<ProductionList> {
             Provider.of<OrderProvider>(context, listen: false).fetchOrders(),
         builder: (context, AsyncSnapshot<List<Order>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else if (!snapshot.hasData || snapshot.hasError) {
             // handle error or no data scenario
             return Text("Error fetching the orders!");
