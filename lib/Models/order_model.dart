@@ -97,40 +97,40 @@ class Order {
     );
   }
 
-  factory Order.fromOrderWS(wsOrder.Order order) {
-    final orderedItems = List.generate(order.lineItems!.length, (index) {
-      final currentItem = order.lineItems![index];
-      var item = OrderedItem(
-          productId: currentItem.id ?? -1,
-          orderId: '0',
-          name: currentItem.name ?? "",
-          productName: currentItem.name ?? "",
-          quantity: currentItem.quantity ?? 0,
-          status: order.status ?? "pending", //TODO:CHANGE,
-          discount: 0,
-          price: double.parse(currentItem.price ?? '0'),
-          packaging: '',
-          itemSource: '',
-          productDescription: '',
-          productRetailPrice: double.parse(currentItem.price ?? '0'));
-      return item;
-    });
-
-    return Order(
-      customerId: order.customerId.toString(),
-      archived: false,
-      id: '0',
-      wooSignalId: order.id,
-      notes: order.customerNote ?? '',
-      orderDate: DateTime.parse(order.dateCreated ?? ''),
-      orderStatus: order.status!,
-      billingAddress: order.billing!.address1!,
-      productName: "Test fetch product from WooCommerce order_model.dart",
-      totalAmount: double.parse(order.total!),
-      shippingAddress: order.shipping!.address1!,
-      orderedItems: orderedItems,
-    );
-  }
+  // factory Order.fromOrderWS(wsOrder.Order order) {
+  //   final orderedItems = List.generate(order.lineItems!.length, (index) {
+  //     final currentItem = order.lineItems![index];
+  //     var item = OrderedItem(
+  //         productId: currentItem.id ?? -1,
+  //         orderId: '0',
+  //         name: currentItem.name ?? "",
+  //         productName: currentItem.name ?? "",
+  //         quantity: currentItem.quantity ?? 0,
+  //         status: order.status ?? "pending", //TODO:CHANGE,
+  //         discount: 0,
+  //         price: double.parse(currentItem.price ?? '0'),
+  //         packaging: '',
+  //         itemSource: '',
+  //         productDescription: '',
+  //         productRetailPrice: double.parse(currentItem.price ?? '0'));
+  //     return item;
+  //   });
+  //
+  //   return Order(
+  //     customerId: order.customerId.toString(),
+  //     archived: false,
+  //     id: '0',
+  //     wooSignalId: order.id,
+  //     notes: order.customerNote ?? '',
+  //     orderDate: DateTime.parse(order.dateCreated ?? ''),
+  //     orderStatus: order.status!,
+  //     billingAddress: order.billing!.address1!,
+  //     productName: "Test fetch product from WooCommerce order_model.dart",
+  //     totalAmount: double.parse(order.total!),
+  //     shippingAddress: order.shipping!.address1!,
+  //     orderedItems: orderedItems,
+  //   );
+  // }
 
   Map<String, dynamic> toMap() {
     List<Map<String, dynamic>> orderedItemsToMap() {

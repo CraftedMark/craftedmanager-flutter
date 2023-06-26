@@ -171,7 +171,7 @@ class WooSignalService {
   static Future<void> updateCustomer(People customer) async {
     var data = customer.toWSCustomer().toJson();
     data.removeWhere((key, value) => key =='username');//with [username] field don`t work
-    await WooSignal.instance.updateCustomer(customer.id, data: data);
+    // await WooSignal.instance.updateCustomer(customer.id, data: data);
   }
 
   static Future<void> deleteCustomer(int id) async {
@@ -222,16 +222,16 @@ class WooSignalService {
     return await WooSignal.instance.createOrder(orderForSend);
   }
 
-  static Future<List<Order>> getOrders() async {
-    var wcOrders = await WooSignal.instance.getOrders();
-    return List.generate(wcOrders.length, (index) => Order.fromOrderWS(wcOrders[index]));
-  }
+  // static Future<List<Order>> getOrders() async {
+  //   var wcOrders = await WooSignal.instance.getOrders();
+  //   return List.generate(wcOrders.length, (index) => Order.fromOrderWS(wcOrders[index]));
+  // }
 
   static Future<Order?> getOrderById(int id) async {
     var rawOrder = await  WooSignal.instance.retrieveOrder(id);
 
     if(rawOrder != null){
-      return Order.fromOrderWS(rawOrder);
+      // return Order.fromOrderWS(rawOrder);
     }
     return null;
   }

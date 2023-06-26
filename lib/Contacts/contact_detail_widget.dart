@@ -26,7 +26,7 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
   @override
   void initState() {
     newCustomer = widget.contact;
-    if (newCustomer.id <= 0) {
+    if (newCustomer.id.isEmpty) {
       isNewCustomer = true;
     }
     super.initState();
@@ -145,12 +145,12 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
   Future<void> onSaveEditButtonClick() async {
     setState(() => isNewCustomer = !isNewCustomer);
 
-    if (newCustomer.id <= 0) {
+    if (newCustomer.id.isEmpty) {
       print('try to create a customer name: ${newCustomer.firstName}');
 
-      int newId = 0;
+      String newId = '';
       if(AppConfig.ENABLE_WOOSIGNAL){
-        newId = await WooSignalService.createCustomer(newCustomer);
+        // newId = await WooSignalService.createCustomer(newCustomer);
       }else{
         newId = await PeoplePostgres.createCustomer(newCustomer);
 

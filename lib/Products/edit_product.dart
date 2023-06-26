@@ -66,7 +66,7 @@ class _EditProductPageState extends State<EditProductPage> {
     _quantityInStock = widget.product.quantityInStock;
     _imageUrl = widget.product.imageUrl;
     _perGramCost = widget.product.perGramCost;
-    _bulkPricing = widget.product.bulkPricing;
+    _bulkPricing = widget.product.bulkPricing ?? 0;
     _weightInGrams = widget.product.weightInGrams;
     _packageWeightMeasure = widget.product.packageWeightMeasure;
     _packageWeight = widget.product.packageWeight;
@@ -337,14 +337,14 @@ class _EditProductPageState extends State<EditProductPage> {
                   decoration: const InputDecoration(labelText: 'Per Gram Cost'),
                   keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
-                  onSaved: (value) => _perGramCost = int.parse(value!),
+                  onSaved: (value) => _perGramCost = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _bulkPricing.toString(),
                   decoration: const InputDecoration(labelText: 'Bulk Pricing'),
                   keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
-                  onSaved: (value) => _bulkPricing = int.parse(value!),
+                  onSaved: (value) => _bulkPricing = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _weightInGrams.toString(),

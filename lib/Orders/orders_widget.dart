@@ -31,7 +31,6 @@ class OrderList extends StatelessWidget {
                 builder: (context) => OrderDetailScreen(
                   order: order,
                   customer: customer,
-                  onStateChanged: () {},
                 ),
               ),
             );

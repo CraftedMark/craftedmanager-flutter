@@ -11,7 +11,7 @@ class CustomerBasedPricingDbManager {
 
   // CRUD Methods
 
-  Future<void> updateCustomerBasedPricing(int customerId, bool value) async {
+  Future<void> updateCustomerBasedPricing(String customerId, bool value) async {
     final connection = PostgreSQLConnectionManager.connection;
     const query =
         'UPDATE people SET customerbasedpricing = @value WHERE id = @customerId';
@@ -72,7 +72,7 @@ class CustomerBasedPricingDbManager {
   Future<double?> getCustomProductPrice(
       int productId, String customerId) async {
     double? customPrice;
-    int? pricingListId = await CustomerBasedPricingDbManager.instance
+    String? pricingListId = await CustomerBasedPricingDbManager.instance
         .getPricingListByCustomerId(customerId);
 
     if (pricingListId != null) {
@@ -136,7 +136,7 @@ class CustomerBasedPricingDbManager {
   }
 
   // Get pricing list id by customer id
-  Future<int?> getPricingListIdByCustomerId(int customerId) async {
+  Future<String?> getPricingListIdByCustomerId(String customerId) async {
     final connection = PostgreSQLConnectionManager.connection;
     final PostgreSQLResult result = await connection.query(
       '''
@@ -153,7 +153,7 @@ class CustomerBasedPricingDbManager {
   }
 
   // Get pricing list by customer id
-  Future<int?> getPricingListByCustomerId(int customerId) async {
+  Future<String?> getPricingListByCustomerId(String customerId) async {
     final connection = PostgreSQLConnectionManager.connection;
     final PostgreSQLResult result = await connection.query(
       '''
@@ -166,7 +166,7 @@ class CustomerBasedPricingDbManager {
     ''',
       substitutionValues: {'customerId': customerId},
     );
-    return result.isNotEmpty ? result.first[0] : null;
+    return result.isNotEmpty ? result.first[0].toString() : null;
   }
 
   // Future<List<Map<String, dynamic>>> fetchCustomerBasedPricing(
@@ -202,7 +202,7 @@ class CustomerBasedPricingDbManager {
   // }
 
   Future<Map<String, dynamic>?> getCustomerProductPricing(
-      int productId, int pricingListId) async {
+      int productId, String pricingListId) async {
     final pricingData = await search(
         'customer_product_pricing',
         'product_id = @productId AND customer_pricing_list_id = @pricingListId',

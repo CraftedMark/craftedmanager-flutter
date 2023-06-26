@@ -2,19 +2,19 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
+import 'package:postgres/postgres.dart';
 import 'package:provider/provider.dart';
 
-import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
-import '../Providers/order_provider.dart';
+import 'old_order_provider.dart';
+// import '../Providers/order_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
@@ -32,13 +32,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   Future<double?> getCustomProductPrice(
       int productId, String customerId) async {
     double? customPrice;
-    String? pricingListId = (await CustomerBasedPricingDbManager.instance
-        .getPricingListByCustomerId(customerId)) as String?;
+    String? pricingListId = await CustomerBasedPricingDbManager.instance
+        .getPricingListByCustomerId(customerId);
 
     if (pricingListId != null) {
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
-          .getCustomerProductPricing(productId, pricingListId as int);
+          .getCustomerProductPricing(productId, pricingListId);
 
       if (pricingData != null) {
         customPrice = pricingData['price'];
@@ -96,36 +96,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     Map<String, dynamic>? addressFields = await getAddressFields(
         PostgreSQLConnectionManager.connection, widget.client.id);
     if (addressFields != null) {
-        final newOrder = Order(
-        customerId: widget.client.id.toString(),
-        id: orderId,
-        orderDate: DateTime.now(),
-        shippingAddress:
-              '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
-        billingAddress:
-              '${widget.client.address1},${widget.client.city},${widget.client.state},${widget.client.zip}',
-        productName: orderedItems.map((e) => e.productName).toList().join(','),
-        totalAmount: totalAmount,
-        orderStatus: 'Pending',
-        notes: '',
-        archived: false,
-        orderedItems: orderedItems,
-        );
-        Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
-    } else {
-      // Handle the case when addressFields are null
-      print("Error: Address fields are null.");
-    }
-
-    
       final newOrder = Order(
         customerId: widget.client.id.toString(),
         id: orderId,
         orderDate: DateTime.now(),
         shippingAddress:
-            '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
         billingAddress:
-            '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
         productName: orderedItems.map((e) => e.productName).toList().join(','),
         totalAmount: totalAmount,
         orderStatus: 'Pending',
@@ -133,15 +111,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         archived: false,
         orderedItems: orderedItems,
       );
+      Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
+      // await OrderProvider().createOrder(newOrder, orderedItems);
 
-      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-      await OrderProvider().createOrder(newOrder, orderedItems);
-      sendNewOrderNotification();
     } else {
       // Handle the case when addressFields are null
       print("Error: Address fields are null.");
     }
   }
+
+
 
 
   @override
@@ -523,5 +502,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             );
       }
     }
+  }
+}
+
+Future<Map<String, dynamic>?> getAddressFields(
+    PostgreSQLExecutionContext ctx, String customerId) async {
+  List<Map<String, Map<String, dynamic>>> results =
+  await ctx.mappedResultsQuery('''
+SELECT address1, city, state, zip FROM people WHERE id = @customer_id
+''', substitutionValues: {'customer_id': customerId});
+
+  if (results.isNotEmpty) {
+    return results.first['people'];
+  } else {
+    return null;
   }
 }

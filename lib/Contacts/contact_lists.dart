@@ -53,7 +53,7 @@ class ContactsListState extends State<ContactsList> {
     setState(() {});
 
     if(AppConfig.ENABLE_WOOSIGNAL){
-      await WooSignalService.deleteCustomer(customer.id);
+      // await WooSignalService.deleteCustomer(customer.id);
     }else{
       await PeoplePostgres.deleteCustomer(customer.id);
     }

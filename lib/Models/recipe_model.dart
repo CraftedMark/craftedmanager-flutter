@@ -13,14 +13,14 @@ class Recipe {
   List<String> stepImages;
 
   Recipe({
-    this.id,
-    this.name,
-    this.ingredients,
-    this.amounts,
-    this.costs,
-    this.pieces,
-    this.steps,
-    this.stepImages,
+    required this.id,
+    required this.name,
+    required this.ingredients,
+    required this.amounts,
+    required this.costs,
+    required this.pieces,
+    required this.steps,
+    required this.stepImages,
   }) {
     var uuid = Uuid();
     id = uuid.v4();

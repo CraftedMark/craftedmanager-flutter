@@ -5,6 +5,7 @@ import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
 import '../../Providers/order_provider.dart';
 import '../../Providers/product_provider.dart';
+import '../Products/product_db_manager.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   @override
@@ -26,7 +27,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
   Future<void> loadProducts() async {
     var products = await ProductPostgres.getAllProducts('Product');
-    widget.products.addAll(products);
+    filteredProducts.addAll(products);
     setState(() {});
   }
 
@@ -65,131 +66,133 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredProducts.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(filteredProducts[index].name),
-                    subtitle: Text(filteredProducts[index].description),
-                    trailing: Text('\$${filteredProducts[index].retailPrice}'),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          TextEditingController quantityController =
-                              TextEditingController(text: '1');
-                          TextEditingController itemSourceController =
-                              TextEditingController();
-                          TextEditingController packagingController =
-                              TextEditingController();
-                          TextEditingController doseController =
-                              TextEditingController();
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(filteredProducts[index].name),
+                      subtitle: Text(filteredProducts[index].description),
+                      trailing:
+                          Text('\$${filteredProducts[index].retailPrice}'),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            TextEditingController quantityController =
+                                TextEditingController(text: '1');
+                            TextEditingController itemSourceController =
+                                TextEditingController();
+                            TextEditingController packagingController =
+                                TextEditingController();
+                            TextEditingController doseController =
+                                TextEditingController();
 
-                          return AlertDialog(
-                            title: const Text('Add to Order'),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(height: 8),
-                                  Text(filteredProducts[index].name),
-                                  const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: quantityController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Quantity',
-                                      border: OutlineInputBorder(),
+                            return AlertDialog(
+                              title: const Text('Add to Order'),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(height: 8),
+                                    Text(filteredProducts[index].name),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: quantityController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Quantity',
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: itemSourceController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Item Source',
-                                      border: OutlineInputBorder(),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: itemSourceController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Item Source',
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: packagingController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Packaging',
-                                      border: OutlineInputBorder(),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: packagingController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Packaging',
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: doseController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Dose',
-                                      border: OutlineInputBorder(),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: doseController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Dose',
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("Cancel"),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  selectedQuantity =
-                                      int.parse(quantityController.text);
-                                  final orderedItem = OrderedItem(
-                                    id: DateTime.now().toString(),
-                                    orderId: 'order_id',
-                                    // Replace with the actual order ID
-                                    product: filteredProducts[index],
-                                    // this is the required product object
-                                    productName: filteredProducts[index].name,
-                                    productId: filteredProducts[index].id ?? 0,
-                                    name: filteredProducts[index].name,
-                                    quantity: selectedQuantity,
-                                    price: filteredProducts[index].retailPrice,
-                                    discount: 0.0,
-                                    productDescription:
-                                        filteredProducts[index].description,
-                                    productRetailPrice:
-                                        filteredProducts[index].retailPrice,
-                                    status: 'status',
-                                    // replace this with your actual status
-                                    itemSource: itemSourceController.text,
-                                    packaging: packagingController.text,
-                                    flavor: '',
-                                    // replace this with your actual flavor
-                                    dose: double.parse(doseController.text),
-                                  );
-                                  Provider.of<OrderProvider>(context,
-                                          listen: false)
-                                      .addOrderedItem(orderedItem);
-                                  Navigator.pop(context);
-                                  Navigator.pop(
-                                    context,
-                                    {
-                                      'product': filteredProducts[index],
-                                      'quantity': selectedQuantity,
-                                    },
-                                  );
-                                },
-                                child: const Text("Add to Order"),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    selectedQuantity =
+                                        int.parse(quantityController.text);
+                                    final orderedItem = OrderedItem(
+                                      orderId: 'order_id',
+                                      // Replace with the actual order ID
+                                      product: filteredProducts[index],
+                                      // this is the required product object
+                                      productName: filteredProducts[index].name,
+                                      productId:
+                                          filteredProducts[index].id ?? 0,
+                                      name: filteredProducts[index].name,
+                                      quantity: selectedQuantity,
+                                      price:
+                                          filteredProducts[index].retailPrice,
+                                      discount: 0.0,
+                                      productDescription:
+                                          filteredProducts[index].description,
+                                      productRetailPrice:
+                                          filteredProducts[index].retailPrice,
+                                      status: 'status',
+                                      // replace this with your actual status
+                                      itemSource: itemSourceController.text,
+                                      packaging: packagingController.text,
+                                      flavor: '',
+                                      // replace this with your actual flavor
+                                      dose: double.parse(doseController.text),
+                                    );
+                                    Provider.of<OrderProvider>(context,
+                                            listen: false)
+                                        .addOrderedItem(orderedItem);
+                                    Navigator.pop(context);
+                                    Navigator.pop(
+                                      context,
+                                      {
+                                        'product': filteredProducts[index],
+                                        'quantity': selectedQuantity,
+                                      },
+                                    );
+                                  },
+                                  child: const Text("Add to Order"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -2,13 +2,12 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/Orders/old_order_provider.dart';
 import 'package:crafted_manager/Orders/ordered_item_postgres.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
-import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../config.dart';
 import 'ordered_item_postgres.dart';
@@ -17,7 +16,6 @@ class EditOrderScreen extends StatefulWidget {
   final Order order;
   final People customer;
   final List<Product> products;
-  final VoidCallback onStateChanged;
 
   const EditOrderScreen({super.key,
     required this.order,
@@ -90,9 +88,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       );
       _subTotal = calculateSubtotal();
     } else {
-      var uuid = Uuid();
       _orderedItems.add(OrderedItem(
-        id: uuid.v1(),
         orderId: widget.order.id,
         product: product,
         productName: product.name,
@@ -424,16 +420,16 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   );
                 }).toList(),
               ),
-              SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await updateOrder();
-                    // Navigator.pop(context);
-                  },
-                  child: Text('Save'),
-                ),
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: ElevatedButton(
+                onPressed: () async {
+                  await updateOrder();
+                  // Navigator.pop(context);
+                },
+                child: Text('Save'),
               ),
             ),
           ],

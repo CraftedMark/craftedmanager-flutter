@@ -1,13 +1,13 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
-import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:provider/provider.dart';
 
 import '../config.dart';
 import 'edit_order_screen.dart';
+import 'old_order_provider.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final Order order;
@@ -45,11 +45,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'Archived',
           'Cancelled'
         ];
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   void updateOrderStatusInUI(String newStatus) {
     widget.order.orderStatus = newStatus;

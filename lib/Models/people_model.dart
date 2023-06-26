@@ -1,10 +1,10 @@
 import 'package:woosignal/models/links.dart';
 import 'package:woosignal/models/response/customer.dart' as wsCustomer;
 import 'package:woosignal/models/response/customer_batch.dart';
+import 'package:uuid/uuid.dart';
 
 final DateTime _defaultDate = DateTime.parse('2000-00-00');
 
-import 'package:uuid/uuid.dart';
 
 class People {
   final String id;
@@ -155,7 +155,7 @@ class People {
 
   factory People.fromWSCustomerS( Customers customer){
     return People(
-        id: 0,
+        id: '',
         wooSignalId: customer.id ?? 0,
         firstName: customer.firstName ?? "Unknown",
         lastName: customer.lastName ?? "Unknown",
@@ -173,7 +173,7 @@ class People {
 
   factory People.fromWSCustomer( wsCustomer.Customer customer) {
     return People(
-      id: 0,
+      id: '',
       wooSignalId: customer.id ?? 1,
       firstName: customer.firstName ?? "Unknown",
       lastName: customer.lastName ?? "Unknown",
