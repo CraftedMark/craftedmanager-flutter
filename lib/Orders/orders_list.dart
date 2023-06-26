@@ -148,15 +148,30 @@ Future<People> _getCustomerById(String customerId) async {
     brand: 'brand',
     notes: 'notes',
   );
+  print('yep');
   return await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
 }
 
-class _OrderWidget extends StatelessWidget {
+class _OrderWidget extends StatefulWidget {
   final Order order;
   const _OrderWidget({Key? key, required this.order}) : super(key: key);
 
-  Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
-    return await OrderedItemPostgres.fetchOrderedItems(orderId);
+  @override
+  State<_OrderWidget> createState() => _OrderWidgetState();
+}
+
+class _OrderWidgetState extends State<_OrderWidget> {
+  People? customer;
+
+  Future<void> loadCustomer() async {
+    customer = await _getCustomerById(widget.order.customerId);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadCustomer();
   }
 
   @override
@@ -167,20 +182,16 @@ class _OrderWidget extends StatelessWidget {
           bottom: BorderSide(color: Colors.black),
         ),
       ),
-      child: FutureBuilder<People>(
-        future: _getCustomerById(order.customerId),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            var customer = snapshot.data!;
-            return GestureDetector(
+      child: customer != null
+          ? GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => OrderDetailScreen(
-                      order: order,
-                      customer: customer,
+                      order: widget.order,
+                      customer: customer!,
                       onStateChanged: () {
                         // Handle state change if needed
                       },
@@ -195,34 +206,26 @@ class _OrderWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Order ID: ${order.id}',
+                      'Order ID: ${widget.order.id}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('Total: \$${order.totalAmount}'),
-                    Text('Status: ${order.orderStatus}'),
+                    Text('Total: \$${widget.order.totalAmount}'),
+                    Text('Status: ${widget.order.orderStatus}'),
                     Text(
-                      'Order Date: ${DateFormat('MM-dd-yyyy').format(order.orderDate)}',
+                      'Order Date: ${DateFormat('MM-dd-yyyy').format(widget.order.orderDate)}',
                     ),
                     Text(
-                        'Customer: ${customer.firstName} ${customer.lastName}'),
+                        'Customer: ${customer!.firstName} ${customer!.lastName}'),
                   ],
                 ),
               ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return const Center(
+            )
+          : const Center(
               child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }
