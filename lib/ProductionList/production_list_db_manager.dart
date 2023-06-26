@@ -1,6 +1,5 @@
 import 'package:crafted_manager/Models/employee_model.dart';
 import 'package:crafted_manager/Models/order_model.dart';
-import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/task_model.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 
@@ -82,22 +81,16 @@ class ProductionListDbManager {
   }
 
   static Future<List<Order>> getOpenOrdersWithAllOrderedItems() async {
-    var connection = PostgreSQLConnectionManager.connection;
-    final ordersResult = await connection.query('SELECT * FROM orders');
+    List<Order> orders = [];
+    final connection = PostgreSQLConnectionManager.connection;
 
-    final List<Order> openOrders =
-        ordersResult.map((data) => Order.fromMap(data.toColumnMap())).toList();
-
-    for (var order in openOrders) {
-      final orderedItemsResult = await connection.query(
-        'SELECT * FROM ordered_items WHERE order_Id = @orderId',
-        substitutionValues: {'orderId': order.id},
-      );
-
-      order.orderedItems = orderedItemsResult
-          .map((data) => OrderedItem.fromMap(data.toColumnMap()))
-          .toList();
+    List<Map<String, Map<String, dynamic>>> results =
+        await connection.mappedResultsQuery('SELECT * FROM orders ');
+//WHERE order_status = \'Open\'
+    for (Map<String, Map<String, dynamic>> row in results) {
+      Order order = Order.fromMap(row['orders']!);
+      orders.add(order);
     }
-    return openOrders;
+    return orders;
   }
 }

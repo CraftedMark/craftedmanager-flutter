@@ -24,25 +24,22 @@ class CustomerBasedPricingDbManager {
     );
   }
 
-  // Get all records from the specified table
   Future<List<Map<String, dynamic>>> getAll(String tableName) async {
     final connection = PostgreSQLConnectionManager.connection;
     final result = await connection.query('SELECT * FROM $tableName');
     return result.map((row) => row.toTableColumnMap()).toList();
   }
 
-  // Add a record to the specified table
   Future<void> add(String tableName, Map<String, dynamic> data) async {
     final connection = PostgreSQLConnectionManager.connection;
     final columns = data.keys.join(', ');
-    final values = data.keys.map((key) => '@${key}').join(', ');
+    final values = data.keys.map((key) => '@$key').join(', ');
     await connection.execute(
       'INSERT INTO $tableName ($columns) VALUES ($values)',
       substitutionValues: data,
     );
   }
 
-  // Update a record in the specified table with the provided updated data
   Future<void> update(
       String tableName, int id, Map<String, dynamic> updatedData) async {
     final connection = PostgreSQLConnectionManager.connection;
@@ -62,7 +59,6 @@ class CustomerBasedPricingDbManager {
     );
   }
 
-  // Search records in the specified table using search query and substitution values
   Future<List<Map<String, dynamic>>> search(String tableName,
       String searchQuery, Map<String, dynamic> substitutionValues) async {
     final connection = PostgreSQLConnectionManager.connection;
@@ -73,14 +69,13 @@ class CustomerBasedPricingDbManager {
     return result.map((row) => row.toTableColumnMap()).toList();
   }
 
-  Future<double?> getCustomProductPrice(int productId, int customerId) async {
+  Future<double?> getCustomProductPrice(
+      int productId, String customerId) async {
     double? customPrice;
-    // Fetch the customer's assigned pricing list id
     int? pricingListId = await CustomerBasedPricingDbManager.instance
         .getPricingListByCustomerId(customerId);
 
     if (pricingListId != null) {
-      // Fetch the custom pricing for the product based on the pricing list id
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
           .getCustomerProductPricing(productId, pricingListId);
@@ -95,24 +90,21 @@ class CustomerBasedPricingDbManager {
 
   Future<void> addOrUpdateCustomerProductPricing({
     required int productId,
-    required int customerId,
+    required String customerId,
     required double price,
   }) async {
-    print(
-        'Adding or updating customer product pricing for product: $productId, customer: $customerId, price: $price');
-    int? pricingListId = await getPricingListIdByCustomerId(customerId);
+    String? pricingListId = await getPricingListIdByCustomerId(customerId);
 
     if (pricingListId == null) {
-      pricingListId = await addPricingList(
+      pricingListId = (await addPricingList(
         customerId: customerId,
-        name: 'Default Pricing List', // You can provide a default name here
-        description:
-            'No Custom Pricing', // You can provide a default description here
-      );
+        name: 'Default Pricing List',
+        description: 'No Custom Pricing',
+      )) as String?;
+
       if (pricingListId != null && pricingListId != -1) {
-        await updateCustomerPricingListId(customerId, pricingListId);
+        await updateCustomerPricingListId(customerId, pricingListId as int?);
       } else {
-        print('Failed to create a new pricing list for customer: $customerId');
         return;
       }
     }
@@ -149,11 +141,11 @@ class CustomerBasedPricingDbManager {
     final PostgreSQLResult result = await connection.query(
       '''
     SELECT
-      id
+    id
     FROM
-      customer_pricing_lists
+    customer_pricing_lists
     WHERE
-      customer_id = @customerId
+    customer_id = @customerId
     ''',
       substitutionValues: {'customerId': customerId},
     );
@@ -166,11 +158,11 @@ class CustomerBasedPricingDbManager {
     final PostgreSQLResult result = await connection.query(
       '''
     SELECT
-      assigned_pricing_list_id
+    assigned_pricing_list_id
     FROM
-      people
+    people
     WHERE
-      id = @customerId
+    id = @customerId
     ''',
       substitutionValues: {'customerId': customerId},
     );
@@ -178,38 +170,37 @@ class CustomerBasedPricingDbManager {
   }
 
   // Future<List<Map<String, dynamic>>> fetchCustomerBasedPricing(
-  //     int customerId) async {
-  //   final connection = await openConnection();
-  //   final PostgreSQLResult result = await connection.query(
-  //     '''
+  // int customerId) async {
+  // final connection = await openConnection();
+  // final PostgreSQLResult result = await connection.query(
+  // '''
   // SELECT
-  //   p.id as product_id,
-  //   p.name as product_name,
-  //   p.retailPrice as original_price,
-  //   cpp.price as custom_price
+  // p.id as product_id,
+  // p.name as product_name,
+  // p.retailPrice as original_price,
+  // cpp.price as custom_price
   // FROM
-  //   products p
+  // products p
   // LEFT JOIN customer_product_pricing cpp ON p.id = cpp.product_id
   // LEFT JOIN customer_pricing_lists cpl ON cpl.id = cpp.customer_pricing_list_id
   // LEFT JOIN people cust ON cust.assigned_pricing_list_id = cpl.id
   // WHERE
-  //   cust.id = @customerId
+  // cust.id = @customerId
   // ''',
-  //     substitutionValues: {'customerId': customerId},
-  //   );
-  //   final List<Map<String, dynamic>> results = result
-  //       .map((row) => {
-  //             'product_id': row[0],
-  //             'product_name': row[1],
-  //             'original_price': row[2],
-  //             'custom_price': row[3],
-  //           })
-  //       .toList();
-  //   await closeConnection(connection);
-  //   return results;
+  // substitutionValues: {'customerId': customerId},
+  // );
+  // final List<Map<String, dynamic>> results = result
+  // .map((row) => {
+  // 'product_id': row[0],
+  // 'product_name': row[1],
+  // 'original_price': row[2],
+  // 'custom_price': row[3],
+  // })
+  // .toList();
+  // await closeConnection(connection);
+  // return results;
   // }
 
-  // Get customer product pricing by product id and pricing list id
   Future<Map<String, dynamic>?> getCustomerProductPricing(
       int productId, int pricingListId) async {
     final pricingData = await search(
@@ -222,9 +213,8 @@ class CustomerBasedPricingDbManager {
     return pricingData.isNotEmpty ? pricingData[0] : null;
   }
 
-  // fetchCustomerBasedPricing
   Future<Map<String, dynamic>?> fetchCustomerBasedPricing(
-      int customerId, int productId) async {
+      String customerId, int productId) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;
       const query =
@@ -239,7 +229,6 @@ class CustomerBasedPricingDbManager {
       // Check if a custom price is found and return the entire row
       final customPriceRow = await CustomerBasedPricingDbManager.instance
           .fetchCustomerBasedPricing(customerId, productId);
-      print("Custom price row: $customPriceRow");
 
       num? customPrice;
       if (customPriceRow != null &&
@@ -247,7 +236,6 @@ class CustomerBasedPricingDbManager {
         customPrice = num.tryParse(
             customPriceRow['customer_product_pricing']['price'].toString());
       }
-      print("Custom price: $customPrice");
     } catch (e) {
       print("Error: $e");
     }
@@ -255,27 +243,23 @@ class CustomerBasedPricingDbManager {
   }
 
   Future<int?> addPricingList({
-    required int customerId,
+    required String customerId,
     required String name,
     required String description,
   }) async {
-    Map<String, dynamic> data = {
+    final data = {
       'customer_id': customerId,
       'name': name,
       'description': description,
     };
-    print("Adding pricing list with data: $data");
-    var result = await addReturning('customer_pricing_lists', data, 'id');
+    final result = await addReturning('customer_pricing_lists', data, 'id');
     int? pricingListId = result['customer_pricing_lists']['id'] as int?;
 
     if (pricingListId == null) {
-      print("Error: Failed to add pricing list. Result: $result");
+      return null;
     } else {
-      print("Successfully added pricing list with id: $pricingListId");
-      // Update the customer's assigned_pricing_list_id with the new pricing list id
       await updateCustomerPricingListId(customerId, pricingListId);
     }
-
     return pricingListId;
   }
 
@@ -295,15 +279,13 @@ class CustomerBasedPricingDbManager {
     }
   }
 
-  // Add a customer-product pricing
   Future<void> addCustomerProductPricing(Map<String, dynamic> data) async {
     return add('customer_product_pricing', data);
   }
 
   Future<void> updateCustomerPricingListId(
-      int customerId, int? pricingListId) async {
+      String customerId, int? pricingListId) async {
     if (pricingListId == null) {
-      print("Error: pricingListId is null. Skipping update.");
       return;
     }
     final connection = PostgreSQLConnectionManager.connection;

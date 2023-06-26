@@ -10,8 +10,11 @@ import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../Orders/order_provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
+import '../PostresqlConnection/postqresql_connection_manager.dart';
+import '../Providers/order_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
@@ -26,15 +29,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
   double shippingCost = 10;
 
-  Future<double?> getCustomProductPrice(int productId, int customerId) async {
+  Future<double?> getCustomProductPrice(
+      int productId, String customerId) async {
     double? customPrice;
-    int? pricingListId = await CustomerBasedPricingDbManager.instance
-        .getPricingListByCustomerId(customerId);
+    String? pricingListId = (await CustomerBasedPricingDbManager.instance
+        .getPricingListByCustomerId(customerId)) as String?;
 
     if (pricingListId != null) {
       Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
           .instance
-          .getCustomerProductPricing(productId, pricingListId);
+          .getCustomerProductPricing(productId, pricingListId as int);
 
       if (pricingData != null) {
         customPrice = pricingData['price'];
@@ -69,7 +73,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               itemSource.isNotEmpty ? itemSource : product.itemSource ?? '',
           packaging: packaging,
           flavor: flavor,
-          dose: dose));
+          dose: dose,
+          product: product)); // Pass an actual product instance instead of null
     });
   }
 
@@ -87,22 +92,55 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
     print("new orderid = $orderId");
 
-    final newOrder = Order(
-      customerId: widget.client.id.toString(),
-      id: orderId,
-      orderDate: DateTime.now(),
-      shippingAddress:
-          '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
-      billingAddress:
-          '${widget.client.address1},${widget.client.city},${widget.client.state},${widget.client.zip}',
-      productName: orderedItems.map((e) => e.productName).toList().join(','),
-      totalAmount: totalAmount,
-      orderStatus: 'Pending',
-      notes: '',
-      archived: false,
-      orderedItems: orderedItems,
-    );
-    Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
+    // Fetch address fields from the database
+    Map<String, dynamic>? addressFields = await getAddressFields(
+        PostgreSQLConnectionManager.connection, widget.client.id);
+    if (addressFields != null) {
+        final newOrder = Order(
+        customerId: widget.client.id.toString(),
+        id: orderId,
+        orderDate: DateTime.now(),
+        shippingAddress:
+              '${widget.client.address1}, ${widget.client.city},${widget.client.state},${widget.client.zip}',
+        billingAddress:
+              '${widget.client.address1},${widget.client.city},${widget.client.state},${widget.client.zip}',
+        productName: orderedItems.map((e) => e.productName).toList().join(','),
+        totalAmount: totalAmount,
+        orderStatus: 'Pending',
+        notes: '',
+        archived: false,
+        orderedItems: orderedItems,
+        );
+        Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
+    } else {
+      // Handle the case when addressFields are null
+      print("Error: Address fields are null.");
+    }
+
+    
+      final newOrder = Order(
+        customerId: widget.client.id.toString(),
+        id: orderId,
+        orderDate: DateTime.now(),
+        shippingAddress:
+            '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        billingAddress:
+            '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+        productName: orderedItems.map((e) => e.productName).toList().join(','),
+        totalAmount: totalAmount,
+        orderStatus: 'Pending',
+        notes: '',
+        archived: false,
+        orderedItems: orderedItems,
+      );
+
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      await OrderProvider().createOrder(newOrder, orderedItems);
+      sendNewOrderNotification();
+    } else {
+      // Handle the case when addressFields are null
+      print("Error: Address fields are null.");
+    }
   }
 
 

@@ -170,7 +170,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
   }
 
   Future<void> onTileTap(Map<String, dynamic> peopleData) async {
-    int customerId = peopleData['id'];
+    String customerId = peopleData['id'].toString();
     print('Selected customer: $customerId');
     await CustomerBasedPricingDbManager.instance
         .updateCustomerBasedPricing(customerId, true);
@@ -206,7 +206,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     }
   }
 
-  void _navigateToCPListScreen(int customerId) {
+  void _navigateToCPListScreen(String customerId) {
     Navigator.push(
       context,
       MaterialPageRoute(

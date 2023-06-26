@@ -1,6 +1,6 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -26,14 +26,20 @@ class _ProductionListState extends State<ProductionList> {
   List<Order> orders = [];
   List<OrderedItem> filteredItems = [];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+  void getOrdersAndItems() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<OrderProvider>(context, listen: false)
           .filterOrderedItems(widget.itemSource);
-      updateLoadingState();
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
+
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getOrdersAndItems();
     });
   }
 
@@ -44,65 +50,80 @@ class _ProductionListState extends State<ProductionList> {
 
   @override
   Widget build(BuildContext context) {
-    var orderProvider = context.watch<OrderProvider>();
-    var filteredItems = orderProvider.filteredItems;
+    return FutureBuilder(
+        future:
+            Provider.of<OrderProvider>(context, listen: false).fetchOrders(),
+        builder: (context, AsyncSnapshot<List<Order>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (!snapshot.hasData || snapshot.hasError) {
+            // handle error or no data scenario
+            return Text("Error fetching the orders!");
+          } else {
+            OrderProvider orderProvider = Provider.of<OrderProvider>(context);
+            // give dart event loop chance to finish building widgets
+            Future.microtask(
+                () => orderProvider.filterOrderedItems(widget.itemSource));
+            List<OrderedItem> filteredItems = orderProvider.filteredItems;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {
-            widget._sliderDrawerKey.currentState?.toggle();
-          },
-        ),
-        title: const Text(
-          'Production List',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: SafeArea(
-        child: SliderDrawer(
-          appBar: const SizedBox.shrink(),
-          key: widget._sliderDrawerKey,
-          sliderOpenSize: 250,
-          slider: SliderView(onItemClick: (title) {
-            // Handle the menu item click as necessary
-          }),
-          child: isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.secondary,
-                ))
-              : filteredItems.isNotEmpty
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        OrderedItem item = filteredItems[index];
-                        return ListTile(
-                          title: Text(
-                            item.productName,
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          subtitle: Text(
-                            'Quantity: ${item.quantity}',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Text(
-                        'No items to show',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-        ),
-      ),
-    );
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.black,
+                leading: IconButton(
+                  icon: Icon(Icons.menu, color: Colors.white),
+                  onPressed: () {
+                    widget._sliderDrawerKey.currentState?.toggle();
+                  },
+                ),
+                title: Text(
+                  'Production List',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              body: SafeArea(
+                child: SliderDrawer(
+                  appBar: SizedBox.shrink(),
+                  key: widget._sliderDrawerKey,
+                  sliderOpenSize: 250,
+                  slider: SliderView(onItemClick: (title) {
+                    // Handle the menu item click as necessary
+                  }),
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ))
+                      : filteredItems.isNotEmpty
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                OrderedItem item = filteredItems[index];
+                                return ListTile(
+                                  title: Text(
+                                    item.productName,
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  subtitle: Text(
+                                    'Quantity: ${item.quantity}',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                );
+                              },
+                            )
+                          : Center(
+                              child: Text(
+                                'No items to show',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                ),
+              ),
+            );
+          }
+        });
   }
 }

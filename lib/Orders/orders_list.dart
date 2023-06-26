@@ -1,8 +1,8 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +37,7 @@ class OrdersList extends StatefulWidget {
 }
 
 class _OrdersListState extends State<OrdersList> {
+    var cachedCustomers = <People>{};
 
 
   Future<void> _refreshOrdersList() async {
@@ -66,8 +67,22 @@ class _OrdersListState extends State<OrdersList> {
       ),
       body: SafeArea(
         child: Consumer<OrderProvider>(
-          builder: (context, orderProvider, _) {
+          builder: (ctx, orderProvider, _) {
+            if (orderProvider == null) {
+              print('OrderProvider is null');
+              return Center(child: CircularProgressIndicator());
+            }
+
             final orders = orderProvider.orders;
+            if (orders == null) {
+              print('Orders are null');
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (orders.isEmpty) {
+              print('No orders found');
+              return Center(child: Text('No orders found'));
+            }
 
             var sortedOrders = <Order>[];
             if (widget.listType == OrderListType.archived) {
@@ -125,10 +140,10 @@ class _OrdersListState extends State<OrdersList> {
   }
 }
 
-Future<People> _getCustomerById(int customerId) async {
+Future<People> _getCustomerById(String customerId) async {
   //TODO: find out why the customer can be null
   People fakeCustomer = People(
-    id: 1,
+    id: '1',
     wooSignalId: 1,
     firstName: 'Fake',
     lastName: "Customer",
@@ -153,13 +168,27 @@ Future<People> _getCustomerById(int customerId) async {
   return cachedUser.first;
 }
 
-class _OrderWidget extends StatelessWidget {
+class _OrderWidget extends StatefulWidget {
   final Order order;
   final VoidCallback onStateChanged;
   const _OrderWidget({Key? key, required this.order, required this.onStateChanged}) : super(key: key);
 
-  Future<List<OrderedItem>> fetchOrderedItems(String orderId) async {
-    return await OrderedItemPostgres.fetchOrderedItems(orderId);
+  @override
+  State<_OrderWidget> createState() => _OrderWidgetState();
+}
+
+class _OrderWidgetState extends State<_OrderWidget> {
+  People? customer;
+
+  Future<void> loadCustomer() async {
+    customer = await _getCustomerById(widget.order.customerId);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadCustomer();
   }
 
   @override
@@ -170,24 +199,19 @@ class _OrderWidget extends StatelessWidget {
           bottom: BorderSide(color: Colors.black),
         ),
       ),
-      child: FutureBuilder<People>(
-        future: _getCustomerById(order.customerId),
-        builder: (context, snapshot) {
-          const height = 90.0;
-          if (snapshot.hasData) {
-            var customer = snapshot.data!;
-            return SizedBox(
-              height: height,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OrderDetailScreen(
-                        order: order,
-                        customer: customer,
-                      ),
+      child: customer != null
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OrderDetailScreen(
+                      order: widget.order,
+                      customer: customer!,
+                      onStateChanged: () {
+                        // Handle state change if needed
+                      },
                     ),
                   );
                 },
@@ -213,23 +237,35 @@ class _OrderWidget extends StatelessWidget {
                           'Customer: ${customer.firstName} ${customer.lastName}'),
                     ],
                   ),
+                );
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Order ID: ${widget.order.id}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Total: \$${widget.order.totalAmount}'),
+                    Text('Status: ${widget.order.orderStatus}'),
+                    Text(
+                      'Order Date: ${DateFormat('MM-dd-yyyy').format(widget.order.orderDate)}',
+                    ),
+                    Text(
+                        'Customer: ${customer!.firstName} ${customer!.lastName}'),
+                  ],
                 ),
               ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return const SizedBox.square(
-              dimension: height,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-        },
-      ),
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

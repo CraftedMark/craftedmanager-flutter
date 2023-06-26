@@ -1,5 +1,8 @@
+import 'package:crafted_manager/Models/product_model.dart';
+
 class OrderedItem {
   String orderId;
+  Product product;
   String productName;
   int productId;
   String name;
@@ -16,6 +19,7 @@ class OrderedItem {
 
   OrderedItem({
     required this.orderId,
+    required this.product,
     required this.productName,
     required this.productId,
     required this.name,
@@ -33,6 +37,7 @@ class OrderedItem {
 
   OrderedItem copyWith({
     String? orderId,
+    Product? product,
     String? productName,
     int? productId,
     String? name,
@@ -49,6 +54,7 @@ class OrderedItem {
   }) {
     return OrderedItem(
       orderId: orderId ?? this.orderId,
+      product: product ?? this.product,
       productName: productName ?? this.productName,
       productId: productId ?? this.productId,
       name: name ?? this.name,
@@ -80,6 +86,7 @@ class OrderedItem {
 
     return OrderedItem(
       orderId: map['order_id'].toString(),
+      product: Product.fromMap(map),
       productName: map['product_name'] as String? ?? 'Unknown',
       productId: int.tryParse(map['product_id'].toString()) ?? 0,
       name: map['name'] as String? ?? 'Unknown',
@@ -99,8 +106,10 @@ class OrderedItem {
   Map<String, dynamic> toMap() {
     return {
       'order_id': orderId,
+      'product': product.toMap(),
+      'product_name': productName,
       'product_id': productId,
-      'product_name': name,
+      'name': name,
       'quantity': quantity,
       'price': price,
       'discount': discount,

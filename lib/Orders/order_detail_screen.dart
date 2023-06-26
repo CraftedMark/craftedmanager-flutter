@@ -1,7 +1,7 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
-import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:provider/provider.dart';
@@ -163,52 +163,73 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   color: Colors.white),
             ),
             SizedBox(height: 16),
-            for (OrderedItem orderedItem in widget.order.orderedItems)
-              Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade900,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Product Name: ${orderedItem.productName}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+            Consumer<OrderProvider>(
+              builder: (context, orderProvider, child) => Column(
+                children: widget.order.orderedItems
+                    .map(
+                      (OrderedItem orderedItem) => Card(
+                        color: Colors.grey[800],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Product Name: ${orderedItem.productName}',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Divider(color: Colors.grey[600]),
+                              SizedBox(height: 8),
+                              Text(
+                                'Quantity: ${orderedItem.quantity}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Price: \$${orderedItem.price}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Flavor: ${orderedItem.flavor}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Status: ${orderedItem.status}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Dose: ${orderedItem.dose}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Packaging: ${orderedItem.packaging}',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Quantity: ${orderedItem.quantity}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Price: \$${orderedItem.price}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Flavor: ${orderedItem.flavor}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Status: ${orderedItem.status}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Dose: ${orderedItem.dose}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      Text(
-                        'Packaging: ${orderedItem.packaging}',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
+                    )
+                    .toList(),
               ),
+            ),
           ],
         ),
       ),

@@ -27,8 +27,8 @@ class Product {
   final String packageWeightMeasure;
   final int packageWeight;
   final int weightInGrams;
-  final int bulkPricing;
-  final int perGramCost;
+  final double? bulkPricing;
+  final double perGramCost;
   final bool isAssemblyItem;
   final double? dose;
   final String? packaging;
@@ -98,7 +98,7 @@ class Product {
       stockQuantity:
           map['stock_quantity'] != null ? map['stock_quantity'].round() : 0,
       backordered: map['backordered'] ?? false,
-      supplier: map['supplier'] ?? '',
+      supplier: map['supplier_name'] ?? '',
       manufacturerId:
           map['manufacturer_id'] != null ? map['manufacturer_id'] as int : null,
       manufacturerName: map['manufacturer_name'] ?? '',
@@ -110,9 +110,13 @@ class Product {
       packageWeightMeasure: map['package_weight_measure'] ?? '',
       packageWeight: map['package_weight'] ?? 0,
       weightInGrams: map['weight_in_grams'] ?? 0,
-      bulkPricing: map['bulk_pricing'] ?? 0,
-      perGramCost: map['per_gram_cost'] ?? 0,
-      dose: map['dose'] != null ? double.parse(map['dose']) : 0.0,
+      bulkPricing: map['bulk_pricing'] != null
+          ? (map['bulk_pricing'] as num).toDouble()
+          : 0.0,
+      perGramCost: map['per_gram_cost'] != null
+          ? (map['per_gram_cost'] as num).toDouble()
+          : 0.0,
+      dose: map['dose'] != null ? (map['dose'] as num).toDouble() : null,
       packaging: map['packaging'] ?? '',
       isAssemblyItem: map['isAssemblyItem'] ?? false,
       assemblyItems: map['assembly_items'] != null
@@ -216,7 +220,9 @@ class Product {
       'weightInGrams': weightInGrams,
       'bulkPricing': bulkPricing,
       'perGramCost': perGramCost,
-      'isassembly': isAssemblyItem,
+      'is_assembly': isAssemblyItem
+          ? 1
+          : 0, // Corrected key and convert boolean to integer
       'dose': dose,
       'packaging': packaging,
       'category': category,

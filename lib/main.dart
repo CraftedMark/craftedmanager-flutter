@@ -1,8 +1,12 @@
 import 'dart:io';
 import 'package:crafted_manager/Menu/menu_item.dart';
-import 'package:crafted_manager/Orders/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
+import 'package:crafted_manager/Providers/employee_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
+import 'package:crafted_manager/Providers/people_provider.dart';
+import 'package:crafted_manager/Providers/product_provider.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -18,10 +22,14 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize the database
   PostgreSQLConnectionManager.init();
   await PostgreSQLConnectionManager.open();
 
-  OrderProvider provider = OrderProvider();
+  // Initialize the providers before runApp is called.
+  final OrderProvider orderProvider = OrderProvider();
+  final PeopleProvider peopleProvider = PeopleProvider();
+  final ProductProvider productProvider = ProductProvider();
 
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
@@ -31,9 +39,10 @@ void main() async {
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
       print("new notification + $result");
     });
-    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) {
+
+    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
       print('___________update orders___________');
-      provider.fetchOrders();
+      await orderProvider.fetchOrders();
     });
   }
   if(AppConfig.ENABLE_WOOSIGNAL){
@@ -41,9 +50,18 @@ void main() async {
 
   }
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => provider,
-      child: const MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<OrderProvider>(
+            create: (context) => OrderProvider()),
+        ChangeNotifierProvider<PeopleProvider>(
+            create: (context) => PeopleProvider()),
+        ChangeNotifierProvider<ProductProvider>(
+            create: (context) => ProductProvider()),
+        ChangeNotifierProvider<EmployeeProvider>(
+            create: (context) => EmployeeProvider()),
+      ],
+      child: MyApp(),
     ),
   );
 }
@@ -56,11 +74,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+    Provider.of<PeopleProvider>(context, listen: false).fetchPeople();
+    Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+    //Provider.of<EmployeeProvider>(context, listen: false).fetchEmployees();
   }
 
   @override
@@ -69,19 +90,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async  {
-
-    if(state == AppLifecycleState.paused){
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
       await PostgreSQLConnectionManager.close();
     }
-    if(state == AppLifecycleState.resumed){
+    if (state == AppLifecycleState.resumed) {
       PostgreSQLConnectionManager.init();
       await PostgreSQLConnectionManager.open();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

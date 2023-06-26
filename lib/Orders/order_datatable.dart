@@ -1,4 +1,4 @@
-import 'package:crafted_manager/Orders/order_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
