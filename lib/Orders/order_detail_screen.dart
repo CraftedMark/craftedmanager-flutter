@@ -13,10 +13,12 @@ class OrderDetailScreen extends StatefulWidget {
   final Order order;
   final People customer;
 
-  OrderDetailScreen(
-      {required this.order,
-      required this.customer,
-      });
+  OrderDetailScreen({
+    required this.order,
+    required this.customer,
+  });
+
+
 
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
@@ -24,6 +26,8 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late OrderProvider _provider;
+  List<OrderedItem> products = [];
+
   List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
       ? [
           'pending',
@@ -46,17 +50,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'Cancelled'
         ];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _provider = Provider.of<OrderProvider>(context, listen: false);
+      loadProducts();
+    });
+  }
+
   void updateOrderStatusInUI(String newStatus) {
     widget.order.orderStatus = newStatus;
     setState(() {});
     // _provider.updateOrder(widget.order);
   }
 
+  Future<void> loadProducts() async {
+    products = await _provider.getOrderedItemsForOrder(widget.order.id);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    _provider = Provider.of<OrderProvider>(context);
-    final order = _provider.getOrderedItemsForOrder(widget.order.id);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -75,7 +90,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   builder: (context) => EditOrderScreen(
                     order: widget.order,
                     customer: widget.customer,
-                    products: [],
+                    products: products.map((i) => i.product).toList(),
                   ),
                 ),
               );
@@ -88,157 +103,178 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           children: [
-            Text(
-              'Order ID: ${widget.order.id}',
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Customer: ${widget.customer.firstName} ${widget.customer.lastName}',
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Total Amount: \$${widget.order.totalAmount}',
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Order Status: ${widget.order.orderStatus}',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue),
-            ),
+            _orderTextInfo(),
             SizedBox(height: 4),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-              ),
-              child: Text('Change Order Status'),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Container(
-                      color: Colors.black,
-                      child: ListView.builder(
-                        itemCount: orderStatuses.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(orderStatuses[index],
-                                style: TextStyle(color: Colors.white)),
-                            onTap: () async {
-                              final orderForSend = widget.order.copyWith(orderStatus:  orderStatuses[index]);
-                              Navigator.pop(context);
-                              // displayLoading();
-                              final result = await _provider.updateOrder(orderForSend, status: WSOrderStatus.values[index]);
-                              // Navigator.pop(context);
-                              if(result){
-                                updateOrderStatusInUI(orderStatuses[index]);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            _changeOrderState(),
             SizedBox(height: 24),
-            Text(
-              'Products:',
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(height: 16),
-            Consumer<OrderProvider>(
-              builder: (context, orderProvider, child) => Column(
-                children: widget.order.orderedItems
-                    .map(
-                      (OrderedItem orderedItem) => Card(
-                        color: Colors.grey[800],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Product Name: ${orderedItem.productName}',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Divider(color: Colors.grey[600]),
-                              SizedBox(height: 8),
-                              Text(
-                                'Quantity: ${orderedItem.quantity}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Price: \$${orderedItem.price}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Flavor: ${orderedItem.flavor}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Status: ${orderedItem.status}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Dose: ${orderedItem.dose}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Packaging: ${orderedItem.packaging}',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
+            _orderProductsList(),
           ],
         ),
       ),
     );
   }
-  void displayLoading(){
+
+  Widget _orderTextInfo(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Order ID: ${widget.order.id}',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
+        SizedBox(height: 16),
+        Text(
+          'Customer: ${widget.customer.firstName} ${widget.customer.lastName}',
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+        SizedBox(height: 24),
+        Text(
+          'Total Amount: \$${widget.order.totalAmount}',
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+        SizedBox(height: 24),
+        Text(
+          'Order Status: ${widget.order.orderStatus}',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue),
+        ),
+      ],
+    );
+  }
+  Widget _changeOrderState(){
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue,
+      ),
+      child: Text('Change Order Status'),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.black,
+              child: ListView.builder(
+                itemCount: orderStatuses.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(orderStatuses[index],
+                        style: TextStyle(color: Colors.white)),
+                    onTap: () async {
+                      final orderForSend = widget.order
+                          .copyWith(orderStatus: orderStatuses[index]);
+                      Navigator.pop(context);
+                      // displayLoading();
+                      final result = await _provider.updateOrder(
+                          orderForSend,
+                          status: WSOrderStatus.values[index]);
+                      // Navigator.pop(context);
+                      if (result) {
+                        updateOrderStatusInUI(orderStatuses[index]);
+                      }
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+  Widget _orderProductsList(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Products:',
+          style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
+        SizedBox(height: 16),
+        Column(
+          children: products
+              .map(
+                (OrderedItem orderedItem) => Card(
+              color: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Product Name: ${orderedItem.productName}',
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Divider(color: Colors.grey[600]),
+                    SizedBox(height: 8),
+                    Text(
+                      'Quantity: ${orderedItem.quantity}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Price: \$${orderedItem.price}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Flavor: ${orderedItem.flavor}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Status: ${orderedItem.status}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Dose: ${orderedItem.dose}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Packaging: ${orderedItem.packaging}',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+              .toList(),
+        )
+      ],
+    );
+  }
+  void displayLoading() {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context)=> const AlertDialog(
+      builder: (context) => const AlertDialog(
         backgroundColor: Colors.transparent,
         contentPadding: EdgeInsets.symmetric(horizontal: 120),
         content: AspectRatio(
-          aspectRatio: 1/1,
+          aspectRatio: 1 / 1,
           child: CircularProgressIndicator(),
         ),
       ),

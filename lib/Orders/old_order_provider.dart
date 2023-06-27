@@ -39,8 +39,18 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Order getOrderedItemsForOrder(String orderId) {
-    return _orders.firstWhere((order) => order.id == orderId);
+  Future<List<OrderedItem>> getOrderedItemsForOrder(String orderId) async {
+      final connection = PostgreSQLConnectionManager.connection;
+
+      var items = <OrderedItem>[];
+      await connection.transaction((ctx) async {
+        final result = await ctx.query('''
+        SELECT * FROM ordered_items WHERE order_id = @order_id
+      ''', substitutionValues: {"order_id":orderId});
+
+        items = result.map((item)=>OrderedItem.fromMap(item.toColumnMap())).toList();
+      });
+      return items;
   }
 
   Future<void> fetchOrders() async {

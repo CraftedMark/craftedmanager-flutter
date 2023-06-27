@@ -85,21 +85,21 @@ class OrderedItem {
     }
 
     return OrderedItem(
-      orderId: map['order_id'].toString(),
-      product: Product.fromMap(map),
-      productName: map['product_name'] as String? ?? 'Unknown',
-      productId: int.tryParse(map['product_id'].toString()) ?? 0,
-      name: map['name'] as String? ?? 'Unknown',
-      quantity: int.tryParse(map['quantity'].toString()) ?? 0,
+      orderId: map['order_id'] as String,
+      productId: map['product_id'] ?? 0,
+      quantity: map['quantity'] ?? 0,
       price: parseNum(map['price']).toDouble(),
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
-      productRetailPrice: parseNum(map['retail_price']).toDouble(),
-      status: map['status'] ?? "Unknown",
+      productName: map['product_name'] as String? ?? 'Unknown',
+      status:  map['status'] ?? "Unknown",
       itemSource: map['item_source'] ?? "Unknown",
-      packaging: map['packaging'] ?? "Unknown",
       flavor: map['flavor'] ?? "Unknown",
-      dose: double.tryParse(map['dose'].toString()) ?? 0.0,
+      dose: double.parse(map['dose'].toString() ?? '0.0'),
+      packaging: map['packaging'] ?? "Unknown",
+      name:  map['status'] ??'Unknown',
+      productRetailPrice: 0,
+      product: Product.fromMap(map),
     );
   }
 

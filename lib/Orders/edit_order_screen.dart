@@ -2,7 +2,6 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
-import 'package:crafted_manager/Orders/old_order_provider.dart';
 import 'package:crafted_manager/Orders/ordered_item_postgres.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
@@ -10,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config.dart';
+import 'old_order_provider.dart';
 import 'ordered_item_postgres.dart';
 
 class EditOrderScreen extends StatefulWidget {
