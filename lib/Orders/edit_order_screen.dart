@@ -169,7 +169,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
-    print(widget.order.orderedItems.length);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Order'),
@@ -213,7 +212,29 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     ),
                   ).then((result) async {
                     if (result != null) {
-                      addOrderedItem(result['product'], result['quantity']);
+                      final product = result['product'] as Product;
+                      final quantity = result['quantity'];
+                      addOrderedItem(product, result['quantity']);
+
+
+                      final orderedItem = OrderedItem(
+                        orderId: widget.order.id,
+                        product: product,
+                        productName: product.name,
+                        productId: product.id!,
+                        name: product.name,
+                        quantity: quantity,
+                        price: product.retailPrice,
+                        discount: 0,
+                        productDescription: product.description,
+                        productRetailPrice: product.retailPrice,
+                        status: 'Processing',
+                        itemSource: product.itemSource,
+                        packaging: product.packaging ?? '',
+                        dose: product.dose?? 0.1,
+                        flavor: product.flavor,
+                      );
+                      _provider.addOrderedItem(widget.order.id, orderedItem);
                     }
                     // print('return from product screen');
                     // print(selectedProducts);
