@@ -50,29 +50,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'Cancelled'
         ];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _provider = Provider.of<OrderProvider>(context, listen: false);
-      loadProducts();
-    });
-  }
-
   void updateOrderStatusInUI(String newStatus) {
     widget.order.orderStatus = newStatus;
     setState(() {});
     // _provider.updateOrder(widget.order);
   }
 
-  Future<void> loadProducts() async {
-    orderedItems = await _provider.getOrderedItemsForOrder(widget.order.id);
-    widget.order.orderedItems = orderedItems;
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
+    _provider = Provider.of<OrderProvider>(context);
+    orderedItems = _provider.orders.firstWhere((o) => o.id == widget.order.id).orderedItems;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
