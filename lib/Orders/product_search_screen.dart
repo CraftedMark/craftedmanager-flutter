@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
-import '../../Providers/order_provider.dart';
+// import '../../Providers/order_provider.dart';
 import '../../Providers/product_provider.dart';
 import '../Products/product_db_manager.dart';
+import 'old_order_provider.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   @override
@@ -168,9 +169,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                       // replace this with your actual flavor
                                       dose: double.parse(doseController.text),
                                     );
-                                    Provider.of<OrderProvider>(context,
-                                            listen: false)
-                                        .addOrderedItem(orderedItem);
+                                    // Provider.of<OrderProvider>(context,
+                                    //         listen: false)
+                                    //     .addOrderedItem(orderedItem);
                                     Navigator.pop(context);
                                     Navigator.pop(
                                       context,

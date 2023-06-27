@@ -88,7 +88,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditOrderScreen(
-                    order: widget.order,
+                    order: widget.order..orderedItems.addAll(products),
                     customer: widget.customer,
                     products: products.map((i) => i.product).toList(),
                   ),

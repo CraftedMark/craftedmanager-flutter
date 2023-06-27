@@ -36,6 +36,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   void _setInitialOrderedItems() {
     if (_orderedItems.isEmpty) {
       _orderedItems = List.from(widget.order.orderedItems);
+      setState(() {});
     }
   }
 
@@ -166,13 +167,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
+    print(widget.order.orderedItems.length);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Order'),
       ),
-      body: Consumer<OrderProvider>(builder: (context, orderProvider, child) {
-        // _orderedItems = widget.order.orderedItems; // Remove this line
-        return ListView(
+      body: ListView(
           children: [
             SizedBox(height: 12.0),
             Padding(
@@ -232,7 +232,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: _orderedItems.length,
+              itemCount: widget.order.orderedItems.length,
               itemBuilder: (context, index) {
                 return Card(
                   color: Colors.grey[800],
@@ -433,8 +433,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               ),
             ),
           ],
-        );
-      }),
+        ),
     );
   }
 }
