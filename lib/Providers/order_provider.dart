@@ -44,11 +44,6 @@ class OrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateOrderedItem(OrderedItem item) {
-    int index = _orderedItems.indexWhere((i) => i.id == item.id);
-    _orderedItems[index] = item;
-    notifyListeners();
-  }
 
   Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
     bool result = await createOrder(order, orderedItems);
@@ -111,15 +106,6 @@ class OrderProvider with ChangeNotifier {
       print('Error fetching ordered items by order id: ${e.toString()}');
     }
     return orderedItems;
-  }
-
-  void updateOrderStatus(String orderId, String newStatus, bool isArchived) {
-    final order = _orders.firstWhere((order) => order.id == orderId);
-    order.orderStatus = newStatus;
-    if (isArchived) {
-      order.isArchived = true;
-    }
-    notifyListeners();
   }
 
   Future<People> fetchCustomerById(String id) async {

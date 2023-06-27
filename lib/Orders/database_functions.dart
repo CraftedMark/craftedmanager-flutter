@@ -16,7 +16,7 @@ Future<List<Map<String, dynamic>>> fetchTableSchema(String tableName) async {
     debugPrint('Fetched $tableName schema: $result');
   }
 
-  return result != null ? result.map((row) => row.toColumnMap()).toList() : [];
+  return result.isNotEmpty ? result.map((row) => row.toColumnMap()).toList() : [];
 }
 
 // Fetches the schema for all tables in the database and stores them in SharedPreferences
@@ -25,7 +25,7 @@ Future<void> fetchAndStoreAllSchemas() async {
   final result = await connection.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'");
 
-  if (result != null) {
+  if (result.isNotEmpty) {
     final allSchemas = <String, List<Map<String, dynamic>>>{};
     for (final row in result) {
       final tableName = row[0].toString();

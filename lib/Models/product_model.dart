@@ -1,4 +1,5 @@
 import 'package:crafted_manager/Models/assembly_item_model.dart';
+import 'package:woosignal/models/response/product.dart' as ws;
 
 class Product {
   final int? id;
@@ -125,6 +126,88 @@ class Product {
     );
   }
 
+  factory Product.fromWSProduct(ws.Product product) {
+    //TODO: rework
+    return Product(
+      id: product.id,
+      name: product.name?? 'Unknown',
+      retailPrice: double.tryParse(product.regularPrice ?? '0' ) ?? 0,
+      wholesalePrice: double.tryParse(product.salePrice ?? '0') ?? 0,
+      manufacturingPrice: double.parse(product.price ?? '0'),
+      assemblyItems: [],
+      backordered: false,
+      bulkPricing: 0,
+      category: product.categories.first.toString(),
+      costOfGood: double.parse(product.price ?? "0"),
+      weightInGrams: int.tryParse(product.weight.toString()) ?? 0,
+      type: '' , //simple, grouped, external and variable
+      supplier: 'Supplier',
+      subCategory: '',
+      subcat2: '',
+      stockQuantity: product.stockQuantity ?? 0,
+      quantitySold: 0,
+      quantityInStock: 0,
+      perGramCost: 0,
+      packageWeightMeasure: '0',
+      packageWeight: 0,
+      manufacturerName: '',
+      manufacturerId: 0,
+      itemSource: '' ,
+      isAssemblyItem: false,
+      imageUrl: '',
+      flavor: '',
+      description: product.description??'',
+    );
+  }
+
+  Map<String, dynamic> toWSMap() {
+    return {
+      'name': name,
+      'description': description,
+      'short_description': description,
+      'regular_price': retailPrice.toString(),
+      'sale_price': wholesalePrice.toString(),
+      // 'type': '',
+      // 'status': '',
+      // 'featured': '',
+      // 'catalog_visibility': '',
+      // 'sku': '',
+      // 'date_on_sale_from'	: '',
+      // 'date_on_sale_from_gmt'	: '',
+      // 'date_on_sale_to'	: '',
+      // 'date_on_sale_to_gmt'	: '',
+      // 'virtual': '',
+      // 'downloadable'	: '',
+      // 'downloads': '',
+      // 'download_limit'	: '',
+      // 'download_expiry'	: '',
+      // 'external_url'	: '',
+      // 'button_text': '',
+      // 'tax_status'	: '',
+      // 'tax_class': '',
+      // 'manage_stock'	: '',
+      // 'stock_quantity'	: '',
+      // 'stock_status'	: '',
+      // 'backorders'	: '',
+      // 'sold_individually'	: '',
+      // 'weight': '',
+      // 'dimensions': '',
+      // 'shipping_class': '',
+      // 'reviews_allowed': '',
+      // 'upsell_ids': '',
+      // 'cross_sell_ids': '',
+      // 'parent_id': '',
+      // 'purchase_note': '',
+      // 'categories': '',
+      // 'tags': '',
+      // 'images': '',
+      // 'attributes' : '',
+      // 'default_attributes': '',
+      // 'grouped_products': '',
+      // 'menu_order': '',
+      // 'meta_data': '',
+    };
+  }
   Map<String, dynamic> toMap() {
     return {
       'id': id,

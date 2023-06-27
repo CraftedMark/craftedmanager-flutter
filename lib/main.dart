@@ -1,10 +1,9 @@
 import 'dart:io';
-
 import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:crafted_manager/ProductionList/production_list.dart';
 import 'package:crafted_manager/Providers/employee_provider.dart';
-import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
+// import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your OrderProvider is in this file
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
@@ -14,6 +13,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+
+import 'Orders/old_order_provider.dart';
+import 'WooCommerce/woosignal-service.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -36,7 +38,7 @@ void main() async {
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
-      print("new notification + ${result}");
+      print("new notification + $result");
     });
 
     OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
@@ -44,13 +46,15 @@ void main() async {
       await orderProvider.fetchOrders();
     });
   }
+  if(AppConfig.ENABLE_WOOSIGNAL){
+    await WooSignalService.init();//TODO: enable WooSignal
 
-  WooSignalService.init(AppConfig.WOOSIGNAL_APP_KEY);
+  }
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<OrderProvider>(
-            create: (context) => OrderProvider()),
+            create: (context) => orderProvider),
         ChangeNotifierProvider<PeopleProvider>(
             create: (context) => PeopleProvider()),
         ChangeNotifierProvider<ProductProvider>(
@@ -113,21 +117,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
-        backgroundColor: Colors.black,
         primaryColor: Colors.blueAccent,
-        colorScheme: ColorScheme.dark().copyWith(
+        colorScheme: const ColorScheme.dark().copyWith(
           primary: Colors.blueAccent,
-          secondary: Color(0xFFB085F5),
+          secondary: const Color(0xFFB085F5),
+          background: Colors.black,
         ),
-        textTheme: TextTheme(
-          bodyText1: TextStyle(color: Color(0xFFB085F5)),
-          bodyText2: TextStyle(color: Color(0xFFB085F5)),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFB085F5)),
+          bodyMedium: TextStyle(color: Color(0xFFB085F5)),
         ),
-        iconTheme: IconThemeData(color: Color(0xFFB085F5)),
+        iconTheme: const IconThemeData(color: Color(0xFFB085F5)),
       ),
       home: Builder(
         builder: (context) => ProductionList(
-          orderedItems: [],
+          orderedItems: const [],
           itemSource: 'Production',
         ),
       ),

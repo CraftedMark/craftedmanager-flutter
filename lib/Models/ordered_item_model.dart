@@ -1,7 +1,6 @@
 import 'package:crafted_manager/Models/product_model.dart';
 
 class OrderedItem {
-  String id;
   String orderId;
   Product product;
   String productName;
@@ -19,7 +18,6 @@ class OrderedItem {
   double dose;
 
   OrderedItem({
-    required this.id,
     required this.orderId,
     required this.product,
     required this.productName,
@@ -38,7 +36,6 @@ class OrderedItem {
   });
 
   OrderedItem copyWith({
-    String? id,
     String? orderId,
     Product? product,
     String? productName,
@@ -56,7 +53,6 @@ class OrderedItem {
     double? dose,
   }) {
     return OrderedItem(
-      id: id ?? this.id,
       orderId: orderId ?? this.orderId,
       product: product ?? this.product,
       productName: productName ?? this.productName,
@@ -89,28 +85,26 @@ class OrderedItem {
     }
 
     return OrderedItem(
-      id: map['ordered_item_id'].toString(),
-      orderId: map['order_id'].toString(),
-      product: Product.fromMap(map),
-      productName: map['product_name'] as String? ?? 'Unknown',
-      productId: int.tryParse(map['product_id'].toString()) ?? 0,
-      name: map['name'] as String? ?? 'Unknown',
-      quantity: int.tryParse(map['quantity'].toString()) ?? 0,
+      orderId: map['order_id'] as String,
+      productId: map['product_id'] ?? 0,
+      quantity: map['quantity'] ?? 0,
       price: parseNum(map['price']).toDouble(),
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
-      productRetailPrice: parseNum(map['retail_price']).toDouble(),
-      status: map['status'] ?? "Unknown",
+      productName: map['product_name'] as String? ?? 'Unknown',
+      status:  map['status'] ?? "Unknown",
       itemSource: map['item_source'] ?? "Unknown",
-      packaging: map['packaging'] ?? "Unknown",
       flavor: map['flavor'] ?? "Unknown",
-      dose: double.tryParse(map['dose'].toString()) ?? 0.0,
+      dose: double.parse(map['dose'].toString() ?? '0.0'),
+      packaging: map['packaging'] ?? "Unknown",
+      name:  map['status'] ??'Unknown',
+      productRetailPrice: 0,
+      product: Product.fromMap(map),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'ordered_item_id': id,
       'order_id': orderId,
       'product': product.toMap(),
       'product_name': productName,
@@ -126,6 +120,16 @@ class OrderedItem {
       'packaging': packaging,
       'flavor': flavor,
       'dose': dose,
+    };
+  }
+  Map<String, dynamic> toWSOrderedItemMap(){
+    return {
+      "name":name,
+      "product_id":productId.toString(),
+      "variation_id":0,
+      "quantity":quantity,
+      "subtotal":(productRetailPrice*quantity).toString(),
+      "total":(productRetailPrice*quantity).toString(),
     };
   }
 }

@@ -1,9 +1,14 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/create_order_screen.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 
+import '../config.dart';
+
 class SearchPeopleScreen extends StatefulWidget {
+  const SearchPeopleScreen({super.key});
+
   @override
   State<SearchPeopleScreen> createState() => _SearchPeopleScreenState();
 }
@@ -13,42 +18,39 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
 
   List<People> _searchResults = [];
 
-
-  Future<void> _fetchPeople(String query) async {
-    // Define the details you want to search customers by
-    String firstName = query;
-    String lastName = query;
-    String phone = query;
-
-    // Call the fetchCustomersByDetails function
-    List<People> customers = await PeoplePostgres.fetchCustomersByDetails(
-        firstName, lastName, phone);
-    if (customers.isNotEmpty) {
-      setState(() {
-        _peopleList = customers;
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    loadCustomers();
   }
 
-  void _search(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-      });
-    } else {
-      _fetchPeople(query).then((_) {
-        setState(() {
-          _searchResults = _peopleList;
-        });
-      });
+  Future<void> loadCustomers() async {
+
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      _peopleList = await WooSignalService.getCustomers();
+    }else{
+      _peopleList = await PeoplePostgres.refreshCustomerList();
     }
+
+    _searchResults = _peopleList;
+    setState(() {});
   }
 
+  void findPeople(query){
+    var result = _peopleList.where(
+            (p) => p.firstName.toLowerCase().contains(query) ||
+                   p.lastName.toLowerCase().contains(query) ||
+                   p.phone.toLowerCase().contains(query)
+    ).toList();
+    _searchResults = result;
+    setState(() {});
+  }
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
-        appBarTheme: AppBarTheme(color: Colors.black),
+        appBarTheme: const AppBarTheme(color: Colors.black),
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
@@ -71,7 +73,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: TextField(
-                  onChanged: _search,
+                  onChanged: findPeople,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),

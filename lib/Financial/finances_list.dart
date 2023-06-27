@@ -61,14 +61,21 @@ class _FinancialScreenState extends State<FinancialScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 10),
-            Container(
+            const SizedBox(height: 10),
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.9,
               child: ToggleButtons(
                 color: themeData.colorScheme.secondary,
                 selectedColor: themeData.colorScheme.primary,
                 fillColor: themeData.colorScheme.secondary.withOpacity(0.2),
-                children: [
+                onPressed: (val) {
+                  setState(() {
+                    segmentedControlValue = val;
+                  });
+                },
+                isSelected:
+                    List.generate(4, (index) => index == segmentedControlValue),
+                children: const [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text("Bills"),
@@ -86,13 +93,6 @@ class _FinancialScreenState extends State<FinancialScreen> {
                     child: Text("Invoices"),
                   ),
                 ],
-                onPressed: (val) {
-                  setState(() {
-                    segmentedControlValue = val;
-                  });
-                },
-                isSelected:
-                    List.generate(4, (index) => index == segmentedControlValue),
               ),
             ),
             Expanded(
@@ -102,9 +102,9 @@ class _FinancialScreenState extends State<FinancialScreen> {
                   future: _initializeDataFuture(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error fetching data'));
+                      return const Center(child: Text('Error fetching data'));
                     } else {
                       List<Map<String, dynamic>> data = snapshot.data!;
                       return ListView.builder(
@@ -121,19 +121,19 @@ class _FinancialScreenState extends State<FinancialScreen> {
                             return ListTile(
                               title: Text(
                                   "Expense ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyText1),
+                                  style: themeData.textTheme.bodyLarge),
                             );
                           } else if (segmentedControlValue == 2) {
                             return ListTile(
                               title: Text(
                                   "Payment ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyText1),
+                                  style: themeData.textTheme.bodyLarge),
                             );
                           } else {
                             return ListTile(
                               title: Text(
                                   "Invoice ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyText1),
+                                  style: themeData.textTheme.bodyLarge),
                             );
                           }
                         },

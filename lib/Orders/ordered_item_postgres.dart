@@ -1,5 +1,4 @@
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/database_functions.dart';
 
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
@@ -20,7 +19,7 @@ class OrderedItemPostgres {
   static Future<void> updateOrderedItemStatus(int orderedItemId, String status) async {
     final connection = PostgreSQLConnectionManager.connection;
 
-    final query = "UPDATE ordered_items SET status = @status WHERE ordered_item_id = @orderedItemId";
+    const query = "UPDATE ordered_items SET status = @status WHERE ordered_item_id = @orderedItemId";
     final values = {
       'status': status,
       'orderedItemId': orderedItemId

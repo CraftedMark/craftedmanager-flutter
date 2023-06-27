@@ -48,9 +48,9 @@ class MenuViewState extends State<MenuView> {
         MenuItem(
             title: "Invoices",
             iconData: CupertinoIcons.money_dollar,
-            destination: OrdersList(title: "Invoices"))
+            destination: const OrdersList(title: "Invoices"))
       ],
-      destination: Text('Placeholder'), //TODO:FIX
+      destination: const Text('Placeholder'), //TODO:FIX
     ),
     MenuItem(
       title: "Contacts",
@@ -62,7 +62,7 @@ class MenuViewState extends State<MenuView> {
           destination: const ContactsList(),
         ),
       ],
-      destination: Text('Placeholder'), //TODO:FIX
+      destination: const Text('Placeholder'), //TODO:FIX
     ),
     MenuItem(
       title: "Product Management",
@@ -71,7 +71,7 @@ class MenuViewState extends State<MenuView> {
         MenuItem(
             title: "Products",
             iconData: CupertinoIcons.cube_box,
-            destination: ProductListPage()),
+            destination: const ProductListPage()),
         MenuItem(
             title: "Customer Based Pricing",
             iconData: CupertinoIcons.money_dollar_circle_fill,
@@ -79,9 +79,9 @@ class MenuViewState extends State<MenuView> {
         MenuItem(
             title: "Assembly Items",
             iconData: CupertinoIcons.cube_box,
-            destination: AssemblyItemManagement()) // New menu item added.
+            destination: const AssemblyItemManagement()) // New menu item added.
       ],
-      destination: Text('Placeholder'), //TODO:FIX
+      destination: const Text('Placeholder'), //TODO:FIX
     ),
     MenuItem(
       title: "Accounting",

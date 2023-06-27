@@ -30,7 +30,7 @@ dependencies:
   expansion_tile_card: ^3.0.0
   flutter_native_timezone:
   timezone:
-  contacts_service:
+  contacts_service: ^0.6.3
   permission_handler: ^8.2.2
   woosignal: ^3.5.0
   onesignal_flutter: ^3.5.1

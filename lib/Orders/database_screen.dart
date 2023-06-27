@@ -35,8 +35,8 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Database Schema'),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Database Schema'),
       ),
       child: SafeArea(
         child: _schemas.isEmpty

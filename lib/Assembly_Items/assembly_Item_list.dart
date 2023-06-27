@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'add_assembly_item.dart';
 
 class AssemblyItemManagement extends StatefulWidget {
+  const AssemblyItemManagement({super.key});
+
   @override
   _AssemblyItemManagementState createState() => _AssemblyItemManagementState();
 }
@@ -17,7 +19,7 @@ class _AssemblyItemManagementState extends State<AssemblyItemManagement> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
-        appBarTheme: AppBarTheme(color: Colors.black),
+        appBarTheme: const AppBarTheme(color: Colors.black),
         scaffoldBackgroundColor: Colors.black,
       ),
       home: Scaffold(
@@ -29,36 +31,34 @@ class _AssemblyItemManagementState extends State<AssemblyItemManagement> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddAssemblyItem()),
+                  MaterialPageRoute(builder: (context) => const AddAssemblyItem()),
                 );
               },
             ),
           ],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 45),
-                child: Text(
-                  'Manage Assembly Items',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+        body: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 45),
+              child: Text(
+                'Manage Assembly Items',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: assemblyItems.length,
-                  itemBuilder: (context, index) {
-                    return _buildItemTile(assemblyItems[index]);
-                  },
-                ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: assemblyItems.length,
+                itemBuilder: (context, index) {
+                  return _buildItemTile(assemblyItems[index]);
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

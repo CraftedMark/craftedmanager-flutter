@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CustomerPricingListScreen extends StatefulWidget {
   final String customerId;
 
-  CustomerPricingListScreen({required this.customerId});
+  const CustomerPricingScreen({super.key, required this.customerId});
 
   @override
   _CustomerPricingListScreenState createState() =>

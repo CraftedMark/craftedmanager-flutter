@@ -67,10 +67,10 @@ class _SystemContactsListState extends State<SystemContactsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('System Contacts'),
+        title: const Text('System Contacts'),
       ),
       body: _isLoadingContacts
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _systemContacts?.length,
               itemBuilder: (BuildContext context, int index) {
@@ -99,6 +99,8 @@ Future<Contact?> showSystemContactList(BuildContext context) async {
 }
 
 class SystemContactsList extends StatefulWidget {
+  const SystemContactsList({super.key});
+
   @override
   _SystemContactsListState createState() => _SystemContactsListState();
 }

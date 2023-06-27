@@ -3,6 +3,8 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:flutter/cupertino.dart';
 
 class AddProductScreen extends StatefulWidget {
+  const AddProductScreen({super.key});
+
   @override
   _AddProductScreenState createState() => _AddProductScreenState();
 }
@@ -19,20 +21,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
   void _saveProduct() async {
     if (_descriptionController.text.isNotEmpty &&
         _retailPriceController.text.isNotEmpty &&
-        _quantityController.text.isNotEmpty &&
+        // _quantityController.text.isNotEmpty &&
         _itemSourceController.text.isNotEmpty &&
         _packagingController.text.isNotEmpty &&
         _flavorController.text.isNotEmpty &&
         _dosageController.text.isNotEmpty) {
       Product newProduct = Product(
         id: 0,
+        name: '',//TODO:FIX
         description: _descriptionController.text,
         retailPrice: double.parse(_retailPriceController.text),
-        quantity: int.parse(_quantityController.text),
+        // quantity: int.parse(_quantityController.text),
         itemSource: _itemSourceController.text,
         packaging: _packagingController.text,
         flavor: _flavorController.text,
-        dose: _dosageController.text,
+        dose: double.parse(_dosageController.text),
         assemblyItems: [],
       );
       await ProductPostgres.saveProduct(newProduct);

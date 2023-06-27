@@ -1,7 +1,14 @@
+import 'package:woosignal/models/links.dart';
+import 'package:woosignal/models/response/customer.dart' as wsCustomer;
+import 'package:woosignal/models/response/customer_batch.dart';
 import 'package:uuid/uuid.dart';
+
+final DateTime _defaultDate = DateTime.parse('2000-00-00');
+
 
 class People {
   final String id;
+  final int wooSignalId;
   final String firstName;
   final String lastName;
   final String phone;
@@ -23,6 +30,7 @@ class People {
 
   People({
     required this.id,
+    required this.wooSignalId,
     required this.firstName,
     required this.lastName,
     required this.phone,
@@ -46,6 +54,7 @@ class People {
   factory People.empty() {
     return People(
       id: Uuid().v4(),
+      wooSignalId: 0,
       firstName: '',
       lastName: '',
       phone: '',
@@ -62,6 +71,8 @@ class People {
       notes: '',
       createdBy: '',
       updatedBy: '',
+      createdDate: DateTime.now(),
+      updatedDate: DateTime.now(),
     );
   }
 
@@ -87,9 +98,102 @@ class People {
         'updatedby': updatedBy,
       };
 
+  Customers toWSCustomer({
+    List<dynamic> metaData = const [],
+     String avatarUrl = 'test',
+    bool isPayingCustomer = false,
+    String role = 'Customer',
+  }){
+    String company = 'Company';
+
+    Ing billing = Ing(
+      firstName: firstName,
+      lastName: lastName,
+      company: company,
+      address1: address1,
+      address2: address2,
+      email: email,
+      state: state,
+      city: city,
+      postcode: zip,
+      phone: phone,
+      country: "US" //TODO:CHANGE,
+    );
+    Ing shipping = Ing(
+      firstName: firstName,
+      lastName: lastName,
+      company: company,
+      address1: address1,
+      address2: address2,
+      city: city,
+      state: state,
+      postcode: zip,
+      email: email,
+      phone: phone,
+      country: "US" //TODO:CHANGE,
+    );
+
+    return Customers(
+      id: 0,
+      firstName: firstName,
+      lastName: lastName,
+      username: firstName,
+      email: email,
+      billing: billing,
+      shipping: shipping,
+      dateCreated: createdDate ?? DateTime.now(),
+      dateCreatedGmt: createdDate ?? DateTime.now(),
+      dateModified: updatedDate ?? DateTime.now(),
+      dateModifiedGmt: updatedDate ?? DateTime.now(),
+      metaData: metaData,
+      links: Links(collection: [],self: [],up: []),
+      avatarUrl: avatarUrl,
+      isPayingCustomer: isPayingCustomer,
+      role: role
+    );
+  }
+
+  factory People.fromWSCustomerS( Customers customer){
+    return People(
+        id: '',
+        wooSignalId: customer.id ?? 0,
+        firstName: customer.firstName ?? "Unknown",
+        lastName: customer.lastName ?? "Unknown",
+        phone: customer.billing?.phone ?? "Unknown",
+        email: customer.email ?? "Unknown",
+        city: customer.billing?.city,
+        state: customer.billing?.state,
+        address1: customer.billing?.country,
+        createdDate: customer.dateCreated ?? _defaultDate,
+        zip: customer.billing?.postcode,
+        updatedDate: customer.dateModified ?? _defaultDate,
+    );
+  }
+
+
+  factory People.fromWSCustomer( wsCustomer.Customer customer) {
+    return People(
+      id: '',
+      wooSignalId: customer.id ?? 1,
+      firstName: customer.firstName ?? "Unknown",
+      lastName: customer.lastName ?? "Unknown",
+      phone: customer.billing?.phone ?? "Unknown",
+      email: customer.email ?? "Unknown",
+      city: customer.billing?.city,
+      state: customer.billing?.state,
+      address1: customer.billing?.address1,
+      address2: customer.billing?.address2,
+      zip: customer.billing?.postcode,
+      createdDate: DateTime.tryParse(customer.dateCreated??'') ?? _defaultDate,
+      updatedDate: DateTime.tryParse(customer.dateModified?? '') ?? _defaultDate,
+    );
+  }
+
+
   factory People.fromMap(Map<String, dynamic> map) {
     return People(
       id: map['id'].toString(),
+      wooSignalId: 0,
       firstName: map['firstname'],
       lastName: map['lastname'],
       phone: map['phone'],
@@ -113,6 +217,7 @@ class People {
 
   People copyWith({
     String? id,
+    int? woosignalId,
     String? firstName,
     String? lastName,
     String? phone,
@@ -134,6 +239,7 @@ class People {
   }) {
     return People(
       id: id ?? this.id,
+      wooSignalId: woosignalId ?? wooSignalId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,

@@ -1,15 +1,18 @@
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../config.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
   final bool isNewProduct;
   final Function onProductSaved;
 
-  ProductDetailPage(
-      {required this.product,
+  const ProductDetailPage(
+      {super.key, required this.product,
       this.isNewProduct = false,
       required this.onProductSaved});
 
@@ -74,11 +77,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   InputDecoration _getInputDecoration(String labelText) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: TextStyle(color: Colors.white),
-      focusedBorder: OutlineInputBorder(
+      labelStyle: const TextStyle(color: Colors.white),
+      focusedBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
       ),
     );
@@ -106,7 +109,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _nameController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Name:'),
+                        decoration: _getInputDecoration('*Name:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -142,7 +145,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _descriptionController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Description:'),
+                        decoration: _getInputDecoration('*Description:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -163,14 +166,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         controller: _wholesalePriceController,
                         style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.number,
-                        decoration: _getInputDecoration('Wholesale Price:'),
+                        decoration: _getInputDecoration('*Wholesale Price:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
                         controller: _retailPriceController,
                         style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.number,
-                        decoration: _getInputDecoration('Retail Price:'),
+                        decoration: _getInputDecoration('*Retail Price:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -201,7 +204,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       TextFormField(
                         controller: _imageUrlController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: _getInputDecoration('Image URL:'),
+                        decoration: _getInputDecoration('*Image URL:'),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -243,14 +246,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         value: _isAssemblyItemController.text.isEmpty
                             ? null
                             : _isAssemblyItemController.text,
-                        items: <DropdownMenuItem<String>>[
+                        items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(
                             value: "true",
-                            child: const Text('Yes'),
+                            child: Text('Yes'),
                           ),
                           DropdownMenuItem<String>(
                             value: "false",
-                            child: const Text('No'),
+                            child: Text('No'),
                           ),
                         ],
                         onChanged: (String? newValue) {
@@ -351,11 +354,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         Provider.of<ProductProvider>(context, listen: false);
 
     if (widget.isNewProduct) {
-      print('Adding new product');
-      productProvider.addProduct(updatedProduct);
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        await WooSignalService.createProduct(updatedProduct);
+      }else{
+        productProvider.addProduct(updatedProduct);
+      }
+      
     } else {
-      print('Updating existing product');
-      productProvider.updateProduct(updatedProduct);
+      if(AppConfig.ENABLE_WOOSIGNAL){
+        await WooSignalService.updateProduct(updatedProduct);
+      }else{
+        productProvider.updateProduct(updatedProduct);
+      }
+      
     }
   }
 }

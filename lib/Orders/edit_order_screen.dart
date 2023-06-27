@@ -4,22 +4,23 @@ import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Orders/ordered_item_postgres.dart';
 import 'package:crafted_manager/Orders/product_search_screen.dart';
-import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
+
+import '../config.dart';
+import 'old_order_provider.dart';
+import 'ordered_item_postgres.dart';
 
 class EditOrderScreen extends StatefulWidget {
   final Order order;
   final People customer;
   final List<Product> products;
-  final VoidCallback onStateChanged;
 
-  const EditOrderScreen({
+  const EditOrderScreen({super.key,
     required this.order,
     required this.customer,
     required this.products,
-    required this.onStateChanged,
   });
 
   @override
@@ -27,6 +28,7 @@ class EditOrderScreen extends StatefulWidget {
 }
 
 class _EditOrderScreenState extends State<EditOrderScreen> {
+  late OrderProvider _provider;
   List<OrderedItem> _orderedItems = [];
   double _subTotal = 0.0;
   String _status = '';
@@ -34,6 +36,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   void _setInitialOrderedItems() {
     if (_orderedItems.isEmpty) {
       _orderedItems = List.from(widget.order.orderedItems);
+      setState(() {});
     }
   }
 
@@ -49,7 +52,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return OrderedItemPostgres.fetchOrderedItems(widget.order.id);
+    return _provider.orders.where((o) => o.id == widget.order.id).first.orderedItems;
   }
 
   double calculateSubtotal() {
@@ -86,9 +89,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       );
       _subTotal = calculateSubtotal();
     } else {
-      var uuid = Uuid();
       _orderedItems.add(OrderedItem(
-        id: uuid.v1(),
         orderId: widget.order.id,
         product: product,
         productName: product.name,
@@ -107,6 +108,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       ));
       _subTotal = calculateSubtotal();
     }
+    getOrderedItemsByOrderId();
+    setState(() {});
     print('_orderedItems: $_orderedItems');
   }
 
@@ -135,14 +138,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Future<void> updateOrder() async {
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
     Order updatedOrder = widget.order.copyWith(
       totalAmount: _subTotal,
       orderStatus: _status,
       orderedItems: _orderedItems,
     );
 
-    bool result = await orderProvider.updateOrder(updatedOrder, _orderedItems);
+    var result = await _provider.updateOrder(updatedOrder, newItems: _orderedItems);
 
     if (mounted) {
       if (result) {
@@ -160,17 +163,17 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         );
       }
     }
+
   }
 
   @override
   Widget build(BuildContext context) {
+    _provider = Provider.of<OrderProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Order'),
+        title: const Text('Edit Order'),
       ),
-      body: Consumer<OrderProvider>(builder: (context, orderProvider, child) {
-        // _orderedItems = widget.order.orderedItems; // Remove this line
-        return ListView(
+      body: ListView(
           children: [
             SizedBox(height: 12.0),
             Padding(
@@ -207,20 +210,45 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     MaterialPageRoute(
                       builder: (context) => ProductSearchScreen(),
                     ),
-                  ).then((selectedProducts) async {
-                    if (selectedProducts != null &&
-                        selectedProducts is List<Product> &&
-                        selectedProducts.isNotEmpty) {
-                      final result = await showDialog<Map<String, dynamic>>(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            AddOrderedItemDialog(products: selectedProducts),
-                      );
+                  ).then((result) async {
+                    if (result != null) {
+                      final product = result['product'] as Product;
+                      final quantity = result['quantity'];
+                      addOrderedItem(product, result['quantity']);
 
-                      if (result != null) {
-                        addOrderedItem(result['product'], result['quantity']);
-                      }
+
+                      final orderedItem = OrderedItem(
+                        orderId: widget.order.id,
+                        product: product,
+                        productName: product.name,
+                        productId: product.id!,
+                        name: product.name,
+                        quantity: quantity,
+                        price: product.retailPrice,
+                        discount: 0,
+                        productDescription: product.description,
+                        productRetailPrice: product.retailPrice,
+                        status: 'Processing',
+                        itemSource: product.itemSource,
+                        packaging: product.packaging ?? '',
+                        dose: product.dose?? 0.1,
+                        flavor: product.flavor,
+                      );
+                      _provider.addOrderedItem(widget.order.id, orderedItem);
                     }
+                    // print('return from product screen');
+                    // print(selectedProducts);
+                    // if (selectedProducts != null &&selectedProducts.isNotEmpty){
+                    //   final result = await showDialog<Map<String, dynamic>>(
+                    //     context: context,
+                    //     builder: (BuildContext context) =>
+                    //         AddOrderedItemDialog(products: [selectedProducts['product']]),
+                    //   );
+                    //
+                    //   if (result != null) {
+                    //     addOrderedItem(result['product'], result['quantity']);
+                    //   }
+                    // }
                   });
                 },
                 child: Text('Add Item'),
@@ -431,8 +459,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               ),
             ),
           ],
-        );
-      }),
+        ),
     );
   }
 }
@@ -440,7 +467,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 class AddOrderedItemDialog extends StatefulWidget {
   final List<Product> products;
 
-  AddOrderedItemDialog({required this.products});
+  const AddOrderedItemDialog({super.key, required this.products});
 
   @override
   _AddOrderedItemDialogState createState() => _AddOrderedItemDialogState();
@@ -453,7 +480,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Item'),
+      title: const Text('Add Item'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -471,12 +498,12 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
                 child: Text(product.name),
               );
             }).toList(),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Product',
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           TextFormField(
             keyboardType: TextInputType.number,
             initialValue: '1',
@@ -485,7 +512,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
                 _quantity = int.tryParse(value) ?? 1;
               });
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Quantity',
               border: OutlineInputBorder(),
             ),
@@ -497,7 +524,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -510,7 +537,7 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
               // Show error message
             }
           },
-          child: Text('Add'),
+          child: const Text('Add'),
         ),
       ],
     );

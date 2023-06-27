@@ -27,7 +27,7 @@ Future<List<Map<String, dynamic>>> fetchData(String tableName) async {
     print('Fetched $tableName data: $result');
   }
 
-  return result != null ? result.map((row) => row.toColumnMap()).toList() : [];
+  return result.isNotEmpty ? result.map((row) => row.toColumnMap()).toList() : [];
 }
 
 // Searches for data in the specified table using the provided search query and substitution values

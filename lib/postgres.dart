@@ -3,7 +3,6 @@
 import 'package:crafted_manager/Admin/user_model.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:flutter/foundation.dart';
-import 'package:postgres/postgres.dart';
 
 // Establishes a connection to the PostgreSQL database
 
@@ -29,8 +28,7 @@ Future<List<Map<String, dynamic>>> fetchData(String tableName) async {
   if (kDebugMode) {
     print('Fetched $tableName data: $result');
   }
-
-  return result != null ? result.map((row) => row.toColumnMap()).toList() : [];
+  return result.isNotEmpty ? result.map((row) => row.toColumnMap()).toList() : [];
 }
 
 // Searches for data in the specified table using the provided search query and substitution values

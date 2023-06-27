@@ -16,7 +16,6 @@ class _EditProductPageState extends State<EditProductPage> {
   late String _category;
   late double _costOfGood;
   late String _description;
-  late String _flavor;
   final _formKey = GlobalKey<FormState>();
   late String _itemSource;
   late int _manufacturerId;
@@ -67,13 +66,13 @@ class _EditProductPageState extends State<EditProductPage> {
     _quantityInStock = widget.product.quantityInStock;
     _imageUrl = widget.product.imageUrl;
     _perGramCost = widget.product.perGramCost;
-    _bulkPricing = widget.product.bulkPricing;
+    _bulkPricing = widget.product.bulkPricing ?? 0;
     _weightInGrams = widget.product.weightInGrams;
     _packageWeightMeasure = widget.product.packageWeightMeasure;
     _packageWeight = widget.product.packageWeight;
     _type = widget.product.type;
-    _dose = widget.product.dose;
-    _packaging = widget.product.packaging;
+    _dose = widget.product.dose ?? 0.5;
+    _packaging = widget.product.packaging ?? 'OEM';
     _flavor = widget.product.flavor;
   }
 
@@ -86,7 +85,6 @@ class _EditProductPageState extends State<EditProductPage> {
         category: _category,
         subCategory: _subCategory,
         subcat2: _subcat2,
-        flavor: _flavor,
         description: _description,
         costOfGood: _costOfGood,
         manufacturingPrice: _manufacturingPrice,
@@ -283,9 +281,9 @@ class _EditProductPageState extends State<EditProductPage> {
                   },
                 ),
                 TextFormField(
-                  initialValue: _dose,
+                  initialValue: _dose.toString(),
                   decoration: const InputDecoration(labelText: 'Dose'),
-                  onSaved: (value) => _dose = value!,
+                  onSaved: (value) => _dose = double.parse(value??'0.5'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an dose';
@@ -318,7 +316,7 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _quantitySold.toString(),
                   decoration: const InputDecoration(labelText: 'Quantity Sold'),
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  keyboardType: const TextInputType.numberWithOptions(signed: false),
                   onSaved: (value) => _quantitySold = int.parse(value!),
                 ),
                 TextFormField(
@@ -337,16 +335,16 @@ class _EditProductPageState extends State<EditProductPage> {
                 TextFormField(
                   initialValue: _perGramCost.toString(),
                   decoration: const InputDecoration(labelText: 'Per Gram Cost'),
-                  keyboardType: TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
-                  onSaved: (value) => _perGramCost = int.parse(value!),
+                  onSaved: (value) => _perGramCost = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _bulkPricing.toString(),
                   decoration: const InputDecoration(labelText: 'Bulk Pricing'),
-                  keyboardType: TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                       decimal: true, signed: false),
-                  onSaved: (value) => _bulkPricing = int.parse(value!),
+                  onSaved: (value) => _bulkPricing = double.parse(value!),
                 ),
                 TextFormField(
                   initialValue: _weightInGrams.toString(),

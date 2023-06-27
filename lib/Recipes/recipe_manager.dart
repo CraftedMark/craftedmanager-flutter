@@ -2,13 +2,13 @@ import 'package:crafted_manager/Recipes/add_recipe.dart';
 import 'package:flutter/material.dart';
 
 class RecipeManager extends StatefulWidget {
+  const RecipeManager({Key? key}) : super(key: key);
   @override
-  _RecipeManagerState createState() => _RecipeManagerState();
+  State<RecipeManager> createState() => _RecipeManagerState();
 }
 
 class _RecipeManagerState extends State<RecipeManager> {
   List<Recipe> recipes = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

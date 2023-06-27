@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'cbp_list_product_screen.dart';
 
 class CustomerSearchScreen extends StatefulWidget {
+  const CustomerSearchScreen({super.key});
+
   @override
   _CustomerSearchScreenState createState() => _CustomerSearchScreenState();
 }
@@ -28,39 +30,39 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
 
   Future<Map<String, String>?> _showAddPricingListDialog(
       BuildContext context) async {
-    TextEditingController _nameController = TextEditingController();
-    TextEditingController _descriptionController = TextEditingController();
+    TextEditingController nameController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
 
     return showDialog<Map<String, String>>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Pricing List Details'),
+          title: const Text('Enter Pricing List Details'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
               ),
               TextField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Save'),
+              child: const Text('Save'),
               onPressed: () {
-                String name = _nameController.text.trim();
-                String description = _descriptionController.text.trim();
+                String name = nameController.text.trim();
+                String description = descriptionController.text.trim();
                 if (name.isNotEmpty) {
                   Navigator.of(context)
                       .pop({'name': name, 'description': description});

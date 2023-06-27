@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class SelectCustomerScreen extends StatelessWidget {
   final List<People> customers;
 
-  SelectCustomerScreen({required this.customers});
+  const SelectCustomerScreen({super.key, required this.customers});
 
   @override
   Widget build(BuildContext context) {

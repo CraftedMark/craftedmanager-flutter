@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:crafted_manager/postgres.dart';
-
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 
 class OrdersPostgres {

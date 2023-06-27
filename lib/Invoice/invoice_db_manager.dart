@@ -1,31 +1,10 @@
 import 'package:crafted_manager/Models/invoices_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/orders_db_manager.dart';
-import 'package:postgres/postgres.dart';
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 
 class InvoicePostgres {
-  static Future<PostgreSQLConnection> openConnection() async {
-    print('Opening connection...');
-    final connection = PostgreSQLConnection(
-      'web.craftedsolutions.co', // Database host
-      5432, // Port number
-      'craftedmanager_db', // Database name
-      username: 'craftedmanager_dbuser', // Database username
-      password: '!!Laganga1983', // Database password
-    );
-    await connection.open();
-    print('Connection opened');
-    return connection;
-  }
-
-  static Future<void> closeConnection(PostgreSQLConnection connection) async {
-    print('Closing connection...');
-    await connection.close();
-    print('Connection closed');
-  }
-
-  Future<void> createInvoice(Invoice invoice) async {
-    final connection = await InvoicePostgres.openConnection();
+   Future<void> createInvoice(Invoice invoice) async {
+    final connection = PostgreSQLConnectionManager.connection;
 
     try {
       await connection.transaction((ctx) async {
@@ -56,14 +35,12 @@ VALUES (@invoice_id, @productId, @quantity, @price, @discount, @description)
       });
     } catch (e) {
       print('Error creating invoice: ${e.toString()}');
-    } finally {
-      await OrderPostgres.closeConnection(connection);
     }
   }
 
   Future<Invoice?> getInvoiceById(String id) async {
     try {
-      final connection = await InvoicePostgres.openConnection();
+      final connection = PostgreSQLConnectionManager.connection;
 
       final results = await connection.mappedResultsQuery('''
 SELECT * FROM invoices WHERE id = @id
@@ -98,7 +75,6 @@ SELECT * FROM ordered_items WHERE invoice_id = @invoice_id
           return invoice;
         }
       }
-      await InvoicePostgres.closeConnection(connection);
     } catch (e) {
       print(e.toString());
       return null;
@@ -107,7 +83,7 @@ SELECT * FROM ordered_items WHERE invoice_id = @invoice_id
   }
 
   Future<void> updateInvoice(Invoice invoice) async {
-    final connection = await InvoicePostgres.openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
 
     try {
       await connection.transaction((ctx) async {
@@ -147,13 +123,11 @@ VALUES (@invoice_id, @productId, @quantity, @price, @discount, @description)
       });
     } catch (e) {
       print('Error updating invoice: ${e.toString()}');
-    } finally {
-      await OrderPostgres.closeConnection(connection);
     }
   }
 
   Future<void> deleteInvoice(int id) async {
-    final connection = await OrderPostgres.openConnection();
+    final connection = PostgreSQLConnectionManager.connection;
 
     try {
       await connection.transaction((ctx) async {
@@ -175,8 +149,6 @@ VALUES (@invoice_id, @productId, @quantity, @price, @discount, @description)
       });
     } catch (e) {
       print('Error deleting invoice: ${e.toString()}');
-    } finally {
-      await OrderPostgres.closeConnection(connection);
     }
   }
 

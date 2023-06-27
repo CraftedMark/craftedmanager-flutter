@@ -2,13 +2,16 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
-import 'package:crafted_manager/Providers/order_provider.dart';
+// import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/people_model.dart';
+import '../config.dart';
+import 'old_order_provider.dart';
 import 'order_detail_screen.dart';
 import 'ordered_item_postgres.dart';
 
@@ -16,6 +19,8 @@ enum OrderListType {
   productionAndCancelled,
   archived,
 }
+
+var _cachedCustomers = <People>{}; //replace with Provider
 
 class OrdersList extends StatefulWidget {
   final OrderListType listType;
@@ -34,18 +39,13 @@ class OrdersList extends StatefulWidget {
 class _OrdersListState extends State<OrdersList> {
   var cachedCustomers = <People>{};
 
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
-  }
-
   Future<void> _refreshOrdersList() async {
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -57,7 +57,7 @@ class _OrdersListState extends State<OrdersList> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SearchPeopleScreen(),
+                    builder: (context) => const SearchPeopleScreen(),
                   ),
                 );
               },
@@ -68,16 +68,7 @@ class _OrdersListState extends State<OrdersList> {
       body: SafeArea(
         child: Consumer<OrderProvider>(
           builder: (ctx, orderProvider, _) {
-            if (orderProvider == null) {
-              print('OrderProvider is null');
-              return Center(child: CircularProgressIndicator());
-            }
-
             final orders = orderProvider.orders;
-            if (orders == null) {
-              print('Orders are null');
-              return Center(child: CircularProgressIndicator());
-            }
 
             if (orders.isEmpty) {
               print('No orders found');
@@ -96,10 +87,16 @@ class _OrdersListState extends State<OrdersList> {
             return EasyRefresh(
               child: ListView.builder(
                 cacheExtent: 10000, //for cache more orders in one time(UI)
-                // addAutomaticKeepAlives: true,
                 itemCount: sortedOrders.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return _OrderWidget(order: sortedOrders[index]);
+                  return _OrderWidget(
+                    order: sortedOrders[index],
+                    onStateChanged: () async {
+                      await orderProvider
+                          .fetchOrders(); // Refresh the orders from the provider
+                      _refreshOrdersList();
+                    },
+                  );
                 },
               ),
               onRefresh: () async {
@@ -141,6 +138,7 @@ Future<People> _getCustomerById(String customerId) async {
   //TODO: find out why the customer can be null
   People fakeCustomer = People(
     id: '1',
+    wooSignalId: 1,
     firstName: 'Fake',
     lastName: "Customer",
     phone: '123',
@@ -148,13 +146,27 @@ Future<People> _getCustomerById(String customerId) async {
     brand: 'brand',
     notes: 'notes',
   );
-  print('yep');
-  return await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+
+  var cachedUser = _cachedCustomers.where((c) => c.id == customerId);
+  if (cachedUser.isEmpty) {
+    var newUser = People.empty();
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
+    } else {
+      newUser = await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
+    }
+    _cachedCustomers.addAll([newUser]);
+    return newUser;
+  }
+  return cachedUser.first;
 }
 
 class _OrderWidget extends StatefulWidget {
   final Order order;
-  const _OrderWidget({Key? key, required this.order}) : super(key: key);
+  final VoidCallback onStateChanged;
+  const _OrderWidget(
+      {Key? key, required this.order, required this.onStateChanged})
+      : super(key: key);
 
   @override
   State<_OrderWidget> createState() => _OrderWidgetState();
@@ -192,9 +204,6 @@ class _OrderWidgetState extends State<_OrderWidget> {
                     builder: (context) => OrderDetailScreen(
                       order: widget.order,
                       customer: customer!,
-                      onStateChanged: () {
-                        // Handle state change if needed
-                      },
                     ),
                   ),
                 );

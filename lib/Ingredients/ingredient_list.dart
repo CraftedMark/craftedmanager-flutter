@@ -6,6 +6,8 @@ import 'ingredient_db_manager.dart';
 import 'ingredient_detail.dart';
 
 class IngredientList extends StatefulWidget {
+  const IngredientList({super.key});
+
   @override
   _IngredientListState createState() => _IngredientListState();
 }
@@ -40,19 +42,19 @@ class _IngredientListState extends State<IngredientList> {
           brightness: Brightness.dark,
           backgroundColor: Colors.black,
           primarySwatch: Colors.blue,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.black),
+          appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
         ),
         home: Scaffold(
           appBar: AppBar(
-            title: Text('Ingredients'),
+            title: const Text('Ingredients'),
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(48),
+              preferredSize: const Size.fromHeight(48),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
                   controller: searchController,
                   onChanged: (value) => searchIngredients(value),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Search...',
                     border: OutlineInputBorder(),
                   ),
@@ -68,17 +70,17 @@ class _IngredientListState extends State<IngredientList> {
                 itemBuilder: (context, index) {
                   Ingredient ingredient = manager.ingredients[index];
                   return Container(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.grey[900],
                     ),
                     child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       title: Text(ingredient.name),
                       subtitle: Container(
-                        padding: EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.only(top: 8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -107,12 +109,12 @@ class _IngredientListState extends State<IngredientList> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IngredientDetail(),
+                  builder: (context) => const IngredientDetail(),
                 ),
               );
             },
-            child: Icon(Icons.add),
             backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.add),
           ),
         ),
       ),

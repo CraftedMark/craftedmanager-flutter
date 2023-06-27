@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class EmployeePage extends StatefulWidget {
+  const EmployeePage({super.key});
+
   @override
   _EmployeePageState createState() => _EmployeePageState();
 }
@@ -46,19 +48,19 @@ class _EmployeePageState extends State<EmployeePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Image Source'),
+          title: const Text('Select Image Source'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 TextButton(
-                  child: Text('Camera'),
+                  child: const Text('Camera'),
                   onPressed: () {
                     Navigator.of(context).pop();
                     _pickImage(ImageSource.camera);
                   },
                 ),
                 TextButton(
-                  child: Text('Photo Library'),
+                  child: const Text('Photo Library'),
                   onPressed: () {
                     Navigator.of(context).pop();
                     _pickImage(ImageSource.gallery);
@@ -78,8 +80,8 @@ class _EmployeePageState extends State<EmployeePage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Employee Added'),
-          content: SingleChildScrollView(
+          title: const Text('Employee Added'),
+          content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text('Employee has been successfully added.'),
@@ -88,7 +90,7 @@ class _EmployeePageState extends State<EmployeePage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -103,7 +105,7 @@ class _EmployeePageState extends State<EmployeePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Employees'),
+        title: const Text('Employees'),
         backgroundColor: Colors.black,
       ),
       body: Column(
@@ -111,12 +113,12 @@ class _EmployeePageState extends State<EmployeePage> {
           Form(
             key: _employeeFormKey,
             child: Padding(
-              padding: EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 children: <Widget>[
                   TextFormField(
                     controller: _firstNameController,
-                    decoration: InputDecoration(labelText: 'First Name'),
+                    decoration: const InputDecoration(labelText: 'First Name'),
                     validator: (value) {
                       if (value?.isEmpty == true) {
                         return 'Please enter first name';
@@ -126,7 +128,7 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   TextFormField(
                     controller: _lastNameController,
-                    decoration: InputDecoration(labelText: 'Last Name'),
+                    decoration: const InputDecoration(labelText: 'Last Name'),
                     validator: (value) {
                       if (value!.isEmpty == true) {
                         return 'Please enter last name';
@@ -136,7 +138,7 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   TextFormField(
                     controller: _payRateController,
-                    decoration: InputDecoration(labelText: 'Pay Rate'),
+                    decoration: const InputDecoration(labelText: 'Pay Rate'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -147,7 +149,7 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   TextFormField(
                     controller: _phoneController,
-                    decoration: InputDecoration(labelText: 'Phone'),
+                    decoration: const InputDecoration(labelText: 'Phone'),
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -158,7 +160,7 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   TextFormField(
                     controller: _positionController,
-                    decoration: InputDecoration(labelText: 'Position'),
+                    decoration: const InputDecoration(labelText: 'Position'),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter position';
@@ -168,7 +170,7 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   if (_selectedImage != null)
                     Container(
-                      margin: EdgeInsets.all(8),
+                      margin: const EdgeInsets.all(8),
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
@@ -180,11 +182,11 @@ class _EmployeePageState extends State<EmployeePage> {
                     ),
                   TextButton(
                     onPressed: _showImagePickerDialog,
-                    child: Text('Pick Image'),
+                    child: const Text('Pick Image'),
                   ),
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(labelText: 'Email'),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -195,21 +197,21 @@ class _EmployeePageState extends State<EmployeePage> {
                   ),
                   TextFormField(
                     controller: _dateOfHireController,
-                    decoration: InputDecoration(labelText: 'Date of Hire'),
+                    decoration: const InputDecoration(labelText: 'Date of Hire'),
                     onTap: () async {
-                      FocusScope.of(context).requestFocus(new FocusNode());
+                      FocusScope.of(context).requestFocus(FocusNode());
                       final DateTime? picked = await showDatePicker(
                         context: context,
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2000),
                         lastDate: DateTime.now(),
                       );
-                      if (picked != null && picked != _selectedDate)
-                        setState(() {
-                          _selectedDate = picked;
-                          _dateOfHireController.text =
-                              _selectedDate!.toIso8601String().split('T')[0];
-                        });
+                      if (picked != null && picked != _selectedDate){
+                        _selectedDate = picked;
+                        _dateOfHireController.text =
+                        _selectedDate!.toIso8601String().split('T')[0];
+                        setState(() {});
+                      }
                     },
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -234,7 +236,7 @@ class _EmployeePageState extends State<EmployeePage> {
                             position: _positionController.text,
                             email: _emailController.text,
                             dateOfHire: DateTime.parse(
-                                _dateOfHireController.text + 'T00:00:00'),
+                                '${_dateOfHireController.text}T00:00:00'),
                             employeeID: null,
                             imageUrl: '',
                             imagePath: imagePath,
@@ -249,7 +251,7 @@ class _EmployeePageState extends State<EmployeePage> {
                         }
                       }
                     },
-                    child: Text('Add Employee'),
+                    child: const Text('Add Employee'),
                   ),
                 ],
               ),
@@ -274,7 +276,7 @@ class _EmployeePageState extends State<EmployeePage> {
                 } else if (snapshot.hasError) {
                   return Text("${snapshot.error}");
                 }
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               },
             ),
           ),

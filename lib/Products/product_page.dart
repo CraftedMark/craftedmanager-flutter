@@ -3,6 +3,9 @@ import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/Products/product_detail.dart';
 import 'package:flutter/material.dart';
 
+import '../WooCommerce/woosignal-service.dart';
+import '../config.dart';
+
 // Add this function right below import statements
 String indexToType(int index) {
   switch (index) {
@@ -20,6 +23,8 @@ String indexToType(int index) {
 }
 
 class ProductListPage extends StatefulWidget {
+  const ProductListPage({super.key});
+
   @override
   _ProductListPageState createState() => _ProductListPageState();
 }
@@ -37,15 +42,17 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Future<void> _fetchProducts() async {
-    print('Fetching products for type: ${indexToType(_currentSegmentIndex)}');
-    _products =
-        ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
-    _products.then((value) {
-      print('Fetched products: $value');
-      setState(() {
-        _products = Future.value(value); // Update the products list.
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      _products = WooSignalService.getProducts();
+      setState(() {});
+    }else{
+      _products = ProductPostgres.getAllProducts(indexToType(_currentSegmentIndex));
+      _products.then((value) {
+        setState(() {
+          _products = Future.value(value);
+        });
       });
-    });
+    }
   }
 
   void createNewProduct() {
@@ -113,7 +120,7 @@ class _ProductListPageState extends State<ProductListPage> {
                         );
                       }
                     },
-                    underline: SizedBox.shrink(),
+                    underline: const SizedBox.shrink(),
                     dropdownColor: Colors.grey.shade800,
                     items: [
                       DropdownMenuItem(
@@ -150,7 +157,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       itemBuilder: (context, index) {
                         final product = snapshot.data![index];
                         return ListTile(
-                          tileColor: Color(0xFF2C2C2E),
+                          tileColor: const Color(0xFF2C2C2E),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),

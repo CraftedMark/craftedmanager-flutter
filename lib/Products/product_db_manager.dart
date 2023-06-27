@@ -6,6 +6,8 @@ import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 
 class ProductPostgres {
+  ProductPostgres._();
+
   static Future<Product> addAssemblyProduct(Product assemblyProduct) async {
     print('Adding assembly product: ${assemblyProduct.name}');
     final connection = PostgreSQLConnectionManager.connection;
