@@ -73,7 +73,7 @@ class OrderProvider extends ChangeNotifier {
   Future<void> createOrder(Order newOrder, People customer) async {
 
     if(AppConfig.ENABLE_WOOSIGNAL){
-      var result = await WooSignalService.createOrder(newOrder, newOrder.orderedItems);
+      var result = await WooSignalService.createOrder(newOrder, newOrder.orderedItems, customer.wooSignalId);
       print(result);
     }else{
       await OrderPostgres().createOrder(newOrder, newOrder.orderedItems);
