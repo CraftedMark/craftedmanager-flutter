@@ -65,17 +65,15 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   void editOrderedItem(int index) {
     if (_orderedItems[index].quantity > 1) {
-      setState(() {
-        _orderedItems[index] = _orderedItems[index].copyWith(
-          quantity: _orderedItems[index].quantity - 1,
-        );
-        _subTotal = calculateSubtotal();
-      });
+      _orderedItems[index] = _orderedItems[index].copyWith(
+        quantity: _orderedItems[index].quantity - 1,
+      );
+      _subTotal = calculateSubtotal();
+      setState(() {});
     } else {
-      setState(() {
-        _orderedItems.removeAt(index);
-        _subTotal = calculateSubtotal();
-      });
+      _orderedItems.removeAt(index);
+      _subTotal = calculateSubtotal();
+      setState(() {});
     }
   }
 
@@ -115,26 +113,27 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   void updateOrderedItem({
     required int index,
-    required String name,
-    required double price,
-    required int quantity,
-    required String itemSource,
-    required String packaging,
-    required double dose,
-    required String flavor,
+    String? name,
+    double? price,
+    int? quantity,
+    String? itemSource,
+    String? packaging,
+    double? dose,
+    String? flavor,
   }) {
-    setState(() {
-      _orderedItems[index] = _orderedItems[index].copyWith(
-        productName: name,
-        price: price,
-        quantity: quantity,
-        itemSource: itemSource,
-        packaging: packaging,
-        dose: dose,
-        flavor: flavor,
-      );
-      _subTotal = calculateSubtotal();
-    });
+    final updatedItem = _orderedItems[index].copyWith(
+      productName: name,
+      price: price,
+      quantity: quantity,
+      itemSource: itemSource,
+      packaging: packaging,
+      dose: dose,
+      flavor: flavor,
+    );
+    // _provider.updateOrder(widget.order);
+    _orderedItems[index] = updatedItem;
+    _subTotal = calculateSubtotal();
+    setState(() {});
   }
 
   Future<void> updateOrder() async {
@@ -283,12 +282,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             updateOrderedItem(
                               index: index,
                               name: value,
-                              price: _orderedItems[index].price,
-                              quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
-                              packaging: _orderedItems[index].packaging,
-                              dose: _orderedItems[index].dose,
-                              flavor: _orderedItems[index].flavor,
                             );
                           },
                         ),
@@ -303,13 +296,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: _orderedItems[index].productName,
-                              price: _orderedItems[index].price,
-                              quantity: _orderedItems[index].quantity,
                               itemSource: value,
-                              packaging: _orderedItems[index].packaging,
-                              dose: _orderedItems[index].dose,
-                              flavor: _orderedItems[index].flavor,
                             );
                           },
                         ),
@@ -324,12 +311,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: _orderedItems[index].productName,
-                              price: _orderedItems[index].price,
-                              quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
-                              packaging: _orderedItems[index].packaging,
-                              dose: _orderedItems[index].dose,
                               flavor: value,
                             );
                           },
@@ -346,13 +327,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: _orderedItems[index].productName,
-                              price: _orderedItems[index].price,
-                              quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
-                              packaging: _orderedItems[index].packaging,
                               dose: double.parse(value),
-                              flavor: _orderedItems[index].flavor,
                             );
                           },
                         ),
@@ -367,13 +342,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: _orderedItems[index].productName,
-                              price: _orderedItems[index].price,
-                              quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
                               packaging: value,
-                              dose: _orderedItems[index].dose,
-                              flavor: _orderedItems[index].flavor,
                             );
                           },
                         ),
@@ -389,20 +358,14 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           onChanged: (value) {
                             updateOrderedItem(
                               index: index,
-                              name: _orderedItems[index].productName,
                               price: double.parse(value),
-                              quantity: _orderedItems[index].quantity,
-                              itemSource: _orderedItems[index].itemSource,
-                              packaging: _orderedItems[index].packaging,
-                              dose: _orderedItems[index].dose,
-                              flavor: _orderedItems[index].flavor,
                             );
                           },
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: IconButton(
-                            icon: Icon(Icons.remove_circle_outline),
+                            icon: const Icon(Icons.remove_circle_outline),
                             onPressed: () => editOrderedItem(index),
                           ),
                         ),
