@@ -178,8 +178,10 @@ class WooSignalService {
     await WooSignal.instance.deleteCustomer(id, force: true);
   }
 
-  static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items) async {
-    final customer = await  WooSignal.instance.retrieveCustomer(id: int.parse(order.customerId));
+
+
+  static Future<wsOrder.Order?> createOrder(Order order, List<OrderedItem> items, int customerId) async {
+    final customer = await  WooSignal.instance.retrieveCustomer(id: customerId);
 
 
     List<bs.LineItems> orderedItems = List.generate(
@@ -204,12 +206,12 @@ class WooSignalService {
     var shipping = bs.Shipping.fromJson(customerShipping!.toJson());
 
     bs.OrderWC orderForSend = bs.OrderWC(
-      status: WSOrderStatus.Pending.name,
+      status: WSOrderStatus.Pending.name.toLowerCase(),
       billing: billing,
       shipping: shipping,
       customerNote: order.notes,
       lineItems: orderedItems,
-      customerId: int.parse(order.customerId),
+      // customerId: int.parse(order.customerId),
       // setPaid: false, //work
       // paymentMethod: 'bacs',
       // paymentMethodTitle: "Direct Bank Transfer",//work
