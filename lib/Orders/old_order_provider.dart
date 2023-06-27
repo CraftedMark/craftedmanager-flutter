@@ -60,6 +60,9 @@ class OrderProvider extends ChangeNotifier {
       }else{
         _orders =
         await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
+        for(var o in _orders){
+          o.orderedItems = await getOrderedItemsForOrder(o.id);
+        }
       }
       notifyListeners();
     } catch (e) {
@@ -103,6 +106,7 @@ class OrderProvider extends ChangeNotifier {
   }
 
   void addOrderedItem(String orderId, OrderedItem orderedItem) {
+    print('try to add ${orderedItem.name}');
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderedItems.add(orderedItem);
     notifyListeners();
