@@ -26,7 +26,7 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late OrderProvider _provider;
-  List<OrderedItem> products = [];
+  List<OrderedItem> orderedItems = [];
 
   List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
       ? [
@@ -66,7 +66,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Future<void> loadProducts() async {
-    products = await _provider.getOrderedItemsForOrder(widget.order.id);
+    orderedItems = await _provider.getOrderedItemsForOrder(widget.order.id);
+    widget.order.orderedItems = orderedItems;
     setState(() {});
   }
 
@@ -88,9 +89,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditOrderScreen(
-                    order: widget.order..orderedItems.addAll(products),
+                    order: widget.order,
                     customer: widget.customer,
-                    products: products.map((i) => i.product).toList(),
+                    products: orderedItems.map((i) => i.product).toList(),
                   ),
                 ),
               );
@@ -199,7 +200,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         ),
         SizedBox(height: 16),
         Column(
-          children: products
+          children: orderedItems
               .map(
                 (OrderedItem orderedItem) => Card(
               color: Colors.grey[800],

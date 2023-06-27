@@ -108,6 +108,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       ));
       _subTotal = calculateSubtotal();
     }
+    getOrderedItemsByOrderId();
+    setState(() {});
     print('_orderedItems: $_orderedItems');
   }
 
@@ -209,20 +211,23 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     MaterialPageRoute(
                       builder: (context) => ProductSearchScreen(),
                     ),
-                  ).then((selectedProducts) async {
-                    if (selectedProducts != null &&
-                        selectedProducts is List<Product> &&
-                        selectedProducts.isNotEmpty) {
-                      final result = await showDialog<Map<String, dynamic>>(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            AddOrderedItemDialog(products: selectedProducts),
-                      );
-
-                      if (result != null) {
-                        addOrderedItem(result['product'], result['quantity']);
-                      }
+                  ).then((result) async {
+                    if (result != null) {
+                      addOrderedItem(result['product'], result['quantity']);
                     }
+                    // print('return from product screen');
+                    // print(selectedProducts);
+                    // if (selectedProducts != null &&selectedProducts.isNotEmpty){
+                    //   final result = await showDialog<Map<String, dynamic>>(
+                    //     context: context,
+                    //     builder: (BuildContext context) =>
+                    //         AddOrderedItemDialog(products: [selectedProducts['product']]),
+                    //   );
+                    //
+                    //   if (result != null) {
+                    //     addOrderedItem(result['product'], result['quantity']);
+                    //   }
+                    // }
                   });
                 },
                 child: Text('Add Item'),
@@ -232,7 +237,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: widget.order.orderedItems.length,
+              itemCount: _orderedItems.length,
               itemBuilder: (context, index) {
                 return Card(
                   color: Colors.grey[800],

@@ -83,11 +83,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                             TextEditingController quantityController =
                                 TextEditingController(text: '1');
                             TextEditingController itemSourceController =
-                                TextEditingController();
+                                TextEditingController(text: '');
                             TextEditingController packagingController =
-                                TextEditingController();
+                                TextEditingController(text: '');
                             TextEditingController doseController =
-                                TextEditingController();
+                                TextEditingController(text: '0.1');
 
                             return AlertDialog(
                               title: const Text('Add to Order'),
