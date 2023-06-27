@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
+import '../services/PostgreApi.dart';
 import 'old_order_provider.dart';
 // import '../Providers/order_provider.dart';
 
@@ -29,42 +30,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   List<OrderedItem> orderedItems = [];
   double shippingCost = 10;
 
-  Future<double?> getCustomProductPrice(
-      int productId, String customerId) async {
-    double? customPrice;
-    String? pricingListId = await CustomerBasedPricingDbManager.instance
-        .getPricingListByCustomerId(customerId);
-
-    if (pricingListId != null) {
-      Map<String, dynamic>? pricingData = await CustomerBasedPricingDbManager
-          .instance
-          .getCustomerProductPricing(productId, pricingListId);
-
-      if (pricingData != null) {
-        customPrice = pricingData['price'];
-      }
-    }
-
-    return customPrice;
-  }
-
   Future<void> addOrderedItem(Product product, int quantity, String itemSource,
       String flavor, double dose, String packaging) async {
-    double? customPrice =
-        await getCustomProductPrice(product.id!, widget.client.id);
+    // double? customPrice = await CustomerBasedPricingDbManager.instance
+    //     .getCustomProductPrice(product.id!, widget.client.id);
 
     var newOrderItemStatus = 'Processing - Pending Payment';
 
     setState(() {
       orderedItems.add(OrderedItem(
-          // id: (orderedItems.length + 1).toString(),
-          // Convert the entire expression to a String
           orderId: "0",
           productName: product.name,
           productId: product.id!,
           name: product.name,
           quantity: quantity,
-          price: customPrice ?? product.retailPrice,
+          price: product.retailPrice, //customPrice ?? product.retailPrice, TODO:FIX
           discount: 0.0,
           productDescription: product.description,
           productRetailPrice: product.retailPrice,
@@ -93,17 +73,18 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     print("new orderid = $orderId");
 
     // Fetch address fields from the database
-    Map<String, dynamic>? addressFields = await getAddressFields(
-        PostgreSQLConnectionManager.connection, widget.client.id);
+    Map<String, dynamic>? addressFields =
+        await PostgreSQLAPI.getAddressForUserById(widget.client.id);
+
     if (addressFields != null) {
       final newOrder = Order(
         customerId: widget.client.id.toString(),
         id: orderId,
         orderDate: DateTime.now(),
         shippingAddress:
-        '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+            '${addressFields['address1']}, ${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
         billingAddress:
-        '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
+            '${addressFields['address1']},${addressFields['city']},${addressFields['state']},${addressFields['zip']}',
         productName: orderedItems.map((e) => e.productName).toList().join(','),
         totalAmount: totalAmount,
         orderStatus: 'Pending',
@@ -111,244 +92,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         archived: false,
         orderedItems: orderedItems,
       );
-      Provider.of<OrderProvider>(context, listen: false).createOrder(newOrder, widget.client);
-      // await OrderProvider().createOrder(newOrder, orderedItems);
-
+      Provider.of<OrderProvider>(context, listen: false)
+          .createOrder(newOrder, widget.client);
     } else {
       // Handle the case when addressFields are null
       print("Error: Address fields are null.");
     }
   }
 
+  Future<List<Product>> getAllProduct() async {//TODO: Move to Provider
+    var products = <Product>[];
 
-
-
-  @override
-  Widget build(BuildContext context) {
-    double subTotal = orderedItems.fold(
-      0.0,
-      (previousValue, element) =>
-          previousValue + (element.productRetailPrice * element.quantity),
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.lightBlue,
-          ),
-        ),
-        title: const Text('Create Order'),
-        backgroundColor: Colors.black,
-        actions: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () async {
-              await saveOrder();
-              Navigator.pop(context);
-            },
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                "Save Order",
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: ElevatedButton(
-                onPressed: () => addItemToOrder(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text('Add Item'),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: orderedItems.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(orderedItems[index].productName),
-                    trailing: Text('\$${orderedItems[index].price}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'Qty: ${orderedItems[index].quantity}, Flavor: ${orderedItems[index].flavor}, Dosage: ${orderedItems[index].dose}, Packaging: ${orderedItems[index].packaging}'),
-                        TextButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                var updatedQuantity =
-                                    orderedItems[index].quantity;
-                                var quantityController = TextEditingController(
-                                    text: orderedItems[index]
-                                        .quantity
-                                        .toString());
-
-                                var priceController = TextEditingController(
-                                    text: orderedItems[index].price.toString());
-
-                                var packagingController = TextEditingController(
-                                    text: orderedItems[index].packaging);
-
-                                var flavorController = TextEditingController(
-                                    text: orderedItems[index].flavor);
-
-                                var dosageController = TextEditingController(
-                                    text: orderedItems[index].dose.toString() ??
-                                        '');
-
-                                return AlertDialog(
-                                  title: const Text(
-                                      'Edit Quantity, Price, Flavor, Dosage and Packaging'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextFormField(
-                                        controller: quantityController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Quantity',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: priceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Price',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: flavorController,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Flavor',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: dosageController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Dosage',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: packagingController,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Packaging',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          orderedItems[index].quantity =
-                                              int.parse(
-                                                  quantityController.text);
-                                          orderedItems[index].price =
-                                              double.parse(
-                                                  priceController.text);
-                                          orderedItems[index].packaging =
-                                              packagingController.text;
-                                          orderedItems[index].flavor =
-                                              flavorController.text;
-                                          orderedItems[index].dose =
-                                              double.parse(
-                                                  dosageController.text);
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Update"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: const Text(
-                            "Edit",
-                            style: TextStyle(color: Colors.blue),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Subtotal:'),
-                      Text('\$${subTotal.toStringAsFixed(2)}'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Shipping:'),
-                      Text('\$${shippingCost.toStringAsFixed(2)}'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Total:'),
-                      Text('\$${(subTotal + shippingCost).toStringAsFixed(2)}'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      products = await WooSignalService.getProducts();
+    } else {
+      products = await ProductPostgres.getAllProductsExceptIngredients();
+    }
+    return products;
   }
 
   void addItemToOrder() async {
-    var products = <Product>[];
-
-    if(AppConfig.ENABLE_WOOSIGNAL){
-      products = await WooSignalService.getProducts();
-    }else {
-      products = await ProductPostgres.getAllProductsExceptIngredients();
-    }
+    var products = await getAllProduct();
 
     final selectedProduct = await showDialog<Product>(
       context: context,
@@ -375,8 +139,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       setState(() {
                         filteredProducts = products
                             .where((product) => product.name
-                                .toLowerCase()
-                                .contains(value.toLowerCase()))
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
                             .toList();
                       });
                     },
@@ -401,13 +165,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (selectedProduct != null) {
       var quantityController = TextEditingController(text: '1');
       var itemSourceController =
-          TextEditingController(text: selectedProduct.itemSource ?? '');
+      TextEditingController(text: selectedProduct.itemSource ?? '');
       var flavorController =
-          TextEditingController(text: selectedProduct.flavor ?? '');
+      TextEditingController(text: selectedProduct.flavor ?? '');
       var dosageController =
-          TextEditingController(text: (selectedProduct.dose?.toString() ?? ''));
+      TextEditingController(text: (selectedProduct.dose?.toString() ?? '0.1'));
       var packagingController = TextEditingController(
-          text: (selectedProduct.packaging?.toString() ?? ''));
+          text: (selectedProduct.packaging?.toString() ?? 'OEM'));
 
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
@@ -489,7 +253,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         int quantity = result['quantity'];
         String itemSource = result['itemSource'];
         String packaging = result['packaging'] ?? '';
-        double dose = double.tryParse(result['dosage'] ?? '') ?? 0.0;
+        double dose = double.tryParse(result['dosage'] ?? '0.0') ?? 0.0;
         String flavor = result['flavor'] ?? '';
 
         await addOrderedItem(
@@ -499,22 +263,245 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             flavor, // Fourth argument
             dose, // Fifth argument
             packaging // Sixth argument
-            );
+        );
       }
     }
   }
-}
 
-Future<Map<String, dynamic>?> getAddressFields(
-    PostgreSQLExecutionContext ctx, String customerId) async {
-  List<Map<String, Map<String, dynamic>>> results =
-  await ctx.mappedResultsQuery('''
-SELECT address1, city, state, zip FROM people WHERE id = @customer_id
-''', substitutionValues: {'customer_id': customerId});
 
-  if (results.isNotEmpty) {
-    return results.first['people'];
-  } else {
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: _appBarBackButton(),
+        title: const Text('Create Order'),
+        backgroundColor: Colors.black,
+        actions: [_appBarSaveOrderButton()],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _addOrderedItemButton(),
+            Expanded(
+              child: _listOfOrderedItem(),
+            ),
+            _orderCostWidget()
+          ],
+        ),
+      ),
+    );
   }
+
+  Widget _appBarBackButton(){
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: const Icon(
+        Icons.arrow_back_ios,
+        color: Colors.lightBlue,
+      ),
+    );
+  }
+
+  Widget _appBarSaveOrderButton(){
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async {
+        await saveOrder();
+        Navigator.pop(context);
+      },
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          "Save Order",
+          style: TextStyle(color: Colors.blue),
+        ),
+      ),
+    );
+  }
+
+  Widget _addOrderedItemButton(){
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: ElevatedButton(
+        onPressed: () => addItemToOrder(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+        ),
+        child: const Text('Add Item'),
+      ),
+    );
+  }
+
+  Widget _listOfOrderedItem(){
+    return ListView.builder(
+      itemCount: orderedItems.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(orderedItems[index].productName),
+          trailing: Text('\$${orderedItems[index].price}'),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                  'Qty: ${orderedItems[index].quantity}, Flavor: ${orderedItems[index].flavor}, Dosage: ${orderedItems[index].dose}, Packaging: ${orderedItems[index].packaging}'),
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      var updatedQuantity =
+                          orderedItems[index].quantity;
+                      var quantityController = TextEditingController(
+                          text: orderedItems[index]
+                              .quantity
+                              .toString());
+
+                      var priceController = TextEditingController(
+                          text: orderedItems[index].price.toString());
+
+                      var packagingController = TextEditingController(
+                          text: orderedItems[index].packaging);
+
+                      var flavorController = TextEditingController(
+                          text: orderedItems[index].flavor);
+
+                      var dosageController = TextEditingController(
+                          text: orderedItems[index].dose.toString() ??
+                              '');
+
+                      return AlertDialog(
+                        title: const Text(
+                            'Edit Quantity, Price, Flavor, Dosage and Packaging'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              controller: quantityController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Quantity',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: priceController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Price',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: flavorController,
+                              decoration: const InputDecoration(
+                                labelText: 'Flavor',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            TextFormField(
+                              controller: dosageController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Dosage',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            TextFormField(
+                              controller: packagingController,
+                              decoration: const InputDecoration(
+                                labelText: 'Packaging',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                orderedItems[index].quantity =
+                                    int.parse(
+                                        quantityController.text);
+                                orderedItems[index].price =
+                                    double.parse(
+                                        priceController.text);
+                                orderedItems[index].packaging =
+                                    packagingController.text;
+                                orderedItems[index].flavor =
+                                    flavorController.text;
+                                orderedItems[index].dose =
+                                    double.parse(
+                                        dosageController.text);
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Update"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text(
+                  "Edit",
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _orderCostWidget(){
+    double subTotal = orderedItems.fold(
+      0.0,
+          (previousValue, element) =>
+      previousValue + (element.productRetailPrice * element.quantity),
+    );
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Subtotal:'),
+              Text('\$${subTotal.toStringAsFixed(2)}'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Shipping:'),
+              Text('\$${shippingCost.toStringAsFixed(2)}'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Total:'),
+              Text('\$${(subTotal + shippingCost).toStringAsFixed(2)}'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
 }
