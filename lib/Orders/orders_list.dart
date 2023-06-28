@@ -47,7 +47,10 @@ class _OrdersListState extends State<OrdersList> {
       appBar: AppBar(
         // backgroundColor: Colors.black,
         centerTitle: true,
-        title: Text(widget.title, style: const TextStyle(color: Colors.white, )),
+        title: Text(widget.title,
+            style: const TextStyle(
+              color: Colors.white,
+            )),
         actions: [
           if (widget.listType != OrderListType.archived)
             IconButton(
@@ -283,14 +286,45 @@ class _OrderWidgetState extends State<_OrderWidget> {
     return const Divider(height: 2, color: Colors.white);
   }
 
-  Widget statusField(){
-    return Text('Status: ${widget.order.orderStatus}');
+  Widget statusField() {
+    Color color;
+    switch(widget.order.orderStatus){
+      case 'Processing - Pending Payment':  {color = Colors.orange;break;}
+      case 'Processing - Paid':  {color = Colors.orange;break;}
+      case 'In Production':  {color = Colors.green;break;}
+      case 'Ready to Pickup/ Ship':  {color = Colors.blue;break;}
+      case 'Delivered / Shipped':  {color = Colors.orange;break;}
+      case 'Completed':  {color = Colors.grey;break;}
+      case 'Archived':  {color = Colors.grey;break;}
+      case 'Cancelled':  {color = Colors.red;break;}
+
+      default: color = Colors.green;
+    }
+    return Row(
+      children: [
+        Text('Status: '),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: color
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Text(widget.order.orderStatus, style: const TextStyle(color: Colors.white)),
+          ),
+        )
+      ],
+    );
   }
-  Widget totalField(){
+
+  Widget totalField() {
     return Row(
       children: [
         const Text('Total: '),
-        Text('\$${widget.order.totalAmount}', style: TextStyle(color: Colors.white70),)
+        Text(
+          '\$${widget.order.totalAmount}',
+          style: TextStyle(color: Colors.white70),
+        )
       ],
     );
   }
