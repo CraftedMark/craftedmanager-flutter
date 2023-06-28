@@ -17,13 +17,6 @@ class PeopleProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  static Future<List<People>> refreshCustomerList() async {
-    final connection = PostgreSQLConnectionManager.connection;
-    final result = await connection.query('SELECT * FROM people');
-
-    return result.map((row) => People.fromMap(row.toColumnMap())).toList();
-  }
-
   Future<void> fetchPeople() async {
     _people = await PeoplePostgres.refreshCustomerList();
     notifyListeners();

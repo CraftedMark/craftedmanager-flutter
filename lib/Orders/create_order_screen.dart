@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
 import 'package:provider/provider.dart';
 
-import '../../Orders/orders_db_manager.dart';
 import '../CBP/cbp_db_manager.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../services/PostgreApi.dart';
@@ -74,7 +73,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     // Fetch address fields from the database
     Map<String, dynamic>? addressFields =
-        await PostgreSQLAPI.getAddressForUserById(widget.client.id);
+        await CustomerPostgreAPI.getAddressForUserById(widget.client.id);
 
     if (addressFields != null) {
       final newOrder = Order(
