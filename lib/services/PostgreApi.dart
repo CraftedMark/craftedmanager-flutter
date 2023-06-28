@@ -1,18 +1,16 @@
-import 'dart:core';
-
-import 'package:crafted_manager/Models/order_model.dart';
-import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 import 'package:postgres/postgres.dart';
 
-import '../PostresqlConnection/postqresql_connection_manager.dart';
+import '../Models/order_model.dart';
+import '../Models/ordered_item_model.dart';
 
-class OrderPostgres {
-  OrderPostgres();
+class PostgresOrdersAPI {
+  PostgresOrdersAPI._();
 
   static Future<int?> getProductId(
       PostgreSQLExecutionContext ctx, String productName) async {
     List<Map<String, Map<String, dynamic>>> results =
-        await ctx.mappedResultsQuery('''
+    await ctx.mappedResultsQuery('''
     SELECT id FROM products WHERE name = @name
   ''', substitutionValues: {'name': productName});
 
@@ -23,21 +21,9 @@ class OrderPostgres {
     }
   }
 
-  static Future<Map<String, dynamic>?> getAddressFields(
-      PostgreSQLExecutionContext ctx, String customerId) async {
-    List<Map<String, Map<String, dynamic>>> results =
-        await ctx.mappedResultsQuery('''
-SELECT address1, city, state, zip FROM people WHERE id = @customer_id
-''', substitutionValues: {'customer_id': customerId});
 
-    if (results.isNotEmpty) {
-      return results.first['people'];
-    } else {
-      return null;
-    }
-  }
 
-  Future<bool> updateOrderStatus(Order updatedOrder) async {
+  static Future<bool> updateOrderStatus(Order updatedOrder) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;
 
@@ -125,7 +111,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     try {
       final connection = PostgreSQLConnectionManager.connection;
       List<Map<String, Map<String, dynamic>>> results =
-          await connection.mappedResultsQuery('''
+      await connection.mappedResultsQuery('''
     SELECT * FROM orders WHERE order_id = @id
   ''', substitutionValues: {
         'id': id,
@@ -169,10 +155,11 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     try {
       final connection = PostgreSQLConnectionManager.connection;
       List<Map<String, Map<String, dynamic>>> results =
-          await connection.mappedResultsQuery('''
+      await connection.mappedResultsQuery('''
     SELECT * FROM orders
+    
   ''');
-
+//WHERE order_status = \'Open\'
       return results.map((e) => Order.fromMap(e.values.first)).toList();
     } catch (e) {
       print(e.toString());
@@ -180,7 +167,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     }
   }
 
-  Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
+  static Future<bool> createOrder(Order order, List<OrderedItem> orderedItems) async {
     PostgreSQLConnection connection = PostgreSQLConnectionManager.connection;
     try {
       await connection.transaction((ctx) async {
@@ -223,4 +210,36 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
       return false; // Return false if operation fails
     }
   }
+
+  static Future<List<OrderedItem>> getOrderedItemsForOrder(String orderId) async {
+    final connection = PostgreSQLConnectionManager.connection;
+
+    var items = <OrderedItem>[];
+    await connection.transaction((ctx) async {
+      final result = await ctx.query('''
+        SELECT * FROM ordered_items WHERE order_id = @order_id
+      ''', substitutionValues: {"order_id":orderId});
+
+      items = result.map((item)=>OrderedItem.fromMap(item.toColumnMap())).toList();
+    });
+    return items;
+  }
 }
+
+class CustomerPostgreAPI{
+  static Future<Map<String, dynamic>?> getAddressForUserById(
+      String customerId) async {
+    PostgreSQLExecutionContext ctx = PostgreSQLConnectionManager.connection;
+    List<Map<String, Map<String, dynamic>>> results =
+    await ctx.mappedResultsQuery('''
+SELECT address1, city, state, zip FROM people WHERE id = @customer_id
+''', substitutionValues: {'customer_id': customerId});
+
+    if (results.isNotEmpty) {
+      return results.first['people'];
+    } else {
+      return null;
+    }
+  }
+}
+

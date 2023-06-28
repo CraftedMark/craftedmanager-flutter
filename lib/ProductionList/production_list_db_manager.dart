@@ -79,18 +79,4 @@ class ProductionListDbManager {
 
     return Order.fromMap(ordersResult.first.toColumnMap());
   }
-
-  static Future<List<Order>> getOpenOrdersWithAllOrderedItems() async {
-    List<Order> orders = [];
-    final connection = PostgreSQLConnectionManager.connection;
-
-    List<Map<String, Map<String, dynamic>>> results =
-        await connection.mappedResultsQuery('SELECT * FROM orders ');
-//WHERE order_status = \'Open\'
-    for (Map<String, Map<String, dynamic>> row in results) {
-      Order order = Order.fromMap(row['orders']!);
-      orders.add(order);
-    }
-    return orders;
-  }
 }

@@ -10,13 +10,13 @@ class AddProductScreen extends StatefulWidget {
 }
 
 class _AddProductScreenState extends State<AddProductScreen> {
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _retailPriceController = TextEditingController();
-  TextEditingController _quantityController = TextEditingController();
-  TextEditingController _itemSourceController = TextEditingController();
-  TextEditingController _packagingController = TextEditingController();
-  TextEditingController _flavorController = TextEditingController();
-  TextEditingController _dosageController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _retailPriceController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _itemSourceController = TextEditingController();
+  final _packagingController = TextEditingController();
+  final _flavorController = TextEditingController();
+  final _dosageController = TextEditingController();
 
   void _saveProduct() async {
     if (_descriptionController.text.isNotEmpty &&
