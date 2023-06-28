@@ -28,6 +28,7 @@ class _ProductionListState extends State<ProductionList> {
   List<OrderedItem> filteredItems = [];
   late OrderProvider _provider;
 
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -36,19 +37,14 @@ class _ProductionListState extends State<ProductionList> {
   }
 
   void getOrdersAndItems() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _provider = Provider.of<OrderProvider>(context, listen: false);
-      _provider.filterOrderedItems(widget.itemSource);
-      setState(() {
-        isLoading = false;
-      });
+    filteredItems = Provider.of<OrderProvider>(context, listen: false).filterOrderedItems(widget.itemSource);
+    setState(() {
+      isLoading = false;
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    filteredItems = Provider.of<OrderProvider>(context).filteredItems;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -72,37 +68,47 @@ class _ProductionListState extends State<ProductionList> {
             // Handle the menu item click as necessary
           }),
           child: isLoading
-              ? Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.secondary,
-              ))
+              ? _loadingIndicator()
               : filteredItems.isNotEmpty
-              ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: filteredItems.length,
-            itemBuilder: (context, index) {
-              OrderedItem item = filteredItems[index];
-              return ListTile(
-                title: Text(
-                  item.productName,
-                  style: TextStyle(color: Colors.black),
-                ),
-                subtitle: Text(
-                  'Quantity: ${item.quantity}',
-                  style: TextStyle(color: Colors.black),
-                ),
-              );
-            },
-          )
-              : Center(
-            child: Text(
-              'No items to show',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-              ),
-            ),
+                  ? _productionList()
+                  : _emptyListPlaceHolder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _loadingIndicator(){
+    return Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.secondary,
+        ));
+  }
+  Widget _productionList(){
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: filteredItems.length,
+      itemBuilder: (context, index) {
+        OrderedItem item = filteredItems[index];
+        return ListTile(
+          title: Text(
+            item.productName,
+            style: TextStyle(color: Colors.black),
           ),
+          subtitle: Text(
+            'Quantity: ${item.quantity}',
+            style: TextStyle(color: Colors.black),
+          ),
+        );
+      },
+    );
+  }
+  Widget _emptyListPlaceHolder(){
+    return const Center(
+      child: Text(
+        'No items to show',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
         ),
       ),
     );
