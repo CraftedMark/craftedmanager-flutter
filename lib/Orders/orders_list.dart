@@ -14,19 +14,16 @@ import '../config.dart';
 import 'order_detail_screen.dart';
 
 enum OrderListType {
+  newOrders,
   productionAndCancelled,
   archived,
 }
 
-var _cachedCustomers = <People>{}; //replace with Provider
-
 class OrdersList extends StatefulWidget {
   final OrderListType listType;
-  final String title;
 
   const OrdersList({
     Key? key,
-    required this.title,
     this.listType = OrderListType.productionAndCancelled,
   }) : super(key: key);
 
@@ -35,34 +32,56 @@ class OrdersList extends StatefulWidget {
 }
 
 class _OrdersListState extends State<OrdersList> {
-  var cachedCustomers = <People>{};
-
   Future<void> _refreshOrdersList() async {
     setState(() {});
+  }
+
+  String getListTitle() {
+    switch (widget.listType) {
+      case OrderListType.productionAndCancelled:
+        {
+          return 'Orders';
+        }
+      case OrderListType.archived:
+        {
+          return 'Archive';
+        }
+      default:
+        return 'New Orders';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // backgroundColor: Colors.black,
         centerTitle: true,
-        title: Text(widget.title,
-            style: const TextStyle(
-              color: Colors.white,
-            )),
+        title: Text(getListTitle()),
         actions: [
           if (widget.listType != OrderListType.archived)
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SearchPeopleScreen(),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: SizedBox(
+                width: 35,
+                height: 35,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: ,
+                    padding: EdgeInsets.zero,
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
                   ),
-                );
-              },
-              icon: const Icon(Icons.add, size: 28, color: Colors.white),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchPeopleScreen(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.add, size: 20, color: Colors.white),
+                ),
+              ),
             ),
         ],
       ),
@@ -72,8 +91,7 @@ class _OrdersListState extends State<OrdersList> {
             final orders = orderProvider.orders;
 
             if (orders.isEmpty) {
-              print('No orders found');
-              return Center(child: Text('No orders found'));
+              return const Center(child: Text('No orders found'));
             }
 
             var sortedOrders = <Order>[];
@@ -133,33 +151,6 @@ class _OrdersListState extends State<OrdersList> {
   void _sortOrderByDate(List<Order> orders) {
     orders.sort((o1, o2) => o2.orderDate.compareTo(o1.orderDate));
   }
-}
-
-Future<People> _getCustomerById(String customerId) async {
-  //TODO: find out why the customer can be null
-  People fakeCustomer = People(
-    id: '1',
-    wooSignalId: 1,
-    firstName: 'Fake',
-    lastName: "Customer",
-    phone: '123',
-    email: 'email',
-    brand: 'brand',
-    notes: 'notes',
-  );
-
-  var cachedUser = _cachedCustomers.where((c) => c.id == customerId);
-  if (cachedUser.isEmpty) {
-    var newUser = People.empty();
-    if (AppConfig.ENABLE_WOOSIGNAL) {
-      // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
-    } else {
-      newUser = await PeoplePostgres.fetchCustomer(customerId) ?? fakeCustomer;
-    }
-    _cachedCustomers.addAll([newUser]);
-    return newUser;
-  }
-  return cachedUser.first;
 }
 
 class _OrderWidget extends StatefulWidget {
@@ -258,7 +249,6 @@ class _OrderWidgetState extends State<_OrderWidget> {
             Text(
               widget.order.id,
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
                 color: Colors.white70,
               ),
             ),
@@ -283,34 +273,66 @@ class _OrderWidgetState extends State<_OrderWidget> {
   }
 
   Widget divider() {
-    return const Divider(height: 2, color: Colors.white);
+    return const Divider(color: Colors.white30);
   }
 
   Widget statusField() {
     Color color;
-    switch(widget.order.orderStatus){
-      case 'Processing - Pending Payment':  {color = Colors.orange;break;}
-      case 'Processing - Paid':  {color = Colors.orange;break;}
-      case 'In Production':  {color = Colors.green;break;}
-      case 'Ready to Pickup/ Ship':  {color = Colors.blue;break;}
-      case 'Delivered / Shipped':  {color = Colors.orange;break;}
-      case 'Completed':  {color = Colors.grey;break;}
-      case 'Archived':  {color = Colors.grey;break;}
-      case 'Cancelled':  {color = Colors.red;break;}
+    switch (widget.order.orderStatus) {
+      case 'Processing - Pending Payment':
+        {
+          color = Colors.orange;
+          break;
+        }
+      case 'Processing - Paid':
+        {
+          color = Colors.orange;
+          break;
+        }
+      case 'In Production':
+        {
+          color = Colors.green;
+          break;
+        }
+      case 'Ready to Pickup/ Ship':
+        {
+          color = Colors.blue;
+          break;
+        }
+      case 'Delivered / Shipped':
+        {
+          color = Colors.orange;
+          break;
+        }
+      case 'Completed':
+        {
+          color = Colors.grey;
+          break;
+        }
+      case 'Archived':
+        {
+          color = Colors.grey;
+          break;
+        }
+      case 'Cancelled':
+        {
+          color = Colors.red;
+          break;
+        }
 
-      default: color = Colors.green;
+      default:
+        color = Colors.green;
     }
     return Row(
       children: [
         Text('Status: '),
         DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: color
-          ),
+              borderRadius: BorderRadius.circular(5), color: color),
           child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Text(widget.order.orderStatus, style: const TextStyle(color: Colors.white)),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+            child: Text(widget.order.orderStatus,
+                style: const TextStyle(color: Colors.white)),
           ),
         )
       ],
