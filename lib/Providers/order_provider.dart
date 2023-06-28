@@ -10,6 +10,7 @@ import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../ProductionList/production_list_db_manager.dart';
+import '../services/PostgreApi.dart';
 
 class FullOrder {
   final Order order;
@@ -83,7 +84,7 @@ class OrderProvider with ChangeNotifier {
   Future<List<Order>> fetchOrders() async {
     if (_orders.isEmpty) {
       _orders =
-          await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
+          await PostgresOrdersAPI.getOrders();
     }
     return _orders;
   }
@@ -138,6 +139,9 @@ class OrderProvider with ChangeNotifier {
     return employees;
   }
 }
+
+
+
 
 Future<int?> getProductId(
     PostgreSQLExecutionContext ctx, String productName) async {
