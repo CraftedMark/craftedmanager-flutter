@@ -44,7 +44,7 @@ class OrderProvider extends ChangeNotifier {
         _orders = await PostgresOrdersAPI.getOrders();
         for (var o in _orders) {
           o.orderedItems =
-          await PostgresOrdersAPI.getOrderedItemsForOrder(o.id);
+          await PostgresOrderedItemAPI.getOrderedItemsForOrder(o.id);
         }
       }
       notifyListeners();
