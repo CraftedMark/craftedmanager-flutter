@@ -258,6 +258,13 @@ class WooSignalService {
     return res != null;
   }
 
+  static Future<bool> updateOrderStatus(Order order, WSOrderStatus newStatus) async {//TODO:check
+    final orderStatuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+    var data = <String, dynamic>{"status": orderStatuses[newStatus.index]};
+    final res = await WooSignal.instance.updateOrder(order.wooSignalId!, data: data);
+    return res != null;
+  }
+
   ///Delete an order
   ///
   /// don`t use await because WooSignal plugin has an error with parsing price field for returned value

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:provider/provider.dart';
 
+import '../Providers/order_provider.dart';
 import '../config.dart';
 import 'edit_order_screen.dart';
-import 'old_order_provider.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final Order order;
@@ -152,7 +152,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   return ListTile(
                     title: Text(orderStatuses[index],
                         style: TextStyle(color: Colors.white)),
-                    onTap: () async {
+                    onTap: () async {//TODO:replace with OrderProvider.updateOrderStatus
                       final orderForSend = widget.order
                           .copyWith(orderStatus: orderStatuses[index]);
                       Navigator.pop(context);

@@ -2,7 +2,7 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../PostresqlConnection/postqresql_connection_manager.dart';
+import '../services/PostgreApi.dart';
 
 class PeopleProvider with ChangeNotifier {
   List<People> _people = [];
@@ -49,5 +49,9 @@ class PeopleProvider with ChangeNotifier {
     await PeoplePostgres.deleteCustomer(id);
     _people.removeWhere((p) => p.id == id);
     notifyListeners();
+  }
+
+  Future<Map<String, dynamic>?>getUserAddressById(String id) async {
+    return PostgreCustomersAPI.getAddressForUserById(id);
   }
 }
