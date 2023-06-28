@@ -51,11 +51,21 @@ class _ProductionListState extends State<ProductionList> {
             slider: SliderView(onItemClick: (title) {
               // Handle the menu item click as necessary
             }),
-            child: filteredItems.isNotEmpty
-                ? _productionList()
-                : _emptyListPlaceHolder(),
+            child: provider.isLoading
+                ? _loadingIndicator()
+                : filteredItems.isNotEmpty
+                    ? _productionList()
+                    : _emptyListPlaceHolder(),
           );
         }),
+      ),
+    );
+  }
+
+  Widget _loadingIndicator() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.secondary,
       ),
     );
   }

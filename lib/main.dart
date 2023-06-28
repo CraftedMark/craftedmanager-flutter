@@ -29,7 +29,6 @@ void main() async {
 
   // Initialize the providers before runApp is called.
   final OrderProvider orderProvider = OrderProvider();
-  await orderProvider.fetchOrders();
   final PeopleProvider peopleProvider = PeopleProvider();
   final ProductProvider productProvider = ProductProvider();
 
@@ -80,7 +79,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
     Provider.of<PeopleProvider>(context, listen: false).fetchPeople();
     Provider.of<ProductProvider>(context, listen: false).fetchProducts();
     //Provider.of<EmployeeProvider>(context, listen: false).fetchEmployees();

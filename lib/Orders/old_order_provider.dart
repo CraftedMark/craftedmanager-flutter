@@ -20,6 +20,7 @@ class FullOrder {
 }
 
 class OrderProvider extends ChangeNotifier {
+  bool isLoading = true;
   List<Order> _orders = [];
 
   List<Order> get orders => _orders;
@@ -50,6 +51,7 @@ class OrderProvider extends ChangeNotifier {
     } catch (e) {
       print('Error fetching orders: $e');
     }
+    isLoading = false;
     notifyListeners();
   }
 
@@ -81,6 +83,7 @@ class OrderProvider extends ChangeNotifier {
     return result;
   }
 
+  //TODO: if order deleted from one device should refresh orders on others devices
   void deleteOrder(Order order) async {
     if (AppConfig.ENABLE_WOOSIGNAL) {
       await WooSignalService.deleteOrder(order.wooSignalId ?? 0); //TODO:FIX
@@ -91,8 +94,7 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addOrderedItem(String orderId, OrderedItem orderedItem) {
-    print('try to add ${orderedItem.name}');
+  void addOrderedItemToOrderForUpdateUI(String orderId, OrderedItem orderedItem) {
     final order = _orders.firstWhere((order) => order.id == orderId);
     order.orderedItems.add(orderedItem);
     notifyListeners();
