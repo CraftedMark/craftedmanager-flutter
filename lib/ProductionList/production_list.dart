@@ -23,25 +23,8 @@ class ProductionList extends StatefulWidget {
 }
 
 class _ProductionListState extends State<ProductionList> {
-  bool isLoading = true;
   List<Order> orders = [];
   List<OrderedItem> filteredItems = [];
-  late OrderProvider _provider;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      getOrdersAndItems();
-    });
-  }
-
-  void getOrdersAndItems() {
-    filteredItems = Provider.of<OrderProvider>(context, listen: false).filterOrderedItems(widget.itemSource);
-    setState(() {
-      isLoading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,30 +43,32 @@ class _ProductionListState extends State<ProductionList> {
         ),
       ),
       body: SafeArea(
-        child: SliderDrawer(
-          appBar: SizedBox.shrink(),
-          key: widget._sliderDrawerKey,
-          sliderOpenSize: 250,
-          slider: SliderView(onItemClick: (title) {
-            // Handle the menu item click as necessary
-          }),
-          child: isLoading
-              ? _loadingIndicator()
-              : filteredItems.isNotEmpty
-                  ? _productionList()
-                  : _emptyListPlaceHolder(),
-        ),
+        child: Consumer<OrderProvider>(builder: (_, provider, __) {
+          filteredItems = provider.getFilteredOrderedItems(widget.itemSource);
+          return SliderDrawer(
+            appBar: const SizedBox.shrink(),
+            key: widget._sliderDrawerKey,
+            sliderOpenSize: 250,
+            slider: SliderView(onItemClick: (title) {
+              // Handle the menu item click as necessary
+            }),
+            child: filteredItems.isNotEmpty
+                ? _productionList()
+                : _emptyListPlaceHolder(),
+          );
+        }),
       ),
     );
   }
 
-  Widget _loadingIndicator(){
+  Widget _loadingIndicator() {
     return Center(
         child: CircularProgressIndicator(
-          color: Theme.of(context).colorScheme.secondary,
-        ));
+      color: Theme.of(context).colorScheme.secondary,
+    ));
   }
-  Widget _productionList(){
+
+  Widget _productionList() {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: filteredItems.length,
@@ -102,7 +87,8 @@ class _ProductionListState extends State<ProductionList> {
       },
     );
   }
-  Widget _emptyListPlaceHolder(){
+
+  Widget _emptyListPlaceHolder() {
     return const Center(
       child: Text(
         'No items to show',
