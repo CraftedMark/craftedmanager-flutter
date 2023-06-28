@@ -23,7 +23,6 @@ class ProductionList extends StatefulWidget {
 }
 
 class _ProductionListState extends State<ProductionList> {
-  List<Order> orders = [];
   List<OrderedItem> filteredItems = [];
 
   @override
@@ -59,13 +58,6 @@ class _ProductionListState extends State<ProductionList> {
         }),
       ),
     );
-  }
-
-  Widget _loadingIndicator() {
-    return Center(
-        child: CircularProgressIndicator(
-      color: Theme.of(context).colorScheme.secondary,
-    ));
   }
 
   Widget _productionList() {
