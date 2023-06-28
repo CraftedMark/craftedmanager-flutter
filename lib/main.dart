@@ -7,6 +7,7 @@ import 'package:crafted_manager/Providers/order_provider.dart'; // Assuming your
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -114,19 +115,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Locale('es', ''),
       ],
       theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          backgroundColor:  UIConstants.BACKGROUND_COLOR,
+        ),
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: Color.fromARGB(255, 24, 26, 32),
+        scaffoldBackgroundColor: UIConstants.BACKGROUND_COLOR,
         primaryColor: Colors.blueAccent,
         colorScheme: const ColorScheme.dark().copyWith(
           primary: Colors.blueAccent,
           secondary: const Color(0xFFB085F5),
           background: Colors.black,
         ),
-        textTheme:   TextTheme(
+        textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Color(0xFFB085F5)),
-          bodyMedium: TextStyle(color: Color.fromARGB(255, 108, 112, 131)),
+          bodyMedium: TextStyle(color: UIConstants.TEXT_COLOR),
         ),
-        iconTheme: const IconThemeData(color: Color.fromARGB(255, 108, 112, 131)),
+        iconTheme: const IconThemeData(color: UIConstants.ICON_COLOR),
       ),
       home: Builder(
         builder: (context) => ProductionList(

@@ -45,9 +45,9 @@ class _OrdersListState extends State<OrdersList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        // backgroundColor: Colors.black,
         centerTitle: true,
-        title: Text(widget.title, style: const TextStyle(color: Colors.white)),
+        title: Text(widget.title, style: const TextStyle(color: Colors.white, )),
         actions: [
           if (widget.listType != OrderListType.archived)
             IconButton(
