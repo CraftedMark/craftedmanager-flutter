@@ -7,7 +7,6 @@ import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/people_model.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
-import '../ProductionList/production_list_db_manager.dart';
 import '../config.dart';
 import '../services/PostgreApi.dart';
 import '../services/one_signal_api.dart';
@@ -22,32 +21,29 @@ class FullOrder {
 
 class OrderProvider extends ChangeNotifier {
   List<Order> _orders = [];
-  List<OrderedItem> _filteredItems = [];
 
   List<Order> get orders => _orders;
 
   // Define the filteredItems getter
-  List<OrderedItem> get filteredItems => _filteredItems;
 
   // Define the filterOrderedItems method
   List<OrderedItem> getFilteredOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
-    _filteredItems = _orders
+    return _orders
         .expand((order) => order.orderedItems)
         .where((item) => item.itemSource == itemSource)
         .toList();
-    return _filteredItems;
   }
 
   Future<void> fetchOrders() async {
     try {
-      if(AppConfig.ENABLE_WOOSIGNAL){
+      if (AppConfig.ENABLE_WOOSIGNAL) {
         // _orders = await WooSignalService.getOrders();
-      }else{
-        _orders =
-        await PostgresOrdersAPI.getOrders();
-        for(var o in _orders){
-          o.orderedItems = await PostgresOrdersAPI.getOrderedItemsForOrder(o.id);
+      } else {
+        _orders = await PostgresOrdersAPI.getOrders();
+        for (var o in _orders) {
+          o.orderedItems =
+              await PostgresOrdersAPI.getOrderedItemsForOrder(o.id);
         }
       }
       notifyListeners();
@@ -58,11 +54,11 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> createOrder(Order newOrder, People customer) async {
-
-    if(AppConfig.ENABLE_WOOSIGNAL){
-      var result = await WooSignalService.createOrder(newOrder, newOrder.orderedItems, customer.wooSignalId);
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      var result = await WooSignalService.createOrder(
+          newOrder, newOrder.orderedItems, customer.wooSignalId);
       print(result);
-    }else{
+    } else {
       await PostgresOrdersAPI.createOrder(newOrder, newOrder.orderedItems);
     }
 
@@ -71,16 +67,14 @@ class OrderProvider extends ChangeNotifier {
     _sendPushNotification(payload);
   }
 
-  Future<bool> updateOrder(
-      Order updatedOrder, {
-        WSOrderStatus status = WSOrderStatus.Processing,
-        List<OrderedItem> newItems = const []}
-      ) async {
-
+  Future<bool> updateOrder(Order updatedOrder,
+      {WSOrderStatus status = WSOrderStatus.Processing,
+      List<OrderedItem> newItems = const []}) async {
     var result = false;
-    if(AppConfig.ENABLE_WOOSIGNAL){
-      result = await WooSignalService.updateOrder(updatedOrder, status, newItems);
-    }else{
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      result =
+          await WooSignalService.updateOrder(updatedOrder, status, newItems);
+    } else {
       result = await PostgresOrdersAPI.updateOrder(updatedOrder);
     }
     fetchOrders();
@@ -88,10 +82,9 @@ class OrderProvider extends ChangeNotifier {
   }
 
   void deleteOrder(Order order) async {
-    if(AppConfig.ENABLE_WOOSIGNAL){
-      await WooSignalService.deleteOrder(order.wooSignalId??0);//TODO:FIX
-    }
-    else {
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      await WooSignalService.deleteOrder(order.wooSignalId ?? 0); //TODO:FIX
+    } else {
       await PostgresOrdersAPI.deleteOrder(order.id);
     }
     _orders.removeWhere((o) => o.id == order.id);
@@ -110,7 +103,6 @@ class OrderProvider extends ChangeNotifier {
   //   order.orderedItems.removeWhere((i) => i.id == item.id);
   //   notifyListeners();
   // }
-
 
   Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
     final connection = PostgreSQLConnectionManager.connection;
@@ -183,7 +175,4 @@ class OrderProvider extends ChangeNotifier {
   Future<void> _sendPushNotification(String payload) async {
     await OneSignalAPI.sendNotification(payload);
   }
-
-
-
 }
