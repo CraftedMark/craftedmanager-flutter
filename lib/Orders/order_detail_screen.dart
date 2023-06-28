@@ -67,7 +67,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Order Details', style: TextStyle(color: Colors.white)),
+        title: const Text('Order Details', style: TextStyle(color: Colors.white)),
         actions: [
           IconButton(
             icon: Icon(Icons.edit, color: Colors.white),
