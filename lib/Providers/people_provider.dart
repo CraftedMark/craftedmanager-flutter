@@ -2,6 +2,7 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:flutter/foundation.dart';
 
+import '../config.dart';
 import '../services/PostgreApi.dart';
 
 class PeopleProvider with ChangeNotifier {
@@ -23,7 +24,11 @@ class PeopleProvider with ChangeNotifier {
   }
 
   Future<void> fetchPersonByCustomerId(String customerId) async {
-    _activePerson = await PeoplePostgres.fetchCustomer(customerId);
+    if (AppConfig.ENABLE_WOOSIGNAL) {
+      // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
+    } else {
+      _activePerson = await PeoplePostgres.fetchCustomer(customerId);
+    }
     notifyListeners();
   }
 

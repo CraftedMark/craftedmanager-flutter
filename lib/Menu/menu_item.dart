@@ -36,20 +36,17 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Create Orders",
         iconData: Icons.list_alt,
-        destination: const OrdersList(title: "New Orders"),
+        destination: const OrdersList(listType: OrderListType.newOrders),
       ),
       MenuItem(
         title: "Open Orders",
         iconData: Icons.list_alt,
-        destination: const OrdersList(title: "Orders"),
+        destination: const OrdersList(listType: OrderListType.productionAndCancelled),
       ),
       MenuItem(
         title: "Archived Orders",
         iconData: Icons.archive,
-        destination: const OrdersList(
-          title: "Archive",
-          listType: OrderListType.archived,
-        ),
+        destination: const OrdersList(listType: OrderListType.archived),
       ),
       MenuItem(
         title: "Invoices",
