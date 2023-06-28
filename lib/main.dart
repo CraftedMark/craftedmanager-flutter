@@ -115,18 +115,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: Color.fromARGB(255, 24, 26, 32),
         primaryColor: Colors.blueAccent,
         colorScheme: const ColorScheme.dark().copyWith(
           primary: Colors.blueAccent,
           secondary: const Color(0xFFB085F5),
           background: Colors.black,
         ),
-        textTheme: const TextTheme(
+        textTheme:   TextTheme(
           bodyLarge: TextStyle(color: Color(0xFFB085F5)),
-          bodyMedium: TextStyle(color: Color(0xFFB085F5)),
+          bodyMedium: TextStyle(color: Color.fromARGB(255, 108, 112, 131)),
         ),
-        iconTheme: const IconThemeData(color: Color(0xFFB085F5)),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 108, 112, 131)),
       ),
       home: Builder(
         builder: (context) => ProductionList(
