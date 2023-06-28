@@ -209,6 +209,10 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     }
   }
 
+}
+
+class PostgresOrderedItemAPI {
+  // Fetch ordered items by orderId
   static Future<List<OrderedItem>> getOrderedItemsForOrder(String orderId) async {
     final connection = PostgreSQLConnectionManager.connection;
 
@@ -223,6 +227,19 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     return items;
   }
 
+
+  static Future<void> updateOrderedItemStatus(int orderedItemId, String status) async {
+    final connection = PostgreSQLConnectionManager.connection;
+
+    const query = "UPDATE ordered_items SET status = @status WHERE ordered_item_id = @orderedItemId";
+    final values = {
+      'status': status,
+      'orderedItemId': orderedItemId
+    };
+
+    final result = await connection.query(query, substitutionValues: values);
+
+  }
 }
 
 class PostgreCustomersAPI{
