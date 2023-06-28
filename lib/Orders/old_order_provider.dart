@@ -31,13 +31,12 @@ class OrderProvider extends ChangeNotifier {
   List<OrderedItem> get filteredItems => _filteredItems;
 
   // Define the filterOrderedItems method
-  List<OrderedItem> filterOrderedItems(String itemSource) {
+  List<OrderedItem> getFilteredOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
     _filteredItems = _orders
         .expand((order) => order.orderedItems)
         .where((item) => item.itemSource == itemSource)
         .toList();
-    notifyListeners();
     return _filteredItems;
   }
 
