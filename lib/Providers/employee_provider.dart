@@ -13,9 +13,6 @@ class EmployeeProvider with ChangeNotifier {
   }
 
   Future<void> fetchAndSetEmployees() async {
-    PostgreSQLConnectionManager.init();
-    await PostgreSQLConnectionManager.open();
-
     List<Map<String, Map<String, dynamic>>> results =
         await PostgreSQLConnectionManager.connection
             .mappedResultsQuery('SELECT * FROM employee');
@@ -38,5 +35,25 @@ class EmployeeProvider with ChangeNotifier {
     notifyListeners();
 
     await PostgreSQLConnectionManager.close();
+  }
+
+  Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
+    List<Employee> employees = [];
+    try {
+      final connection = PostgreSQLConnectionManager.connection;
+      final result = await connection.query(
+        'SELECT * FROM employees WHERE order_id = @orderId',
+        substitutionValues: {
+          'orderId': orderId,
+        },
+      );
+
+      for (var row in result) {
+        employees.add(Employee.fromMap(row.toColumnMap()));
+      }
+    } catch (e) {
+      print('Error fetching employees by order id: ${e.toString()}');
+    }
+    return employees;
   }
 }

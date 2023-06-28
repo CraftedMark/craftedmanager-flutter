@@ -3,18 +3,13 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
+import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
-import 'package:crafted_manager/services/one_signal_api.dart';
 import 'package:flutter/material.dart';
-import 'package:postgres/postgres.dart';
 import 'package:provider/provider.dart';
 
-import '../CBP/cbp_db_manager.dart';
-import '../PostresqlConnection/postqresql_connection_manager.dart';
-import '../services/PostgreApi.dart';
-import 'old_order_provider.dart';
-// import '../Providers/order_provider.dart';
+import '../Providers/order_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final People client;
@@ -72,8 +67,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     print("new orderid = $orderId");
 
     // Fetch address fields from the database
-    Map<String, dynamic>? addressFields =
-        await CustomerPostgreAPI.getAddressForUserById(widget.client.id);
+    Map<String, dynamic>? addressFields = await Provider.of<PeopleProvider>(context).getUserAddressById(widget.client.id);
 
     if (addressFields != null) {
       final newOrder = Order(

@@ -1,7 +1,5 @@
-import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
-import 'package:crafted_manager/Orders/old_order_provider.dart';
-// import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';

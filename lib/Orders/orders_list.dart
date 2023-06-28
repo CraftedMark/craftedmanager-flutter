@@ -1,9 +1,7 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
-import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Orders/search_people_screen.dart';
-// import 'package:crafted_manager/Providers/order_provider.dart';
-import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,9 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../Models/people_model.dart';
 import '../config.dart';
-import 'old_order_provider.dart';
 import 'order_detail_screen.dart';
-import 'ordered_item_postgres.dart';
 
 enum OrderListType {
   productionAndCancelled,

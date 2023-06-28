@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
-// import '../../Providers/order_provider.dart';
+import '../../Providers/order_provider.dart';
 import '../../Providers/product_provider.dart';
 import '../Products/product_db_manager.dart';
-import 'old_order_provider.dart';
+
 
 class ProductSearchScreen extends StatefulWidget {
   @override
