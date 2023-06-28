@@ -10,6 +10,7 @@ import '../Orders/orders_db_manager.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../ProductionList/production_list_db_manager.dart';
 import '../config.dart';
+import '../services/PostgreApi.dart';
 import '../services/one_signal_api.dart';
 
 class FullOrder {
@@ -30,27 +31,14 @@ class OrderProvider extends ChangeNotifier {
   List<OrderedItem> get filteredItems => _filteredItems;
 
   // Define the filterOrderedItems method
-  void filterOrderedItems(String itemSource) {
+  List<OrderedItem> filterOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
     _filteredItems = _orders
         .expand((order) => order.orderedItems)
         .where((item) => item.itemSource == itemSource)
         .toList();
     notifyListeners();
-  }
-
-  Future<List<OrderedItem>> getOrderedItemsForOrder(String orderId) async {
-      final connection = PostgreSQLConnectionManager.connection;
-
-      var items = <OrderedItem>[];
-      await connection.transaction((ctx) async {
-        final result = await ctx.query('''
-        SELECT * FROM ordered_items WHERE order_id = @order_id
-      ''', substitutionValues: {"order_id":orderId});
-
-        items = result.map((item)=>OrderedItem.fromMap(item.toColumnMap())).toList();
-      });
-      return items;
+    return _filteredItems;
   }
 
   Future<void> fetchOrders() async {
@@ -59,15 +47,16 @@ class OrderProvider extends ChangeNotifier {
         // _orders = await WooSignalService.getOrders();
       }else{
         _orders =
-        await ProductionListDbManager.getOpenOrdersWithAllOrderedItems();
+        await PostgresOrdersAPI.getOrders();
         for(var o in _orders){
-          o.orderedItems = await getOrderedItemsForOrder(o.id);
+          o.orderedItems = await PostgresOrdersAPI.getOrderedItemsForOrder(o.id);
         }
       }
       notifyListeners();
     } catch (e) {
       print('Error fetching orders: $e');
     }
+    notifyListeners();
   }
 
   Future<void> createOrder(Order newOrder, People customer) async {
@@ -76,7 +65,7 @@ class OrderProvider extends ChangeNotifier {
       var result = await WooSignalService.createOrder(newOrder, newOrder.orderedItems, customer.wooSignalId);
       print(result);
     }else{
-      await OrderPostgres().createOrder(newOrder, newOrder.orderedItems);
+      await PostgresOrdersAPI.createOrder(newOrder, newOrder.orderedItems);
     }
 
     var customerFullName = "${customer.firstName} ${customer.lastName}";
@@ -94,13 +83,19 @@ class OrderProvider extends ChangeNotifier {
     if(AppConfig.ENABLE_WOOSIGNAL){
       result = await WooSignalService.updateOrder(updatedOrder, status, newItems);
     }else{
-      result = await OrderPostgres.updateOrder(updatedOrder);
+      result = await PostgresOrdersAPI.updateOrder(updatedOrder);
     }
     fetchOrders();
     return result;
   }
 
-  void deleteOrder(Order order) {
+  void deleteOrder(Order order) async {
+    if(AppConfig.ENABLE_WOOSIGNAL){
+      await WooSignalService.deleteOrder(order.wooSignalId??0);//TODO:FIX
+    }
+    else {
+      await PostgresOrdersAPI.deleteOrder(order.id);
+    }
     _orders.removeWhere((o) => o.id == order.id);
     notifyListeners();
   }
