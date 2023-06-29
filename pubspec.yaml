@@ -47,4 +47,8 @@ dev_dependencies:
   flutter_lints: ^2.0.1
 
 flutter:
+  fonts:
+    - family: Geologica
+      fonts:
+        - asset: lib/assets/fonts/Geologica-Regular.ttf
   uses-material-design: true
