@@ -1,3 +1,4 @@
+import 'package:crafted_manager/assets/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
@@ -56,7 +57,7 @@ class _OrdersListState extends State<OrdersList> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(getListTitle()),
+        title: Text(getListTitle(), style: Theme.of(context).textTheme.titleMedium),
         actions: [
           if (widget.listType != OrderListType.archived)
             Padding(
@@ -66,10 +67,9 @@ class _OrdersListState extends State<OrdersList> {
                 height: 35,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: ,
                     padding: EdgeInsets.zero,
                     shape: const CircleBorder(),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: UIConstants.ORDER_TILE_BLUE,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -194,7 +194,7 @@ class _OrderWidgetState extends State<_OrderWidget> {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
       height: 160,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 31, 34, 42),
+        color: UIConstants.ORDER_TILE_BG_COLOR,
         borderRadius: BorderRadius.circular(15),
       ),
       child: customer != null
@@ -273,7 +273,7 @@ class _OrderWidgetState extends State<_OrderWidget> {
   }
 
   Widget divider() {
-    return const Divider(color: Colors.white30);
+    return const Divider(color: UIConstants.ORDER_TILE_DIVIDER_COLOR);
   }
 
   Widget statusField() {
@@ -281,47 +281,47 @@ class _OrderWidgetState extends State<_OrderWidget> {
     switch (widget.order.orderStatus) {
       case 'Processing - Pending Payment':
         {
-          color = Colors.orange;
+          color = UIConstants.ORDER_TILE_ORANGE;
           break;
         }
       case 'Processing - Paid':
         {
-          color = Colors.orange;
+          color = UIConstants.ORDER_TILE_ORANGE;
           break;
         }
       case 'In Production':
         {
-          color = Colors.green;
+          color = UIConstants.ORDER_TILE_GREEN;
           break;
         }
       case 'Ready to Pickup/ Ship':
         {
-          color = Colors.blue;
+          color = UIConstants.ORDER_TILE_BLUE;
           break;
         }
       case 'Delivered / Shipped':
         {
-          color = Colors.orange;
+          color = UIConstants.ORDER_TILE_ORANGE;
           break;
         }
       case 'Completed':
         {
-          color = Colors.grey;
+          color = UIConstants.ORDER_TILE_GREY;
           break;
         }
       case 'Archived':
         {
-          color = Colors.grey;
+          color = UIConstants.ORDER_TILE_GREY;
           break;
         }
       case 'Cancelled':
         {
-          color = Colors.red;
+          color = UIConstants.ORDER_TILE_RED;
           break;
         }
 
       default:
-        color = Colors.green;
+        color = UIConstants.ORDER_TILE_GREEN;
     }
     return Row(
       children: [
@@ -344,7 +344,7 @@ class _OrderWidgetState extends State<_OrderWidget> {
       children: [
         const Text('Total: '),
         Text(
-          '\$${widget.order.totalAmount}',
+          '\$ ${widget.order.totalAmount}',
           style: TextStyle(color: Colors.white70),
         )
       ],

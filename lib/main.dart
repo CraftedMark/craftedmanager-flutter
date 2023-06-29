@@ -129,9 +129,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           background: Colors.black,
         ),
         textTheme: const TextTheme(
-
-          bodyLarge: TextStyle(color: Color(0xFFB085F5)),
-          bodyMedium: TextStyle(color: UIConstants.TEXT_COLOR),
+          titleMedium: TextStyle(color: UIConstants.TITLE_COLOR, fontWeight: FontWeight.bold, fontSize: 19),
+          bodyMedium: TextStyle(color: UIConstants.TEXT_COLOR, fontSize: 14),
         ),
         iconTheme: const IconThemeData(color: UIConstants.ICON_COLOR),
       ),
