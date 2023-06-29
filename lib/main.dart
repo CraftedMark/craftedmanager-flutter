@@ -119,6 +119,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor:  UIConstants.BACKGROUND_COLOR,
+          centerTitle: true,
         ),
         brightness: Brightness.dark,
         scaffoldBackgroundColor: UIConstants.BACKGROUND_COLOR,
