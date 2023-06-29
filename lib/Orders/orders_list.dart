@@ -1,4 +1,5 @@
 import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/plus_button.dart';
 import 'package:flutter/services.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/order_model.dart';
@@ -12,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../Models/people_model.dart';
 import '../Providers/people_provider.dart';
 import '../config.dart';
+import '../widgets/tile.dart';
 import 'order_detail_screen.dart';
 
 enum OrderListType {
@@ -62,26 +64,16 @@ class _OrdersListState extends State<OrdersList> {
           if (widget.listType != OrderListType.archived)
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: SizedBox(
-                width: 35,
-                height: 35,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    shape: const CircleBorder(),
-                    backgroundColor: UIConstants.ORDER_TILE_BLUE,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SearchPeopleScreen(),
-                      ),
-                    );
-                  },
-                  child: const Icon(Icons.add, size: 20, color: Colors.white),
-                ),
-              ),
+              child: PlusButton(
+                onPress: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SearchPeopleScreen(),
+                    ),
+                  );
+                },
+              )
             ),
         ],
       ),
@@ -189,40 +181,31 @@ class _OrderWidgetState extends State<_OrderWidget> {
   Widget build(BuildContext context) {
     customer = getCustomer();
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
-      height: 160,
-      decoration: BoxDecoration(
-        color: UIConstants.ORDER_TILE_BG_COLOR,
-        borderRadius: BorderRadius.circular(15),
+    return Tile(child: customer != null
+        ? GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTileTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          orderIdField(),
+          orderDateField(),
+          customerInfoField(),
+          divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              statusField(),
+              totalField(),
+            ],
+          ),
+        ],
       ),
-      child: customer != null
-          ? GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTileTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  orderIdField(),
-                  orderDateField(),
-                  customerInfoField(),
-                  divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      statusField(),
-                      totalField(),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
-            ),
-    );
+    )
+        : const Center(
+      child: CircularProgressIndicator(),
+    ),);
   }
 
   Widget orderIdField() {
