@@ -21,15 +21,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
-    });
-  }
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
 
-  Future<void> loadProducts() async {
-    var products = await ProductPostgres.getAllProducts('Product');
-    filteredProducts.addAll(products);
-    setState(() {});
+      await Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+      // filteredProducts =
+    });
   }
 
   void _filterProducts(String query) {
