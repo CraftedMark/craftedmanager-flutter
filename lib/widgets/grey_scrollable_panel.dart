@@ -15,10 +15,7 @@ class GreyScrollablePanel extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         decoration: const BoxDecoration(
           color: UIConstants.GREY_MEDIUM,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(25)),
         ),
         child: child,
       ),
