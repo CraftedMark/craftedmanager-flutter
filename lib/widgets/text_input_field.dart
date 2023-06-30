@@ -17,8 +17,9 @@ class TextInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      enabled: false,
+      enabled: onChange != null,
       decoration: InputDecoration(
+        focusedBorder: UIConstants.FIELD_BORDER,
         disabledBorder: UIConstants.FIELD_BORDER,
         enabledBorder: UIConstants.FIELD_BORDER,
         filled: true,
