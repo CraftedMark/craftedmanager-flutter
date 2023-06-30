@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
 import '../config.dart';
+import '../widgets/big_button.dart';
 import '../widgets/divider.dart';
 import '../widgets/edit_button.dart';
 import '../widgets/order_id_field.dart';
@@ -171,14 +172,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget _changeOrderStateButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: const Text('Change Order Status',
-            style: TextStyle(color: UIConstants.WHITE)),
+      child: BigButton(
+        text:'Change Order Status',
         onPressed: () {
           showModalBottomSheet(
             context: context,
