@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/utils/getColorByStatus.dart';
+import 'package:crafted_manager/widgets/grey_scrollable_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
 import '../config.dart';
+import '../widgets/big_button.dart';
 import '../widgets/divider.dart';
 import '../widgets/edit_button.dart';
 import '../widgets/order_id_field.dart';
@@ -33,26 +35,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   List<OrderedItem> orderedItems = [];
 
   List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
-      ? [
-          'pending',
-          'processing',
-          'on-hold',
-          'completed',
-          'cancelled',
-          'refunded',
-          'failed',
-          'trash'
-        ]
-      : [
-          'Processing - Pending Payment',
-          'Processing - Paid',
-          'In Production',
-          'Ready to Pickup/ Ship',
-          'Delivered / Shipped',
-          'Completed',
-          'Archived',
-          'Cancelled'
-        ];
+      ? AppConfig.ORDER_STATUSES_WOOSIGNAL
+      : AppConfig.ORDER_STATUSES_POSTGRES;
 
   void updateOrderStatusInUI(String newStatus) {
     widget.order.orderStatus = newStatus;
@@ -83,28 +67,31 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              color: UIConstants.GREY_MEDIUM,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
+        child: Stack(
+          children: [
+            GreyScrollablePanel(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  children: [
+                    _orderTextInfo(),
+                    const SizedBox(height: 24),
+                    _changeOrderStateButton(),
+                    const SizedBox(height: 24),
+                    _OrderedItemList(items: orderedItems),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-            child: Column(
+            Column(
               children: [
-                _orderTextInfo(),
-                const SizedBox(height: 24),
-                _changeOrderStateButton(),
-                const SizedBox(height: 24),
-                _OrderedItemList(items: orderedItems),
+                const Expanded(child: SizedBox.shrink()),
                 _orderCost(),
               ],
             ),
-          ),
+
+          ],
         ),
       ),
     );
@@ -160,14 +147,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget _changeOrderStateButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: const Text('Change Order Status',
-            style: TextStyle(color: UIConstants.WHITE)),
+      child: BigButton(
+        text:'Change Order Status',
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -205,26 +186,30 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _orderCost() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const DividerCustom(),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Total Amount:',
+    return ColoredBox(
+      color: UIConstants.GREY_MEDIUM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Amount:',
+                ),
+                Text(
+                  '\$ ${widget.order.totalAmount}',
+                  style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                ),
+              ],
             ),
-            Text(
-              '\$ ${widget.order.totalAmount}',
-              style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const DividerCustom(),
-      ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
