@@ -3,6 +3,7 @@ import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/utils/getColorByStatus.dart';
+import 'package:crafted_manager/widgets/grey_scrollable_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:get/get.dart';
@@ -86,17 +87,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: const BoxDecoration(
-                  color: UIConstants.GREY_MEDIUM,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  ),
-                ),
+            GreyScrollablePanel(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Column(
                   children: [
                     _orderTextInfo(),
