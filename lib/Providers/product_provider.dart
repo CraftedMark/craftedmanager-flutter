@@ -34,7 +34,7 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  void fetchProducts() async {
+  Future<void> fetchProducts() async {
     _products = await ProductPostgres.getAllProductsExceptIngredients();
     notifyListeners();
   }

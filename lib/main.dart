@@ -119,18 +119,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor:  UIConstants.BACKGROUND_COLOR,
+          centerTitle: true,
         ),
         brightness: Brightness.dark,
         scaffoldBackgroundColor: UIConstants.BACKGROUND_COLOR,
-        primaryColor: Colors.blueAccent,
         colorScheme: const ColorScheme.dark().copyWith(
-          primary: Colors.blueAccent,
+          primary: UIConstants.BLUE,
           secondary: const Color(0xFFB085F5),
-          background: Colors.black,
         ),
         textTheme: const TextTheme(
-          titleMedium: TextStyle(color: UIConstants.TITLE_COLOR, fontWeight: FontWeight.bold, fontSize: 19),
-          bodyMedium: TextStyle(color: UIConstants.TEXT_COLOR, fontSize: 14),
+          titleMedium: TextStyle(color: UIConstants.WHITE, fontWeight: FontWeight.bold, fontSize: 19),
+          bodySmall: TextStyle(color: UIConstants.TEXT_COLOR, fontSize: 14),
+          bodyMedium: TextStyle(color: UIConstants.TEXT_COLOR, fontSize: 16),
+          bodyLarge: TextStyle(color: UIConstants.TEXT_COLOR, fontSize: 19),
+
         ),
         iconTheme: const IconThemeData(color: UIConstants.ICON_COLOR),
       ),
