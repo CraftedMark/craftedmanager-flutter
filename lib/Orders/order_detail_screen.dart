@@ -83,28 +83,39 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              color: UIConstants.GREY_MEDIUM,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: UIConstants.GREY_MEDIUM,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _orderTextInfo(),
+                    const SizedBox(height: 24),
+                    _changeOrderStateButton(),
+                    const SizedBox(height: 24),
+                    _OrderedItemList(items: orderedItems),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-            child: Column(
+            Column(
               children: [
-                _orderTextInfo(),
-                const SizedBox(height: 24),
-                _changeOrderStateButton(),
-                const SizedBox(height: 24),
-                _OrderedItemList(items: orderedItems),
+                const Expanded(child: SizedBox.shrink()),
                 _orderCost(),
               ],
             ),
-          ),
+
+          ],
         ),
       ),
     );
@@ -205,26 +216,30 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _orderCost() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const DividerCustom(),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Total Amount:',
+    return ColoredBox(
+      color: UIConstants.GREY_MEDIUM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Amount:',
+                ),
+                Text(
+                  '\$ ${widget.order.totalAmount}',
+                  style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                ),
+              ],
             ),
-            Text(
-              '\$ ${widget.order.totalAmount}',
-              style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const DividerCustom(),
-      ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
