@@ -1,12 +1,18 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
+import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/utils/getColorByStatus.dart';
 import 'package:flutter/material.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
 import '../config.dart';
+import '../widgets/divider.dart';
+import '../widgets/edit_button.dart';
+import '../widgets/order_id_field.dart';
 import 'edit_order_screen.dart';
 
 class OrderDetailScreen extends StatefulWidget {
@@ -17,8 +23,6 @@ class OrderDetailScreen extends StatefulWidget {
     required this.order,
     required this.customer,
   });
-
-
 
   @override
   _OrderDetailScreenState createState() => _OrderDetailScreenState();
@@ -59,201 +63,171 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
-    orderedItems = _provider.orders.firstWhere((o) => o.id == widget.order.id).orderedItems;
+    orderedItems = _provider.orders
+        .firstWhere((o) => o.id == widget.order.id)
+        .orderedItems;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Order Details', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'Order Details',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditOrderScreen(
-                    order: widget.order,
-                    customer: widget.customer,
-                    products: orderedItems.map((i) => i.product).toList(),
-                  ),
-                ),
-              );
-            },
+          EditButton(
+            onPressed: _onEditButtonPress,
           ),
         ],
       ),
-      backgroundColor: Colors.black,
       body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          children: [
-            _orderTextInfo(),
-            SizedBox(height: 4),
-            _changeOrderState(),
-            SizedBox(height: 24),
-            _orderProductsList(),
-          ],
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: UIConstants.GREY_MEDIUM,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
+            ),
+            child: Column(
+              children: [
+                _orderTextInfo(),
+                const SizedBox(height: 24),
+                _changeOrderStateButton(),
+                const SizedBox(height: 24),
+                _OrderedItemList(items: orderedItems),
+                _orderCost(),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _orderTextInfo(){
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Order ID: ${widget.order.id}',
-          style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white),
+  void _onEditButtonPress() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditOrderScreen(
+          order: widget.order,
+          customer: widget.customer,
+          products: orderedItems.map((i) => i.product).toList(),
         ),
-        SizedBox(height: 16),
-        Text(
-          'Customer: ${widget.customer.firstName} ${widget.customer.lastName}',
-          style: TextStyle(fontSize: 18, color: Colors.white),
-        ),
-        SizedBox(height: 24),
-        Text(
-          'Total Amount: \$${widget.order.totalAmount}',
-          style: TextStyle(fontSize: 18, color: Colors.white),
-        ),
-        SizedBox(height: 24),
-        Text(
-          'Order Status: ${widget.order.orderStatus}',
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue),
-        ),
-      ],
-    );
-  }
-  Widget _changeOrderState(){
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.blue,
       ),
-      child: Text('Change Order Status'),
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return Container(
-              color: Colors.black,
-              child: ListView.builder(
-                itemCount: orderStatuses.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(orderStatuses[index],
-                        style: TextStyle(color: Colors.white)),
-                    onTap: () async {//TODO:replace with OrderProvider.updateOrderStatus
-                      final orderForSend = widget.order
-                          .copyWith(orderStatus: orderStatuses[index]);
-                      Navigator.pop(context);
-                      // displayLoading();
-                      final result = await _provider.updateOrder(
-                          orderForSend,
-                          status: WSOrderStatus.values[index]);
-                      // Navigator.pop(context);
-                      if (result) {
-                        updateOrderStatusInUI(orderStatuses[index]);
-                      }
-                    },
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
     );
   }
-  Widget _orderProductsList(){
+
+  Widget _orderTextInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Products:',
-          style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white),
-        ),
-        SizedBox(height: 16),
-        Column(
-          children: orderedItems
-              .map(
-                (OrderedItem orderedItem) => Card(
-              color: Colors.grey[800],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Product Name: ${orderedItem.productName}',
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Divider(color: Colors.grey[600]),
-                    SizedBox(height: 8),
-                    Text(
-                      'Quantity: ${orderedItem.quantity}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Price: \$${orderedItem.price}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Flavor: ${orderedItem.flavor}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Status: ${orderedItem.status}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Dose: ${orderedItem.dose}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Packaging: ${orderedItem.packaging}',
-                      style:
-                      TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
+        OrderIdField(orderId: widget.order.id),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Customer:',
             ),
-          )
-              .toList(),
-        )
+            Text(
+              '${widget.customer.firstName} ${widget.customer.lastName}',
+              style: const TextStyle(color: UIConstants.WHITE_LIGHT),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Order Status:'),
+            Text(
+              widget.order.orderStatus,
+              style: TextStyle(
+                  color: StatusColor.getColor(widget.order.orderStatus)),
+            ),
+          ],
+        ),
       ],
     );
   }
+
+  Widget _changeOrderStateButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        child: const Text('Change Order Status',
+            style: TextStyle(color: UIConstants.WHITE)),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                color: Colors.black,
+                child: ListView.builder(
+                  itemCount: orderStatuses.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(orderStatuses[index],
+                          style: TextStyle(color: Colors.white)),
+                      onTap: () async {
+                        //TODO:replace with OrderProvider.updateOrderStatus
+                        final orderForSend = widget.order
+                            .copyWith(orderStatus: orderStatuses[index]);
+                        Navigator.pop(context);
+                        // displayLoading();
+                        final result = await _provider.updateOrder(orderForSend,
+                            status: WSOrderStatus.values[index]);
+                        // Navigator.pop(context);
+                        if (result) {
+                          updateOrderStatusInUI(orderStatuses[index]);
+                        }
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _orderCost() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const DividerCustom(),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total Amount:',
+            ),
+            Text(
+              '\$ ${widget.order.totalAmount}',
+              style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        const DividerCustom(),
+      ],
+    );
+  }
+
   void displayLoading() {
     showDialog(
       barrierDismissible: false,
@@ -268,4 +242,97 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ),
     );
   }
+}
+
+class _OrderedItemList extends StatefulWidget {
+  final List<OrderedItem> items;
+  const _OrderedItemList({Key? key, required this.items}) : super(key: key);
+
+  @override
+  State<_OrderedItemList> createState() => _OrderedItemListState();
+}
+
+class _OrderedItemListState extends State<_OrderedItemList> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('PRODUCTS (${widget.items.length})', style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 16),
+        ListView.builder(
+          padding: EdgeInsets.zero,
+
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: widget.items.length,
+          shrinkWrap: true,
+          itemBuilder: (_, index) => itemTile(widget.items[index]),
+        ),
+      ],
+    );
+  }
+
+  Widget itemTile(OrderedItem item) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: UIConstants.GREY_LIGHT,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            item.productName,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                  child: itemTilePicture(),
+              ),
+              Flexible(
+                child: Column(
+                  children: [
+                    itemTileRow('Quantity', item.quantity.toString()),
+                    const SizedBox(height: 4),
+                    itemTileRow('Price', item.price.toString()),
+                    const SizedBox(height: 4),
+                    itemTileRow('Flavor', item.flavor),
+                    const SizedBox(height: 4),
+                    itemTileRow('Status', item.status, valuColor: StatusColor.getColor(item.status)),
+                    const SizedBox(height: 4),
+                    itemTileRow('Dose', item.dose.toString()),
+                    const SizedBox(height: 4),
+                    itemTileRow('Packaging', item.packaging),
+                  ],
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+  Widget itemTileRow(String field, String value, {Color? valuColor}){
+    return Row(
+      children: [
+        Text('$field: '),
+        Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT)),
+      ],
+    );
+  }
+  Widget itemTilePicture({String? url, Image? image} ){
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: UIConstants.TEXT_COLOR,
+      ),
+      width: 140,
+      height: 140,
+    );
+  }//TODO: implement
 }
