@@ -14,7 +14,7 @@ class Tile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
         height: height,
         decoration: BoxDecoration(
-          color: UIConstants.GREY_MEDIUM_COLOR,
+          color: UIConstants.GREY_MEDIUM,
           borderRadius: BorderRadius.circular(15),
         ),
         child: child,

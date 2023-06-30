@@ -7,6 +7,6 @@ class DividerCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(color: UIConstants.ORDER_TILE_DIVIDER_COLOR);
+    return const Divider(color: UIConstants.DIVIDER_COLOR);
   }
 }

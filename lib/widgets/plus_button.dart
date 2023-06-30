@@ -15,7 +15,7 @@ class PlusButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
           shape: const CircleBorder(),
-          backgroundColor: UIConstants.ORDER_TILE_BLUE,
+          backgroundColor: UIConstants.BLUE,
         ),
         onPressed: onPressed,
         child: const Icon(Icons.add, size: 20, color: Colors.white),

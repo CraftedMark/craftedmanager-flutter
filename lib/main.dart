@@ -124,7 +124,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: UIConstants.BACKGROUND_COLOR,
         colorScheme: const ColorScheme.dark().copyWith(
-          primary: UIConstants.ORDER_TILE_BLUE,
+          primary: UIConstants.BLUE,
           secondary: const Color(0xFFB085F5),
         ),
         textTheme: const TextTheme(

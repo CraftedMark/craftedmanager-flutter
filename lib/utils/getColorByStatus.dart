@@ -8,47 +8,47 @@ class StatusColor{
     switch (status) {
       case 'Processing - Pending Payment':
         {
-          color = UIConstants.ORDER_TILE_ORANGE;
+          color = UIConstants.ORANGE;
           break;
         }
       case 'Processing - Paid':
         {
-          color = UIConstants.ORDER_TILE_ORANGE;
+          color = UIConstants.ORANGE;
           break;
         }
       case 'In Production':
         {
-          color = UIConstants.ORDER_TILE_GREEN;
+          color = UIConstants.GREEN;
           break;
         }
       case 'Ready to Pickup/ Ship':
         {
-          color = UIConstants.ORDER_TILE_BLUE;
+          color = UIConstants.BLUE;
           break;
         }
       case 'Delivered / Shipped':
         {
-          color = UIConstants.ORDER_TILE_ORANGE;
+          color = UIConstants.ORANGE;
           break;
         }
       case 'Completed':
         {
-          color = UIConstants.ORDER_TILE_GREY;
+          color = UIConstants.GREY;
           break;
         }
       case 'Archived':
         {
-          color = UIConstants.ORDER_TILE_GREY;
+          color = UIConstants.GREY;
           break;
         }
       case 'Cancelled':
         {
-          color = UIConstants.ORDER_TILE_RED;
+          color = UIConstants.RED;
           break;
         }
 
       default:
-        color = UIConstants.ORDER_TILE_GREEN;
+        color = UIConstants.GREEN;
     }
     return color;
   }
