@@ -1,4 +1,5 @@
 import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/utils/getColorByStatus.dart';
 import 'package:crafted_manager/widgets/plus_button.dart';
 import 'package:flutter/services.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
@@ -13,6 +14,8 @@ import 'package:provider/provider.dart';
 import '../Models/people_model.dart';
 import '../Providers/people_provider.dart';
 import '../config.dart';
+import '../widgets/divider.dart';
+import '../widgets/order_id_field.dart';
 import '../widgets/tile.dart';
 import 'order_detail_screen.dart';
 
@@ -59,22 +62,22 @@ class _OrdersListState extends State<OrdersList> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(getListTitle(), style: Theme.of(context).textTheme.titleMedium),
+        title: Text(getListTitle(),
+            style: Theme.of(context).textTheme.titleMedium),
         actions: [
           if (widget.listType != OrderListType.archived)
             Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: PlusButton(
-                onPress: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SearchPeopleScreen(),
-                    ),
-                  );
-                },
-              )
-            ),
+                padding: const EdgeInsets.only(right: 16),
+                child: PlusButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchPeopleScreen(),
+                      ),
+                    );
+                  },
+                )),
         ],
       ),
       body: SafeArea(
@@ -181,141 +184,70 @@ class _OrderWidgetState extends State<_OrderWidget> {
   Widget build(BuildContext context) {
     customer = getCustomer();
 
-    return Tile(child: customer != null
-        ? GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTileTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          orderIdField(),
-          orderDateField(),
-          customerInfoField(),
-          divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              statusField(),
-              totalField(),
-            ],
-          ),
-        ],
-      ),
-    )
-        : const Center(
-      child: CircularProgressIndicator(),
-    ),);
-  }
-
-  Widget orderIdField() {
-    Future<void> onCopyButtonTap() async {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.black,
-        content: Text(
-          'Copied to clipboard',
-          style: TextStyle(color: Colors.white),
-        ),
-      ));
-      await Clipboard.setData(ClipboardData(text: widget.order.id));
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Order ID:'),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              widget.order.id,
-              style: const TextStyle(
-                color: Colors.white70,
+    return Tile(
+      child: customer != null
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTileTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  OrderIdField(
+                      orderId: widget.order.id,
+                      style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  orderDateField(),
+                  customerInfoField(),
+                  const DividerCustom(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      statusField(),
+                      totalField(),
+                    ],
+                  ),
+                ],
               ),
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
             ),
-            GestureDetector(
-              onTap: onCopyButtonTap,
-              child: const Icon(Icons.copy, size: 20),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
   Widget orderDateField() {
     return Text(
       'Order Date: ${DateFormat('MM-dd-yyyy').format(widget.order.orderDate)}',
+        style: Theme.of(context).textTheme.bodySmall,
     );
   }
 
   Widget customerInfoField() {
-    return Text('Customer: ${customer!.firstName} ${customer!.lastName}');
-  }
-
-  Widget divider() {
-    return const Divider(color: UIConstants.ORDER_TILE_DIVIDER_COLOR);
+    return Text(
+      'Customer: ${customer!.firstName} ${customer!.lastName}',
+      style: Theme.of(context).textTheme.bodySmall,
+    );
   }
 
   Widget statusField() {
-    Color color;
-    switch (widget.order.orderStatus) {
-      case 'Processing - Pending Payment':
-        {
-          color = UIConstants.ORDER_TILE_ORANGE;
-          break;
-        }
-      case 'Processing - Paid':
-        {
-          color = UIConstants.ORDER_TILE_ORANGE;
-          break;
-        }
-      case 'In Production':
-        {
-          color = UIConstants.ORDER_TILE_GREEN;
-          break;
-        }
-      case 'Ready to Pickup/ Ship':
-        {
-          color = UIConstants.ORDER_TILE_BLUE;
-          break;
-        }
-      case 'Delivered / Shipped':
-        {
-          color = UIConstants.ORDER_TILE_ORANGE;
-          break;
-        }
-      case 'Completed':
-        {
-          color = UIConstants.ORDER_TILE_GREY;
-          break;
-        }
-      case 'Archived':
-        {
-          color = UIConstants.ORDER_TILE_GREY;
-          break;
-        }
-      case 'Cancelled':
-        {
-          color = UIConstants.ORDER_TILE_RED;
-          break;
-        }
+    final color = StatusColor.getColor(widget.order.orderStatus);
 
-      default:
-        color = UIConstants.ORDER_TILE_GREEN;
-    }
     return Row(
       children: [
-        Text('Status: '),
+        Text('Status: ', style: Theme.of(context).textTheme.bodySmall),
         DecoratedBox(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5), color: color),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-            child: Text(widget.order.orderStatus,
-                style: const TextStyle(color: Colors.white)),
+            child: Text(
+              widget.order.orderStatus,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: UIConstants.WHITE),
+            ),
           ),
         )
       ],
@@ -325,10 +257,13 @@ class _OrderWidgetState extends State<_OrderWidget> {
   Widget totalField() {
     return Row(
       children: [
-        const Text('Total: '),
+        Text('Total: ', style: Theme.of(context).textTheme.bodySmall),
         Text(
           '\$ ${widget.order.totalAmount}',
-          style: TextStyle(color: Colors.white70),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: UIConstants.WHITE_LIGHT),
         )
       ],
     );
