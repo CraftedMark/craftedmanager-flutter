@@ -35,26 +35,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   List<OrderedItem> orderedItems = [];
 
   List<String> orderStatuses = AppConfig.ENABLE_WOOSIGNAL
-      ? [
-          'pending',
-          'processing',
-          'on-hold',
-          'completed',
-          'cancelled',
-          'refunded',
-          'failed',
-          'trash'
-        ]
-      : [
-          'Processing - Pending Payment',
-          'Processing - Paid',
-          'In Production',
-          'Ready to Pickup/ Ship',
-          'Delivered / Shipped',
-          'Completed',
-          'Archived',
-          'Cancelled'
-        ];
+      ? AppConfig.ORDER_STATUSES_WOOSIGNAL
+      : AppConfig.ORDER_STATUSES_POSTGRES;
 
   void updateOrderStatusInUI(String newStatus) {
     widget.order.orderStatus = newStatus;
