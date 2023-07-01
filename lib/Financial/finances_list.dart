@@ -38,9 +38,11 @@ class _FinancialScreenState extends State<FinancialScreen> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
+    final themeText = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Money Management'),
+        title: Text('Money Management', style: themeText.titleMedium),
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: themeData.iconTheme.color),
@@ -110,32 +112,17 @@ class _FinancialScreenState extends State<FinancialScreen> {
                       return ListView.builder(
                         itemCount: data.length,
                         itemBuilder: (context, index) {
-                          if (segmentedControlValue == 0) {
-                            return ListTile(
-                              title: Text(
-                                "Bill ${data[index]['id']}: ${data[index]['name']}",
-                                style: themeData.textTheme.bodyText1,
-                              ),
-                            );
-                          } else if (segmentedControlValue == 1) {
-                            return ListTile(
-                              title: Text(
-                                  "Expense ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyLarge),
-                            );
-                          } else if (segmentedControlValue == 2) {
-                            return ListTile(
-                              title: Text(
-                                  "Payment ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyLarge),
-                            );
-                          } else {
-                            return ListTile(
-                              title: Text(
-                                  "Invoice ${data[index]['id']}: ${data[index]['name']}",
-                                  style: themeData.textTheme.bodyLarge),
-                            );
-                          }
+                          return ListTile(
+                            title: Text(
+                              "${[
+                                'Bill',
+                                'Expense',
+                                'Payment',
+                                'Invoice'
+                              ][segmentedControlValue]} ${data[index]['id']}: ${data[index]['name']}",
+                              style: themeText.bodyMedium,
+                            ),
+                          );
                         },
                       );
                     }

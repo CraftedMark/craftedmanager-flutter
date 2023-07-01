@@ -1,5 +1,3 @@
-import 'package:woosignal/models/response/order.dart' as wsOrder;
-
 import 'package:uuid/uuid.dart';
 
 import 'ordered_item_model.dart';
@@ -15,6 +13,9 @@ class Order {
   String shippingAddress;
   String billingAddress;
   double totalAmount;
+  bool isPaid;
+  int paymentId;
+  double paidAmount;
   String orderStatus;
   String productName;
   String notes;
@@ -29,6 +30,9 @@ class Order {
     required this.shippingAddress,
     required this.billingAddress,
     required this.totalAmount,
+    this.paymentId = 0,
+    this.isPaid = false,
+    this.paidAmount = 0.0,
     required this.orderStatus,
     required this.productName,
     required this.notes,
@@ -44,6 +48,9 @@ class Order {
     String? shippingAddress,
     String? billingAddress,
     double? totalAmount,
+    int? paymentid,
+    bool? ispaid,
+    double? paidAmount,
     String? orderStatus,
     String? productName,
     String? notes,
@@ -58,6 +65,9 @@ class Order {
       shippingAddress: shippingAddress ?? this.shippingAddress,
       billingAddress: billingAddress ?? this.billingAddress,
       totalAmount: totalAmount ?? this.totalAmount,
+      paymentId: paymentid ?? this.paymentId,
+      isPaid: ispaid ?? this.isPaid,
+      paidAmount: paidAmount ?? this.paidAmount,
       orderStatus: orderStatus ?? this.orderStatus,
       productName: productName ?? this.productName,
       notes: notes ?? this.notes,
@@ -87,6 +97,9 @@ class Order {
       orderDate: parseOrderDate(map['order_date'].toString()),
       shippingAddress: map['shipping_address'] ?? '',
       billingAddress: map['billing_address'] ?? '',
+      paymentId: map['id'] ?? 0,
+      isPaid: map['is_paid'] == 1,
+      paidAmount: double.tryParse(map['paid_amount']?.toString() ?? '0') ?? 0.0,
       totalAmount:
           double.tryParse(map['total_amount']?.toString() ?? '0') ?? 0.0,
       orderStatus: map['order_status'] ?? '',

@@ -1,18 +1,16 @@
 import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
+import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/utils/getColorByStatus.dart';
 import 'package:crafted_manager/widgets/grey_scrollable_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
 import '../config.dart';
 import '../widgets/big_button.dart';
-import '../widgets/divider.dart';
 import '../widgets/edit_button.dart';
 import '../widgets/order_id_field.dart';
 import 'edit_order_screen.dart';
@@ -90,7 +88,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 _orderCost(),
               ],
             ),
-
           ],
         ),
       ),
@@ -148,7 +145,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return SizedBox(
       width: double.infinity,
       child: BigButton(
-        text:'Change Order Status',
+        text: 'Change Order Status',
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -202,7 +199,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
                 Text(
                   '\$ ${widget.order.totalAmount}',
-                  style: TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                  style:
+                      TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Paid Amount:',
+                ),
+                Text(
+                  '\$ ${widget.order.paidAmount}',
+                  // assuming 'paidAmount' exists in 'Order' class
+                  style:
+                      TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
                 ),
               ],
             ),
@@ -243,11 +259,11 @@ class _OrderedItemListState extends State<_OrderedItemList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('PRODUCTS (${widget.items.length})', style: Theme.of(context).textTheme.bodyLarge),
+        Text('PRODUCTS (${widget.items.length})',
+            style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 16),
         ListView.builder(
           padding: EdgeInsets.zero,
-
           physics: const NeverScrollableScrollPhysics(),
           itemCount: widget.items.length,
           shrinkWrap: true,
@@ -277,7 +293,7 @@ class _OrderedItemListState extends State<_OrderedItemList> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
-                  child: itemTilePicture(),
+                child: itemTilePicture(),
               ),
               Flexible(
                 child: Column(
@@ -288,11 +304,14 @@ class _OrderedItemListState extends State<_OrderedItemList> {
                     const SizedBox(height: 4),
                     itemTileRow('Flavor', item.flavor),
                     const SizedBox(height: 4),
-                    itemTileRow('Status', item.status, valuColor: StatusColor.getColor(item.status)),
+                    itemTileRow('Status', item.status,
+                        valuColor: StatusColor.getColor(item.status)),
                     const SizedBox(height: 4),
                     itemTileRow('Dose', item.dose.toString()),
                     const SizedBox(height: 4),
                     itemTileRow('Packaging', item.packaging),
+                    const SizedBox(height: 4),
+                    itemTileRow('Price', item.price.toString()),
                   ],
                 ),
               )
@@ -302,15 +321,21 @@ class _OrderedItemListState extends State<_OrderedItemList> {
       ),
     );
   }
-  Widget itemTileRow(String field, String value, {Color? valuColor}){
+
+  Widget itemTileRow(String field, String value, {Color? valuColor}) {
     return Row(
       children: [
         Text('$field: '),
-        Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT)),
+        Text(value,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT)),
       ],
     );
   }
-  Widget itemTilePicture({String? url, Image? image} ){
+
+  Widget itemTilePicture({String? url, Image? image}) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -319,5 +344,5 @@ class _OrderedItemListState extends State<_OrderedItemList> {
       width: 140,
       height: 140,
     );
-  }//TODO: implement
+  } //TODO: implement
 }

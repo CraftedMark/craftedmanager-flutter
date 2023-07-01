@@ -10,6 +10,8 @@ class Payments {
   String method;
   bool collectedbymark;
   String? description;
+  bool isPaid;
+  double paidAmount;
 
   Payments({
     required this.id,
@@ -20,6 +22,8 @@ class Payments {
     required this.method,
     required this.collectedbymark,
     this.description,
+    this.isPaid = false,
+    this.paidAmount = 0.0,
   });
 
   Payments.fromMap(Map<String, dynamic> data)
@@ -30,7 +34,10 @@ class Payments {
         collectedBy = data['collected_by'],
         method = data['method'],
         collectedbymark = data['collectedbymark'] == 1,
-        description = data['description'];
+        description = data['description'],
+        isPaid = data['is_paid'] == 1,
+        paidAmount =
+            double.parse(data['paid_amount'].toString() ?? '0.0') ?? 0.0;
 }
 
 class Bills {
