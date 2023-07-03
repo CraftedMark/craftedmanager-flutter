@@ -229,7 +229,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               const SizedBox(height: 16),
               _subtotalField(),
               const SizedBox(height: 16),
-              const SizedBox(height: 16),
               BigButton(
                 text: 'Save',
                 onPressed: () async {
@@ -339,6 +338,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   Widget _subtotalField(){
     return TextInputField(
+      enabled: false,
       labelText: 'Sub Total:',
       initialValue: '\$ ${_subTotal.toStringAsFixed(2)}',
     );
@@ -364,6 +364,7 @@ class _OrderInformation extends StatelessWidget {
          ),
         const SizedBox(height: 24),
         TextInputField(
+          enabled: false,
           labelText: 'Customer:',
           initialValue: '${customer.firstName} ${customer.lastName}',
         ),

@@ -9,7 +9,7 @@ class TextInputField extends StatelessWidget {
     required this.labelText,
     this.onChange,
     this.controller,
-    this.enabled = false,
+    this.enabled = true,
     this.keyboardType = TextInputType.text
   }) : super(key: key);
 
