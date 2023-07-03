@@ -1,13 +1,12 @@
 import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
-import '../../Providers/order_provider.dart';
 import '../../Providers/product_provider.dart';
-import '../Products/product_db_manager.dart';
-
+import '../widgets/big_button.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   @override
@@ -15,14 +14,22 @@ class ProductSearchScreen extends StatefulWidget {
 }
 
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
-  TextEditingController _searchController = TextEditingController();
+  List<Product> allProducts = [];
   List<Product> filteredProducts = [];
   int selectedQuantity = 1;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      filteredProducts = Provider.of<ProductProvider>(context, listen: false).allProducts;
+      setState(() {});
+    });
+  }
+
   void _filterProducts(String query) {
     setState(() {
-      filteredProducts = Provider.of<ProductProvider>(context, listen: false)
-          .allProducts
+      filteredProducts = allProducts
           .where((product) =>
               product.name.toLowerCase().contains(query.trim().toLowerCase()))
           .toList();
@@ -31,105 +38,160 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    filteredProducts = Provider.of<ProductProvider>(context).allProducts;
-    return  Scaffold(
-        appBar: AppBar(
-            title: const Text('Search Product'),
-            bottom: PreferredSize(
-              preferredSize: const Size(double.infinity, 50),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _filterProducts,
-                  decoration: InputDecoration(
+    allProducts = Provider.of<ProductProvider>(context).allProducts;
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: UIConstants.GREY_MEDIUM,
+        title: const Text('Search Product'),
+        bottom: PreferredSize(
+          preferredSize: const Size(double.infinity, 64),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            child: SizedBox(
+              height: 46,
+              child: TextField(
+                style: Theme.of(context).textTheme.bodyMedium,
+                onChanged: _filterProducts,
+                decoration: InputDecoration(
+                    filled: true,
+                    fillColor: UIConstants.SEARCH_BAR_COLOR,
                     // prefix: Icon(Icons.search),
                     labelText: 'Search product',
-                    enabledBorder: UIConstants.FIELD_BORDER
-                  ),
+                    enabledBorder: UIConstants.FIELD_BORDER,
+                  focusedBorder:  UIConstants.FIELD_BORDER,
                 ),
               ),
             ),
+          ),
         ),
-        body: SafeArea(
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(filteredProducts[index].name),
-                        subtitle: Text(filteredProducts[index].description),
-                        trailing:
-                            Text('\$${filteredProducts[index].retailPrice}'),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              TextEditingController quantityController =
-                                  TextEditingController(text: '1');
-                              TextEditingController itemSourceController =
-                                  TextEditingController(text: '');
-                              TextEditingController packagingController =
-                                  TextEditingController(text: '');
-                              TextEditingController doseController =
-                                  TextEditingController(text: '0.1');
-
-                              return AlertDialog(
-                                title: const Text('Add to Order'),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const SizedBox(height: 8),
-                                      Text(filteredProducts[index].name),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: quantityController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Quantity',
-                                          border: OutlineInputBorder(),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                shrinkWrap: true,
+                itemCount: filteredProducts.length,
+                itemBuilder: (context, index) {
+                  return _productTile(
+                    name: filteredProducts[index].name,
+                    price: filteredProducts[index].retailPrice,
+                    description: filteredProducts[index].description,
+                    onTap: () {
+                      TextEditingController quantityController =
+                          TextEditingController(text: '1');
+                          TextEditingController itemSourceController =
+                          TextEditingController(text: '');
+                          TextEditingController packagingController =
+                          TextEditingController(text: '');
+                          TextEditingController doseController =
+                          TextEditingController(text: '0.1');
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                       bool isNeedPacking = true;
+                        return AlertDialog(
+                          insetPadding: const EdgeInsets.fromLTRB(8,0,8,24),
+                          contentPadding: EdgeInsets.zero,
+                          actionsPadding: const EdgeInsets.all(24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          backgroundColor: UIConstants.GREY_LIGHT,
+                          title: Text('Add to Order', style: Theme.of(context).textTheme.titleMedium,),
+                          content: StatefulBuilder (
+                              builder: (context, changeState) {
+                                final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT);
+                                return SingleChildScrollView(
+                                  physics: const BouncingScrollPhysics(),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          filteredProducts[index].name,
+                                          style: textStyle,
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: itemSourceController,
-                                        decoration: InputDecoration(
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          filteredProducts[index].description,
+                                          style: textStyle,
+                                        ),
+                                        const SizedBox(height: 24),
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: TextInputField(
+                                                enabled: true,
+                                                controller: quantityController,
+                                                keyboardType: TextInputType.number,
+                                                labelText: 'Quantity',
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Flexible(
+                                              child: TextInputField(
+                                                enabled: true,
+                                                controller: doseController,
+                                                keyboardType: TextInputType.number,
+                                                labelText: 'Dose',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TextInputField(
+                                          enabled: true,
+                                          controller: itemSourceController,
                                           labelText: 'Item Source',
-                                          border: OutlineInputBorder(),
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: packagingController,
-                                        decoration: InputDecoration(
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          children: [
+                                            Checkbox(
+                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              value: isNeedPacking,
+                                              onChanged: (value){
+                                                isNeedPacking = !isNeedPacking;
+                                                changeState(() {});
+                                              },
+                                            ),
+                                            Text('Packing',style: textStyle),
+                                          ],
+                                        ),
+
+                                        const SizedBox(height: 16),
+                                        TextInputField(
+                                          enabled: isNeedPacking,
                                           labelText: 'Packaging',
-                                          border: OutlineInputBorder(),
+                                          controller: packagingController,
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: doseController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Dose',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                actions: [
-                                  TextButton(
+                                );
+                              }
+                          ),
+                          actions: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: BigButton(
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: const Text("Cancel"),
+                                    text: 'Cancel',
+                                    color: UIConstants.GREY,
                                   ),
-                                  TextButton(
+                                ),
+                                const SizedBox(width: 16),
+                                Flexible(
+                                  child: BigButton(
                                     onPressed: () {
                                       selectedQuantity =
                                           int.parse(quantityController.text);
@@ -140,16 +202,16 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                         // this is the required product object
                                         productName: filteredProducts[index].name,
                                         productId:
-                                            filteredProducts[index].id ?? 0,
+                                        filteredProducts[index].id ?? 0,
                                         name: filteredProducts[index].name,
                                         quantity: selectedQuantity,
                                         price:
-                                            filteredProducts[index].retailPrice,
+                                        filteredProducts[index].retailPrice,
                                         discount: 0.0,
                                         productDescription:
-                                            filteredProducts[index].description,
+                                        filteredProducts[index].description,
                                         productRetailPrice:
-                                            filteredProducts[index].retailPrice,
+                                        filteredProducts[index].retailPrice,
                                         status: 'status',
                                         // replace this with your actual status
                                         itemSource: itemSourceController.text,
@@ -170,21 +232,69 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                         },
                                       );
                                     },
-                                    child: const Text("Add to Order"),
+                                    text: 'Add to Order',
                                   ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                                ),
+                              ],
+                            ),
+                            
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _productTile(
+      {required String name,
+      required double price,
+      required String description,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          border: Border.all(width: 1, color: UIConstants.DIVIDER_COLOR),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    name,
+                    style: const TextStyle(color: UIConstants.WHITE_LIGHT),
+                  ),
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Text(
+                    '\$ ${price.toStringAsFixed(2)}',
+                    style: const TextStyle(color: UIConstants.WHITE_LIGHT),
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(description),
+          ],
         ),
+      ),
     );
   }
 }
