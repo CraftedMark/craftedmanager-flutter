@@ -76,6 +76,78 @@ class Product {
 
   bool get isEmpty => id == -1;
 
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as int?,
+      name: json['name'] as String,
+      retailPrice: json['retail_price'] as double,
+      wholesalePrice: json['wholesale_price'] as double,
+      manufacturingPrice: json['manufacturing_price'] as double,
+      assemblyItems: (json['assembly_items'] as List<dynamic>)
+          .map((item) => AssemblyItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      backordered: json['backordered'] as bool,
+      bulkPricing: json['bulk_pricing'] as double?,
+      category: json['category'] as String,
+      costOfGood: json['cost_of_good'] as double,
+      weightInGrams: json['weight_in_grams'] as int,
+      type: json['type'] as String,
+      supplier: json['supplier'] as String,
+      subCategory: json['sub_category'] as String,
+      subcat2: json['subcat2'] as String,
+      stockQuantity: json['stock_quantity'] as int,
+      quantitySold: json['quantity_sold'] as int,
+      quantityInStock: json['quantity_in_stock'] as int,
+      perGramCost: json['per_gram_cost'] as double,
+      packageWeightMeasure: json['package_weight_measure'] as String,
+      packageWeight: json['package_weight'] as int,
+      manufacturerName: json['manufacturer_name'] as String,
+      manufacturerId: json['manufacturer_id'] as int?,
+      itemSource: json['item_source'] as String,
+      isAssemblyItem: json['is_assembly'] == 1,
+      imageUrl: json['image_url'] as String,
+      flavor: json['flavor'] as String,
+      description: json['description'] as String,
+      dose: json['dose'] as double?,
+      packaging: json['packaging'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'retail_price': retailPrice,
+      'wholesale_price': wholesalePrice,
+      'manufacturing_price': manufacturingPrice,
+      'assembly_items': assemblyItems.map((item) => item.toJson()).toList(),
+      'backordered': backordered,
+      'bulk_pricing': bulkPricing,
+      'category': category,
+      'cost_of_good': costOfGood,
+      'weight_in_grams': weightInGrams,
+      'type': type,
+      'supplier': supplier,
+      'sub_category': subCategory,
+      'subcat2': subcat2,
+      'stock_quantity': stockQuantity,
+      'quantity_sold': quantitySold,
+      'quantity_in_stock': quantityInStock,
+      'per_gram_cost': perGramCost,
+      'package_weight_measure': packageWeightMeasure,
+      'package_weight': packageWeight,
+      'manufacturer_name': manufacturerName,
+      'manufacturer_id': manufacturerId,
+      'item_source': itemSource,
+      'is_assembly': isAssemblyItem ? 1 : 0,
+      'image_url': imageUrl,
+      'flavor': flavor,
+      'description': description,
+      'dose': dose,
+      'packaging': packaging,
+    };
+  }
+
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
       id: map['product_id'] as int?,
@@ -130,8 +202,8 @@ class Product {
     //TODO: rework
     return Product(
       id: product.id,
-      name: product.name?? 'Unknown',
-      retailPrice: double.tryParse(product.regularPrice ?? '0' ) ?? 0,
+      name: product.name ?? 'Unknown',
+      retailPrice: double.tryParse(product.regularPrice ?? '0') ?? 0,
       wholesalePrice: double.tryParse(product.salePrice ?? '0') ?? 0,
       manufacturingPrice: double.parse(product.price ?? '0'),
       assemblyItems: [],
@@ -140,7 +212,8 @@ class Product {
       category: product.categories.first.toString(),
       costOfGood: double.parse(product.price ?? "0"),
       weightInGrams: int.tryParse(product.weight.toString()) ?? 0,
-      type: '' , //simple, grouped, external and variable
+      type: '',
+      //simple, grouped, external and variable
       supplier: 'Supplier',
       subCategory: '',
       subcat2: '',
@@ -152,11 +225,11 @@ class Product {
       packageWeight: 0,
       manufacturerName: '',
       manufacturerId: 0,
-      itemSource: '' ,
+      itemSource: '',
       isAssemblyItem: false,
       imageUrl: '',
       flavor: '',
-      description: product.description??'',
+      description: product.description ?? '',
     );
   }
 
@@ -208,6 +281,7 @@ class Product {
       // 'meta_data': '',
     };
   }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

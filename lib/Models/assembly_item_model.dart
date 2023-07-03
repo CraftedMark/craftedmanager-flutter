@@ -22,7 +22,27 @@ class AssemblyItem {
     );
   }
 
+  factory AssemblyItem.fromJson(Map<String, dynamic> json) {
+    return AssemblyItem(
+      id: json['id'],
+      productId: json['product_id'],
+      ingredientId: json['ingredient_id'],
+      quantity: json['quantity'],
+      unit: json['unit'] ?? '',
+    );
+  }
+
   Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'product_id': productId,
+      'ingredient_id': ingredientId,
+      'quantity': quantity,
+      'unit': unit,
+    };
+  }
+
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'product_id': productId,

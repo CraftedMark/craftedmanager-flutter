@@ -110,6 +110,44 @@ class Order {
     );
   }
 
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      id: json['id'] as String,
+      customerId: json['customer_id'] as String,
+      orderDate: DateTime.parse(json['order_date']),
+      shippingAddress: json['shipping_address'] ?? '',
+      billingAddress: json['billing_address'] ?? '',
+      totalAmount: json['total_amount'].toDouble(),
+      paymentId: json['payment_id'] ?? 0,
+      isPaid: json['is_paid'] == 1,
+      orderStatus: json['order_status'] ?? '',
+      productName: json['product_name'] ?? '',
+      notes: json['notes'] ?? '',
+      archived: json['archived'] == 1,
+      orderedItems: (json['ordered_items'] as List)
+          .map((i) => OrderedItem.fromJson(i))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'customer_id': customerId,
+      'order_date': orderDate.toIso8601String(),
+      'shipping_address': shippingAddress,
+      'billing_address': billingAddress,
+      'total_amount': totalAmount,
+      'payment_id': paymentId,
+      'is_paid': isPaid ? 1 : 0,
+      'order_status': orderStatus,
+      'product_name': productName,
+      'notes': notes,
+      'archived': archived ? 1 : 0,
+      'ordered_items': orderedItems.map((i) => i.toJson()).toList()
+    };
+  }
+
   // factory Order.fromOrderWS(wsOrder.Order order) {
   //   final orderedItems = List.generate(order.lineItems!.length, (index) {
   //     final currentItem = order.lineItems![index];

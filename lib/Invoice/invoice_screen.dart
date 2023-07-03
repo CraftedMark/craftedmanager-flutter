@@ -1,106 +1,95 @@
+import 'package:crafted_manager/Models/Invoice_model.dart';
+import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/divider.dart';
+import 'package:crafted_manager/widgets/edit_button.dart';
+import 'package:crafted_manager/widgets/tile.dart';
 import 'package:flutter/material.dart';
 
-class InvoicingWidget extends StatefulWidget {
-  final String title;
+class InvoicesList extends StatefulWidget {
+  final List<Invoice> invoices;
 
-  const InvoicingWidget({super.key, required this.title});
+  const InvoicesList({
+    Key? key,
+    required this.invoices,
+  }) : super(key: key);
 
   @override
-  _InvoicingWidgetState createState() => _InvoicingWidgetState();
+  _InvoicesListState createState() => _InvoicesListState();
 }
 
-class _InvoicingWidgetState extends State<InvoicingWidget> {
+class _InvoicesListState extends State<InvoicesList> {
   bool _isEditing = false;
-  final TextEditingController _invoiceNumberController = TextEditingController();
-  final TextEditingController _invoiceDateController = TextEditingController();
-  final TextEditingController _invoiceAmountController = TextEditingController();
+
+  void _toggleEditing() {
+    setState(() {
+      _isEditing = !_isEditing;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Invoice Details',
-            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16.0),
-          const Text(
-            'Invoice Number',
-            style: TextStyle(fontSize: 16.0),
-          ),
-          const SizedBox(height: 8.0),
-          _isEditing
-              ? TextField(
-                  controller: _invoiceNumberController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Invoice Number',
-                  ),
-                )
-              : const Text(
-                  'INV-1234',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-          const SizedBox(height: 16.0),
-          const Text(
-            'Invoice Date',
-            style: TextStyle(fontSize: 16.0),
-          ),
-          const SizedBox(height: 8.0),
-          _isEditing
-              ? TextField(
-                  controller: _invoiceDateController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Invoice Date',
-                  ),
-                )
-              : const Text(
-                  '01/01/2022',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-          const SizedBox(height: 16.0),
-          const Text(
-            'Invoice Amount',
-            style: TextStyle(fontSize: 16.0),
-          ),
-          const SizedBox(height: 8.0),
-          _isEditing
-              ? TextField(
-                  controller: _invoiceAmountController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Invoice Amount',
-                  ),
-                )
-              : const Text(
-                  '\$500.00',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-          const SizedBox(height: 32.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _isEditing
-                  ? ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = false;
-                        });
-                      },
-                      child: const Text('Save'),
-                    )
-                  : ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = true;
-                        });
-                      },
-                      child: const Text('Edit'),
-                    ),
-            ],
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(
+          'Invoices',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+      body: ListView.builder(
+        itemCount: widget.invoices.length,
+        itemBuilder: (BuildContext context, int index) {
+          return InvoiceTile(
+            invoice: widget.invoices[index],
+            isEditing: _isEditing,
+            onEdit: _toggleEditing,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class InvoiceTile extends StatelessWidget {
+  final Invoice invoice;
+  final bool isEditing;
+  final VoidCallback onEdit;
+
+  const InvoiceTile({
+    Key? key,
+    required this.invoice,
+    required this.isEditing,
+    required this.onEdit,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tile(
+      child: Container(
+        color: Theme.of(context).colorScheme.primary,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text('Invoice Number: ${invoice.invoiceNumber}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: UIConstants.WHITE)),
+            Text('Invoice Date: ${invoice.invoiceDate}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: UIConstants.WHITE)),
+            Text('Invoice Amount: \$${invoice.totalAmount}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: UIConstants.WHITE)),
+            const DividerCustom(),
+            EditButton(onPressed: onEdit),
+          ],
+        ),
       ),
     );
   }
