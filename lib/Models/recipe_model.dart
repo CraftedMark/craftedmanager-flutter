@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
 
+import '../models/ingredients_model.dart';
+
 class Recipe {
-  String id;
+  final String id;
   String name;
-  List<String> ingredients;
+  List<Ingredient> ingredients;
   List<double> amounts;
   List<double> costs;
   int pieces;
@@ -21,10 +23,18 @@ class Recipe {
     required this.pieces,
     required this.steps,
     required this.stepImages,
-  }) {
-    var uuid = Uuid();
-    id = uuid.v4();
-  }
+  })  : assert(ingredients.length == amounts.length),
+        assert(ingredients.length == costs.length);
+
+  Recipe.empty()
+      : id = Uuid().v4(),
+        name = '',
+        ingredients = [],
+        amounts = [],
+        costs = [],
+        pieces = 0,
+        steps = [],
+        stepImages = [];
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(

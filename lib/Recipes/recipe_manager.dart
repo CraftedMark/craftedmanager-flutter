@@ -1,8 +1,13 @@
+import 'package:crafted_manager/Models/recipe_model.dart';
 import 'package:crafted_manager/Recipes/add_recipe.dart';
+import 'package:crafted_manager/Recipes/recipe_detail.dart';
 import 'package:flutter/material.dart';
 
 class RecipeManager extends StatefulWidget {
-  const RecipeManager({Key? key}) : super(key: key);
+  final Function(Recipe) onAddRecipe;
+
+  const RecipeManager({super.key, required this.onAddRecipe});
+
   @override
   State<RecipeManager> createState() => _RecipeManagerState();
 }
@@ -22,7 +27,19 @@ class _RecipeManagerState extends State<RecipeManager> {
             title: Text(recipes[index].name),
             subtitle: Text('Cost per piece: ${recipes[index].costPerPiece}'),
             onTap: () {
-              // TODO: Navigate to recipe detail screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RecipeDetail(
+                    recipe: recipes[index],
+                    onAddRecipe: (updatedRecipe) {
+                      setState(() {
+                        recipes[index] = updatedRecipe;
+                      });
+                    },
+                  ),
+                ),
+              );
             },
           );
         },
@@ -46,27 +63,4 @@ class _RecipeManagerState extends State<RecipeManager> {
       ),
     );
   }
-}
-
-class Recipe {
-  final String name;
-  final List<Ingredient> ingredients;
-
-  Recipe({required this.name, required this.ingredients});
-
-  double get costPerPiece {
-    double totalCost = 0;
-    ingredients.forEach((ingredient) {
-      totalCost += ingredient.cost;
-    });
-    return totalCost;
-  }
-}
-
-class Ingredient {
-  final String name;
-  final double cost;
-  final double quantity;
-
-  Ingredient({required this.name, required this.cost, required this.quantity});
 }

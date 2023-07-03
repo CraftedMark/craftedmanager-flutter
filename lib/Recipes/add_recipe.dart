@@ -1,9 +1,12 @@
+import 'package:crafted_manager/Models/ingredients_model.dart';
 import 'package:flutter/material.dart';
 
-import 'recipe_manager.dart';
+import '../../../Models/recipe_model.dart';
+import '../../../Recipes/recipe_db_manager.dart';
 
 class AddRecipe extends StatefulWidget {
   final Function(Recipe) onAddRecipe;
+
   const AddRecipe({Key? key, required this.onAddRecipe}) : super(key: key);
 
   @override
@@ -20,23 +23,56 @@ class _AddRecipeState extends State<AddRecipe> {
   TextEditingController _ingredientWeightController = TextEditingController();
 
   void _addIngredient() {
-    setState(() {
-      ingredients.add(Ingredient(
-        name: _ingredientNameController.text,
-        cost: double.parse(_ingredientCostController.text),
-        quantity: double.parse(_ingredientWeightController.text),
-      ));
-    });
+    final name = _ingredientNameController.text;
+    final cost = double.tryParse(_ingredientCostController.text);
+    final weight = double.tryParse(_ingredientWeightController.text);
 
-    _ingredientNameController.clear();
-    _ingredientCostController.clear();
-    _ingredientWeightController.clear();
+    if (name != null && cost != null && weight != null) {
+      setState(() {
+        ingredients.add(Ingredient.empty().copyWith(
+          name: name,
+          perGramCost: cost,
+          qty: weight,
+        ));
+      });
+
+      _ingredientNameController.clear();
+      _ingredientCostController.clear();
+      _ingredientWeightController.clear();
+    } else {
+      print("Invalid number input for cost or weight");
+      // you might want to show an error message to the user here
+    }
+  }
+
+  void _searchAndPickIngredient(BuildContext context) async {
+    String searchTerm = _ingredientNameController.text;
+    List<Ingredient> foundIngredients = await searchIngredients(searchTerm);
+
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return ListView.builder(
+            itemCount: foundIngredients.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                title: Text(foundIngredients[index].name),
+                onTap: () {
+                  setState(() {
+                    ingredients.add(foundIngredients[index]);
+                  });
+                  Navigator.pop(context);
+                },
+              );
+            },
+          );
+        });
   }
 
   double _calculatePieceCost() {
     double totalCost = 0;
     for (final ingredient in ingredients) {
-      totalCost += ingredient.cost;
+      totalCost += ingredient.perGramCost;
     }
     return totalCost / totalPieces;
   }
@@ -66,15 +102,16 @@ class _AddRecipeState extends State<AddRecipe> {
               const SizedBox(height: 10),
               const Text('Ingredients'),
               ...ingredients.map((ingredient) => ListTile(
-                title: Text(ingredient.name),
-                subtitle: Text('Weight: ${ingredient.quantity}'),
-                trailing: Text('Cost: ${ingredient.cost}'),
-              )),
+                    title: Text(ingredient.name),
+                    subtitle: Text('Weight: ${ingredient.qty}'),
+                    trailing: Text('Cost: ${ingredient.perGramCost}'),
+                  )),
               TextField(
                 controller: _ingredientNameController,
                 decoration: const InputDecoration(
                   hintText: 'Ingredient Name',
                 ),
+                onSubmitted: (value) => _searchAndPickIngredient(context),
               ),
               TextField(
                 controller: _ingredientCostController,
@@ -82,7 +119,7 @@ class _AddRecipeState extends State<AddRecipe> {
                   hintText: 'Ingredient Cost',
                 ),
                 keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
                 controller: _ingredientWeightController,
@@ -90,7 +127,7 @@ class _AddRecipeState extends State<AddRecipe> {
                   hintText: 'Ingredient Weight',
                 ),
                 keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               ElevatedButton(
                 onPressed: _addIngredient,
@@ -100,9 +137,15 @@ class _AddRecipeState extends State<AddRecipe> {
               const Text('Total Pieces'),
               TextField(
                 onChanged: (value) {
-                  setState(() {
-                    totalPieces = int.parse(value);
-                  });
+                  try {
+                    int pieces = int.parse(value);
+                    setState(() {
+                      totalPieces = pieces;
+                    });
+                  } catch (e) {
+                    print("Invalid number input for total pieces");
+                    // you might want to show an error message to the user here
+                  }
                 },
                 decoration: const InputDecoration(
                   hintText: 'Total Pieces',
@@ -115,9 +158,20 @@ class _AddRecipeState extends State<AddRecipe> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      FloatingActionButton(
         onPressed: () {
-          widget.onAddRecipe(Recipe(name: name, ingredients: ingredients));
+          final recipe = Recipe(
+            id: '0',
+            name: name,
+            ingredients: ingredients,
+            amounts: ingredients.map((i) => i.qtyInStock).toList(),
+            costs: ingredients.map((i) => i.perGramCost).toList(),
+            pieces: totalPieces,
+            steps: [],
+            // you need to provide a list of steps
+            stepImages: [], // you need to provide a list of step images
+          );
+          widget.onAddRecipe(recipe);
           Navigator.pop(context);
         },
         child: const Icon(Icons.check),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'recipe_manager.dart';
+import '../Models/recipe_model.dart';
 
 class RecipeDetail extends StatelessWidget {
   final Recipe recipe;
 
-  const RecipeDetail({super.key, required this.recipe});
+  const RecipeDetail({Key? key, required this.recipe}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,15 +13,20 @@ class RecipeDetail extends StatelessWidget {
       appBar: AppBar(
         title: Text(recipe.name),
       ),
-      body: ListView.builder(
+      body: ListView.separated(
         itemCount: recipe.ingredients.length,
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(recipe.ingredients[index].name),
-            subtitle: Text('Quantity: ${recipe.ingredients[index].quantity}'),
-            trailing: Text('Cost: ${recipe.ingredients[index].cost}'),
+            subtitle: Text(
+              'Quantity: ${recipe.ingredients[index].qtyInStock}',
+            ),
+            trailing: Text(
+              'Cost: ${recipe.ingredients[index].perGramCost.toString()}',
+            ),
           );
         },
+        separatorBuilder: (context, index) => Divider(),
       ),
     );
   }
