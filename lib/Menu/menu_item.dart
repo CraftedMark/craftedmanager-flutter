@@ -41,7 +41,8 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Open Orders",
         iconData: Icons.list_alt,
-        destination: const OrdersList(listType: OrderListType.productionAndCancelled),
+        destination:
+            const OrdersList(listType: OrderListType.productionAndCancelled),
       ),
       MenuItem(
         title: "Archived Orders",
@@ -51,7 +52,9 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Invoices",
         iconData: Icons.attach_money,
-        destination: InvoicingWidget(title: "Invoices"),
+        destination: const InvoicesList(
+          invoices: [],
+        ),
       ),
     ],
   ),
@@ -88,10 +91,9 @@ List<MenuItem> menuItems = [
         destination: const IngredientList(),
       ),
       MenuItem(
-        title: "Recipes",
-        iconData: Icons.book,
-        destination: const RecipeManager(),
-      ),
+          title: "Recipes",
+          iconData: Icons.book,
+          destination: RecipeManager(onAddRecipe: (newRecipe) {})),
       MenuItem(
         title: "Production List",
         iconData: Icons.book,

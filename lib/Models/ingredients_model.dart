@@ -12,6 +12,7 @@ class Ingredient {
   String suppliers;
   String productDescription;
   String weight;
+  double qty;
   String bulkMeasurement;
   String manufacturer;
 
@@ -29,9 +30,48 @@ class Ingredient {
     required this.suppliers,
     required this.productDescription,
     required this.weight,
+    required this.qty,
     required this.bulkMeasurement,
     required this.manufacturer,
   });
+
+  Ingredient copyWith({
+    int? id,
+    String? brand,
+    String? name,
+    String? category,
+    double? bulkPricing,
+    double? perGramCost,
+    double? pkgWeight,
+    String? qtyInStock,
+    String? reorderLevel,
+    String? reorderQty,
+    String? suppliers,
+    String? productDescription,
+    String? weight,
+    double? qty,
+    String? bulkMeasurement,
+    String? manufacturer,
+  }) {
+    return Ingredient(
+      id: id ?? this.id,
+      brand: brand ?? this.brand,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      bulkPricing: bulkPricing ?? this.bulkPricing,
+      perGramCost: perGramCost ?? this.perGramCost,
+      pkgWeight: pkgWeight ?? this.pkgWeight,
+      qtyInStock: qtyInStock ?? this.qtyInStock,
+      reorderLevel: reorderLevel ?? this.reorderLevel,
+      reorderQty: reorderQty ?? this.reorderQty,
+      suppliers: suppliers ?? this.suppliers,
+      productDescription: productDescription ?? this.productDescription,
+      weight: weight ?? this.weight,
+      qty: qty ?? this.qty,
+      bulkMeasurement: bulkMeasurement ?? this.bulkMeasurement,
+      manufacturer: manufacturer ?? this.manufacturer,
+    );
+  }
 
   static Ingredient empty() {
     return Ingredient(
@@ -48,6 +88,7 @@ class Ingredient {
       suppliers: '',
       productDescription: '',
       weight: '',
+      qty: 0,
       bulkMeasurement: '',
       manufacturer: '',
     );
@@ -74,6 +115,7 @@ class Ingredient {
       suppliers: map['suppliers']?.toString() ?? '',
       productDescription: map['product_description']?.toString() ?? '',
       weight: map['weight']?.toString() ?? '',
+      qty: map['qty'] == null ? 0 : double.parse(map['qty'].toString()),
       bulkMeasurement: map['bulk_measurement']?.toString() ?? '',
       manufacturer: map['manufacturer']?.toString() ?? '',
     );
@@ -87,15 +129,16 @@ class Ingredient {
       'category': category,
       'bulk_pricing': bulkPricing,
       'per_gram_cost': perGramCost,
-      'pkg_wieght': pkgWeight,
+      'pkg_weight': pkgWeight,
       'qty_in_stock': qtyInStock,
       'reorder_level': reorderLevel,
       'reorder_qty': reorderQty,
       'suppliers': suppliers,
-      'product_discription': productDescription,
-      'wieght': weight,
+      'product_description': productDescription,
+      'weight': weight,
+      'qty': qty,
       'bulk_measurement': bulkMeasurement,
-      'manufactor': manufacturer,
+      'manufacture': manufacturer,
     };
   }
 }

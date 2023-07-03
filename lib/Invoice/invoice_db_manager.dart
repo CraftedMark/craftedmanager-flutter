@@ -1,9 +1,9 @@
-import 'package:crafted_manager/Models/invoices_model.dart';
+import 'package:crafted_manager/Models/invoice_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
 
 class InvoicePostgres {
-   Future<void> createInvoice(Invoice invoice) async {
+  Future<void> createInvoice(Invoice invoice) async {
     final connection = PostgreSQLConnectionManager.connection;
 
     try {

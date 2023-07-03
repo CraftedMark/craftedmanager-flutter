@@ -5,16 +5,19 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import '../Models/people_model.dart';
 import '../WooCommerce/woosignal-service.dart';
 import '../config.dart';
+import '../widgets/edit_button.dart';
+import '../widgets/text_input_field.dart';
+import '../widgets/tile.dart';
 import 'contact_detail_widget.dart';
 
 class ContactsList extends StatefulWidget {
   const ContactsList({Key? key}) : super(key: key);
 
   @override
-  ContactsListState createState() => ContactsListState();
+  _ContactsListState createState() => _ContactsListState();
 }
 
-class ContactsListState extends State<ContactsList> {
+class _ContactsListState extends State<ContactsList> {
   List<People> _contacts = [];
   List<People> _filteredContacts = [];
   final TextEditingController _searchController = TextEditingController();
@@ -36,12 +39,11 @@ class ContactsListState extends State<ContactsList> {
 
   Future<void> refreshContacts() async {
     var contacts = <People>[];
-    if(AppConfig.ENABLE_WOOSIGNAL){
+    if (AppConfig.ENABLE_WOOSIGNAL) {
       contacts = await WooSignalService.getCustomers();
-    }else{
+    } else {
       contacts = await PeoplePostgres.refreshCustomerList();
     }
-
     setState(() {
       _contacts = contacts;
       _filteredContacts = contacts;
@@ -49,12 +51,12 @@ class ContactsListState extends State<ContactsList> {
   }
 
   Future<void> deleteCustomer(People customer) async {
-    _filteredContacts!.removeWhere((c) => c.id == customer.id);
+    _filteredContacts.removeWhere((c) => c.id == customer.id);
     setState(() {});
 
-    if(AppConfig.ENABLE_WOOSIGNAL){
+    if (AppConfig.ENABLE_WOOSIGNAL) {
       // await WooSignalService.deleteCustomer(customer.id);
-    }else{
+    } else {
       await PeoplePostgres.deleteCustomer(customer.id);
     }
     await refreshContacts();
@@ -68,9 +70,10 @@ class ContactsListState extends State<ContactsList> {
         title: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
+              child: TextInputField(
+                initialValue: '',
+                labelText: 'Search Contacts...',
+                onChange: (value) {
                   setState(() {
                     _filteredContacts = _contacts
                         .where((contact) =>
@@ -83,22 +86,19 @@ class ContactsListState extends State<ContactsList> {
                         .toList();
                   });
                 },
-                decoration: const InputDecoration(
-                    suffixIcon: Icon(Icons.search),
-                    hintText: 'Search Contacts...'),
               ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
+          EditButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ContactDetailWidget(
-                    contact: People.empty(),// Create a new contact with default values
+                    contact: People.empty(),
+                    // Create a new contact with default values
                     refresh: refreshContacts,
                   ),
                 ),
@@ -111,9 +111,9 @@ class ContactsListState extends State<ContactsList> {
       body: _filteredContacts.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: _filteredContacts!.length,
+              itemCount: _filteredContacts.length,
               itemBuilder: (BuildContext context, int index) {
-                final contact = _filteredContacts![index];
+                final contact = _filteredContacts[index];
                 return Dismissible(
                   key: Key(contact.id.toString()),
                   background: Container(
@@ -125,7 +125,8 @@ class ContactsListState extends State<ContactsList> {
                         Icon(Icons.delete_forever, color: Colors.white),
                         Icon(Icons.delete_forever, color: Colors.white),
                       ],
-                    ),),
+                    ),
+                  ),
                   onDismissed: (direction) {
                     deleteCustomer(contact);
                   },
@@ -145,16 +146,15 @@ class ContactsListState extends State<ContactsList> {
                       title: _filteredContacts != null
                           ? Text('${contact.firstName} ${contact.lastName}')
                           : CircularProgressIndicator(),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Phone: ${parsePhoneNumber(contact.phone)}'),
-                          // Apply parsing
-                          Text('Email: ${contact.email}'),
-                          // Included email
-                          Text('Brand: ${contact.brand}'),
-                          // Included brand
-                        ],
+                      subtitle: Tile(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Phone: ${parsePhoneNumber(contact.phone)}'),
+                            Text('Email: ${contact.email}'),
+                            Text('Brand: ${contact.brand}'),
+                          ],
+                        ),
                       ),
                     ),
                   ),

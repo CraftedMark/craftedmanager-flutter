@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AddNewFinanceItem extends StatefulWidget {
   final int itemType;
 
-  const AddNewFinanceItem({super.key, required this.itemType});
+  const AddNewFinanceItem({Key? key, required this.itemType}) : super(key: key);
 
   @override
   _AddNewFinanceItemState createState() => _AddNewFinanceItemState();
@@ -26,29 +26,12 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
 
   final _formKey = GlobalKey<FormState>();
 
-  Future<DateTime?> showCupertinoDatePicker({
-    required BuildContext context,
-    required DateTime initialDateTime,
-    DateTime? minimumDate,
-    DateTime? maximumDate,
-  }) {
-    return showCupertinoModalPopup<DateTime>(
+  Future<DateTime?> selectDate() async {
+    return await showDatePicker(
       context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          color: CupertinoColors.white,
-          child: CupertinoDatePicker(
-            mode: CupertinoDatePickerMode.date,
-            initialDateTime: initialDateTime,
-            minimumDate: minimumDate,
-            maximumDate: maximumDate,
-            onDateTimeChanged: (DateTime newDateTime) {
-              selectedDate = newDateTime;
-            },
-          ),
-        );
-      },
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020, 1, 1),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
   }
 
@@ -63,34 +46,17 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
     TextInputType? keyboardType,
     required String? Function(String) onChanged,
   }) {
-    return CupertinoTextField(
+    return TextField(
       keyboardType: keyboardType,
       onChanged: onChanged,
-      placeholder: labelText,
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: CupertinoColors.systemGrey, width: 0.0),
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: TextStyle(color: Colors.white),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
         ),
-      ),
-    );
-  }
-
-  Widget _dueDateFormField({String labelText = 'Due Date'}) {
-    return GestureDetector(
-      onTap: () async {
-        selectedDate = await showCupertinoDatePicker(
-          context: context,
-          initialDateTime: selectedDate ?? DateTime.now(),
-          minimumDate: DateTime(2020, 1, 1),
-          maximumDate: DateTime.now().add(const Duration(days: 365)),
-        );
-
-        setState(() {});
-      },
-      child: AbsorbPointer(
-        child: _textFormField(
-          labelText: labelText,
-          onChanged: (value) {},
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );
@@ -100,18 +66,18 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
   Widget build(BuildContext context) {
     String title;
     if (widget.itemType == 0) {
-      title = 'Add new Bill';
+      title = 'Add Bill';
     } else if (widget.itemType == 1) {
-      title = 'Add new Expense';
+      title = 'Add Expense';
     } else {
-      title = 'Add new Payment';
+      title = 'Add Payment';
     }
 
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
       ),
-      child: SafeArea(
+      body: SafeArea(
         child: GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -144,7 +110,16 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
                       ),
                     const SizedBox(height: 16),
                     if (widget.itemType == 0)
-                      _dueDateFormField(labelText: 'Due Date'),
+                      ListTile(
+                        title: _textFormField(
+                          labelText: 'Due Date',
+                          onChanged: (value) {},
+                        ),
+                        onTap: () async {
+                          selectedDate = await selectDate();
+                          setState(() {});
+                        },
+                      ),
                     if (widget.itemType == 1) ...[
                       _textFormField(
                         labelText: 'Category',
@@ -168,8 +143,15 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
                           return null;
                         },
                       ),
-                      _dueDateFormField(
-                        labelText: 'Payment Date',
+                      ListTile(
+                        title: _textFormField(
+                          labelText: 'Payment Date',
+                          onChanged: (value) {},
+                        ),
+                        onTap: () async {
+                          selectedDate = await selectDate();
+                          setState(() {});
+                        },
                       ),
                       _textFormField(
                         labelText: 'Collected By',
@@ -183,7 +165,7 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Collected by Mark'),
-                          CupertinoSwitch(
+                          Switch(
                             value: _collectedbymark,
                             onChanged: (value) {
                               setState(() {
@@ -197,7 +179,7 @@ class _AddNewFinanceItemState extends State<AddNewFinanceItem> {
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.center,
-                      child: CupertinoButton.filled(
+                      child: ElevatedButton(
                         onPressed: _saveForm,
                         child: const Text('Save'),
                       ),

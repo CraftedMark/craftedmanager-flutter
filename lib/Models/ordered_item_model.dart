@@ -92,15 +92,55 @@ class OrderedItem {
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
       productName: map['product_name'] as String? ?? 'Unknown',
-      status:  map['status'] ?? "Unknown",
+      status: map['status'] ?? "Unknown",
       itemSource: map['item_source'] ?? "Unknown",
       flavor: map['flavor'] ?? "Unknown",
       dose: double.parse(map['dose'].toString() ?? '0.0'),
       packaging: map['packaging'] ?? "Unknown",
-      name:  map['status'] ??'Unknown',
+      name: map['status'] ?? 'Unknown',
       productRetailPrice: 0,
       product: Product.fromMap(map),
     );
+  }
+
+  factory OrderedItem.fromJson(Map<String, dynamic> json) {
+    return OrderedItem(
+      orderId: json['order_id'] as String,
+      product: Product.fromJson(json['product']),
+      productName: json['product_name'] as String,
+      productId: json['product_id'] ?? 0,
+      name: json['name'] as String,
+      quantity: json['quantity'] ?? 0,
+      price: json['price'].toDouble(),
+      discount: json['discount'].toDouble(),
+      productDescription: json['description'] as String,
+      productRetailPrice: json['retail_price'].toDouble(),
+      status: json['status'] as String,
+      itemSource: json['item_source'] as String,
+      packaging: json['packaging'] as String,
+      flavor: json['flavor'] as String,
+      dose: json['dose'].toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'order_id': orderId,
+      'product': product.toJson(),
+      'product_name': productName,
+      'product_id': productId,
+      'name': name,
+      'quantity': quantity,
+      'price': price,
+      'discount': discount,
+      'description': productDescription,
+      'retail_price': productRetailPrice,
+      'status': status,
+      'item_source': itemSource,
+      'packaging': packaging,
+      'flavor': flavor,
+      'dose': dose,
+    };
   }
 
   Map<String, dynamic> toMap() {
@@ -122,14 +162,15 @@ class OrderedItem {
       'dose': dose,
     };
   }
-  Map<String, dynamic> toWSOrderedItemMap(){
+
+  Map<String, dynamic> toWSOrderedItemMap() {
     return {
-      "name":name,
-      "product_id":productId.toString(),
-      "variation_id":0,
-      "quantity":quantity,
-      "subtotal":(productRetailPrice*quantity).toString(),
-      "total":(productRetailPrice*quantity).toString(),
+      "name": name,
+      "product_id": productId.toString(),
+      "variation_id": 0,
+      "quantity": quantity,
+      "subtotal": (productRetailPrice * quantity).toString(),
+      "total": (productRetailPrice * quantity).toString(),
     };
   }
 }

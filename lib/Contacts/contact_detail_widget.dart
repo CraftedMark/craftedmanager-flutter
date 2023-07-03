@@ -5,6 +5,8 @@ import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
 
 import '../WooCommerce/woosignal-service.dart';
+import '../widgets/text_input_field.dart';
+import '../widgets/tile.dart';
 import 'syscontact_list.dart';
 
 class ContactDetailWidget extends StatefulWidget {
@@ -16,7 +18,7 @@ class ContactDetailWidget extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<ContactDetailWidget> createState() => _ContactDetailWidgetState();
+  _ContactDetailWidgetState createState() => _ContactDetailWidgetState();
 }
 
 class _ContactDetailWidgetState extends State<ContactDetailWidget> {
@@ -48,11 +50,32 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
-          appBarTheme: const AppBarTheme(backgroundColor: Colors.black)),
+        // Apply the custom widgets
+        appBarTheme: AppBarTheme(
+          color: Colors.black,
+          actionsIconTheme: IconThemeData(
+            color: Colors.white,
+          ),
+          toolbarTextStyle: TextTheme(
+            headline6: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ).bodyText2,
+          titleTextStyle: TextTheme(
+            headline6: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ).headline6,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: Text('${newCustomer.firstName} ${newCustomer.lastName}'),
@@ -72,19 +95,18 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                 children: [
                   _buildTextField('First Name*', newCustomer.firstName,
                       (n) => newCustomer = newCustomer.copyWith(firstName: n),
-                    textInputType: TextInputType.name, maxLenght: 30
-                  ),
+                      textInputType: TextInputType.name, maxLenght: 30),
                   _buildTextField('Last Name*', newCustomer.lastName,
                       (n) => newCustomer = newCustomer.copyWith(lastName: n),
-                      textInputType: TextInputType.name, maxLenght: 30
-                  ),
+                      textInputType: TextInputType.name, maxLenght: 30),
                   _buildTextField('Phone*', newCustomer.phone,
                       (n) => newCustomer = newCustomer.copyWith(phone: n),
-                      textInputType: TextInputType.phone, maxLenght: 10
-                  ),
-                  _buildTextField('Email*', newCustomer.email,
-                      (n) => newCustomer = newCustomer.copyWith(email: n),
-                      textInputType: TextInputType.emailAddress,
+                      textInputType: TextInputType.phone, maxLenght: 10),
+                  _buildTextField(
+                    'Email*',
+                    newCustomer.email,
+                    (n) => newCustomer = newCustomer.copyWith(email: n),
+                    textInputType: TextInputType.emailAddress,
                   ),
                   _buildTextField('Address 1*', newCustomer.address1,
                       (n) => newCustomer = newCustomer.copyWith(address1: n),
@@ -95,20 +117,24 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
                       (n) => newCustomer = newCustomer.copyWith(city: n)),
                   _buildTextField('State*', newCustomer.state,
                       (n) => newCustomer = newCustomer.copyWith(state: n),
-                  textInputType: TextInputType.text, maxLenght: 2),
+                      textInputType: TextInputType.text, maxLenght: 2),
                   _buildTextField('ZIP*', newCustomer.zip,
                       (n) => newCustomer = newCustomer.copyWith(zip: n),
                       textInputType: TextInputType.number, maxLenght: 5),
                   _buildTextField('Brand', newCustomer.brand,
                       (n) => newCustomer = newCustomer.copyWith(brand: n)),
-                  _buildTextField('Account Number', newCustomer.accountNumber,
-                      (n) => newCustomer = newCustomer.copyWith(accountNumber: n)),
+                  _buildTextField(
+                      'Account Number',
+                      newCustomer.accountNumber,
+                      (n) =>
+                          newCustomer = newCustomer.copyWith(accountNumber: n)),
                   _buildTextField('Type', newCustomer.type,
                       (n) => newCustomer = newCustomer.copyWith(type: n)),
                   _buildSwitchRow(
                       'Customer-Based Pricing',
                       newCustomer.customerBasedPricing ?? false,
-                      (n) => newCustomer = newCustomer.copyWith(customerBasedPricing: n)),
+                      (n) => newCustomer =
+                          newCustomer.copyWith(customerBasedPricing: n)),
                   _buildTextField('Notes', newCustomer.notes,
                       (n) => newCustomer = newCustomer.copyWith(notes: n)),
                   // Add a Load System Contacts button
@@ -149,42 +175,39 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
       print('try to create a customer name: ${newCustomer.firstName}');
 
       String newId = '';
-      if(AppConfig.ENABLE_WOOSIGNAL){
+      if (AppConfig.ENABLE_WOOSIGNAL) {
         // newId = await WooSignalService.createCustomer(newCustomer);
-      }else{
+      } else {
         newId = await PeoplePostgres.createCustomer(newCustomer);
-
       }
 
-      if(newId == -1 ){
+      if (newId == '-1') {
         await showDialog(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title: const Text('Error'),
-                  content: const Text('Incorrent info'),
-                  actions: [
-                    TextButton(
-                      child: const Text('OK'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              );
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Error'),
+            content: const Text('Incorrect info'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
       }
       newCustomer = newCustomer.copyWith(id: newId);
     } else {
       print('try to update a customer id: ${newCustomer.id}');
 
-      if(AppConfig.ENABLE_WOOSIGNAL){
+      if (AppConfig.ENABLE_WOOSIGNAL) {
         await WooSignalService.updateCustomer(newCustomer);
-      }else{
+      } else {
         await PeoplePostgres.updateCustomer(newCustomer);
       }
-
     }
     widget.refresh();
   }
-
 
   Widget _buildTextField(
     String label,
@@ -192,44 +215,45 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     void Function(String) setter, {
     TextInputType textInputType = TextInputType.text,
     int? maxLenght,
-      }
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        isNewCustomer
-            ? TextField(
-          maxLength: maxLenght,
-          keyboardType: textInputType,
-                onChanged: setter,
-                controller: TextEditingController(text: value ?? ''),
-              )
-            : Text(value ?? 'N/A'),
-        const SizedBox(height: 16),
-      ],
+  }) {
+    return Tile(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          isNewCustomer
+              ? TextInputField(
+                  initialValue: value ?? '',
+                  labelText: label,
+                  onChange: setter,
+                )
+              : Text(value ?? 'N/A'),
+        ],
+      ),
     );
   }
 
   Widget _buildSwitchRow(String label, bool value, void Function(bool) setter) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        isNewCustomer
-            ? Switch(
-                value: value,
-                onChanged: setter,
-              )
-            : Text(value ? 'Yes' : 'No'),
-      ],
+    return Tile(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          isNewCustomer
+              ? Switch(
+                  value: value,
+                  onChanged: setter,
+                )
+              : Text(value ? 'Yes' : 'No'),
+        ],
+      ),
     );
   }
 }
