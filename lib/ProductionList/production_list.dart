@@ -133,6 +133,7 @@ class _ProductionListItem extends StatelessWidget {
             'Quantity: ${item.quantity}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
+          Text('Status ${item.status}'),
         ],
       ),
     );
