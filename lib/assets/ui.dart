@@ -4,10 +4,9 @@ class UIConstants {
   UIConstants._();
   static const BACKGROUND_COLOR = Color(0xff181A20);
   static const TEXT_COLOR = Color(0xff707487);
-  static const TEXT_FIELD_COLOR = Color(0xff262A34);
   static const ICON_COLOR = Color.fromARGB(255, 108, 112, 131);
   static const DIVIDER_COLOR = Color(0xff383B45);
-
+  static const SEARCH_BAR_COLOR = Color(0xff3C3B41);
   static const WHITE = Colors.white;
   static const WHITE_LIGHT = Colors.white70;
 
