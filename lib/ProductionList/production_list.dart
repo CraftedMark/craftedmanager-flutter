@@ -1,5 +1,6 @@
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -117,13 +118,14 @@ class _ProductionListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tile(
-      height: 100,
+      height: 110,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             item.productName,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             'Product ID: ${item.productId}',
@@ -133,6 +135,7 @@ class _ProductionListItem extends StatelessWidget {
             'Quantity: ${item.quantity}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
+          Text('Status ${item.status}'),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import '../WooCommerce/woosignal-service.dart';
 import '../assets/ui.dart';
 import '../config.dart';
 import '../widgets/edit_button.dart';
+import '../widgets/search_field_for_appbar.dart';
 import '../widgets/text_input_field.dart';
 import '../widgets/tile.dart';
 import 'contact_detail_widget.dart';
@@ -65,47 +66,26 @@ class _ContactsListState extends State<ContactsList> {
     await refreshContacts();
   }
 
+  void filterContacts(String query){
+    _filteredContacts = _contacts
+        .where((contact) =>
+    contact.firstName
+        .toLowerCase()
+        .contains(query.toLowerCase()) ||
+        contact.lastName
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: UIConstants.GREY_MEDIUM,
-        title: const Text('Search People'),
-        bottom: PreferredSize(
-          preferredSize: const Size(double.infinity, 64),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            child: SizedBox(
-              height: 46,
-              child: TextField(
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium!
-                    .copyWith(color: UIConstants.WHITE_LIGHT),
-                onChanged: (query) {
-                  _filteredContacts = _contacts
-                      .where((contact) =>
-                          contact.firstName
-                              .toLowerCase()
-                              .contains(query.toLowerCase()) ||
-                          contact.lastName
-                              .toLowerCase()
-                              .contains(query.toLowerCase()))
-                      .toList();
-                  setState(() {});
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: UIConstants.SEARCH_BAR_COLOR,
-                  labelText: 'Search',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  enabledBorder: UIConstants.FIELD_BORDER,
-                  focusedBorder: UIConstants.FIELD_BORDER,
-                ),
-              ),
-            ),
-          ),
-        ),
+        title: const Text('Contact'),
+        bottom: searchField(context,filterContacts),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),

@@ -67,7 +67,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     print("new orderid = $orderId");
 
     // Fetch address fields from the database
-    Map<String, dynamic>? addressFields = await Provider.of<PeopleProvider>(context).getUserAddressById(widget.client.id);
+    Map<String, dynamic>? addressFields = await Provider.of<PeopleProvider>(context, listen: false).getUserAddressById(widget.client.id);
 
     if (addressFields != null) {
       final newOrder = Order(

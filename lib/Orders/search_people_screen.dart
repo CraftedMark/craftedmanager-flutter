@@ -2,6 +2,9 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/create_order_screen.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/divider.dart';
+import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
 import 'package:flutter/material.dart';
 
 import '../config.dart';
@@ -48,14 +51,10 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
   
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.dark().copyWith(
-        appBarTheme: const AppBarTheme(color: Colors.black),
-        scaffoldBackgroundColor: Colors.black,
-      ),
-      home: Scaffold(
+    return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+          backgroundColor: UIConstants.GREY_MEDIUM,
           title: const Text('Search People'),
           leading: GestureDetector(
             onTap: () {
@@ -66,26 +65,14 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
               color: Colors.lightBlueAccent,
             ),
           ),
+          bottom: searchField(context, findPeople),
         ),
         body: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  onChanged: findPeople,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    hintText: 'Search',
-                  ),
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.search,
-                ),
-              ),
               Expanded(
-                child: ListView.builder(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   itemCount: _searchResults.length,
                   itemBuilder: (context, index) {
                     People person = _searchResults[index];
@@ -100,23 +87,22 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Colors.grey),
-                          ),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        child: Text(
+                          '${person.firstName} ${person.lastName}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
                         ),
-                        child: Text('${person.firstName} ${person.lastName}'),
                       ),
                     );
+                  },
+                  separatorBuilder: (_,__){
+                    return const DividerCustom();
                   },
                 ),
               ),
             ],
           ),
         ),
-      ),
     );
   }
 }
