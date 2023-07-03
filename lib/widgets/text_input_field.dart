@@ -5,19 +5,27 @@ import '../assets/ui.dart';
 class TextInputField extends StatelessWidget {
   const TextInputField({
     Key? key,
-    required this.initialValue,
+    this.initialValue,
     required this.labelText,
     this.onChange,
+    this.controller,
+    this.enabled = false,
+    this.keyboardType = TextInputType.text
   }) : super(key: key);
 
   final String labelText;
-  final String initialValue;
+  final String? initialValue;
+  final bool enabled;
   final Function(String)? onChange;
+  final TextEditingController? controller;
+  final TextInputType keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      enabled: onChange != null,
+      keyboardType: keyboardType,
+      controller: controller,
+      enabled: enabled,
       decoration: InputDecoration(
         focusedBorder: UIConstants.FIELD_BORDER,
         disabledBorder: UIConstants.FIELD_BORDER,
@@ -28,7 +36,7 @@ class TextInputField extends StatelessWidget {
       ),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
       // enabled: false,
-      initialValue: initialValue,
+      initialValue: controller == null? initialValue: null,
       onChanged: onChange,
     );
   }
