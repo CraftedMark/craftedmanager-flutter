@@ -4,8 +4,8 @@ import 'package:crafted_manager/Models/recipe_model.dart';
 import 'package:logging/logging.dart';
 import 'package:postgres/postgres.dart';
 
-import '../Models/ingredients_model.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
+import '../models/ingredients_model.dart';
 
 final _logger = Logger('Database');
 

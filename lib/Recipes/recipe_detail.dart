@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../Models/recipe_model.dart';
+import '../models/recipe_model.dart';
 
-class RecipeDetail extends StatelessWidget {
+class RecipeDetail extends StatefulWidget {
   final Recipe recipe;
+  final Function(Recipe) onAddRecipe;
 
-  const RecipeDetail({Key? key, required this.recipe}) : super(key: key);
+  RecipeDetail({required this.recipe, required this.onAddRecipe});
+
+  @override
+  _RecipeDetailState createState() => _RecipeDetailState();
+}
+
+class _RecipeDetailState extends State<RecipeDetail> {
+  Recipe get recipe => widget.recipe;
+
+  Function(Recipe) get onAddRecipe => widget.onAddRecipe;
 
   @override
   Widget build(BuildContext context) {

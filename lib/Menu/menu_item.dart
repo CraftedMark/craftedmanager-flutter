@@ -91,10 +91,9 @@ List<MenuItem> menuItems = [
         destination: const IngredientList(),
       ),
       MenuItem(
-        title: "Recipes",
-        iconData: Icons.book,
-        destination: const RecipeManager(),
-      ),
+          title: "Recipes",
+          iconData: Icons.book,
+          destination: RecipeManager(onAddRecipe: (newRecipe) {})),
       MenuItem(
         title: "Production List",
         iconData: Icons.book,

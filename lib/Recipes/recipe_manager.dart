@@ -1,12 +1,12 @@
-import 'package:crafted_manager/Models/recipe_model.dart';
 import 'package:crafted_manager/Recipes/add_recipe.dart';
 import 'package:crafted_manager/Recipes/recipe_detail.dart';
+import 'package:crafted_manager/models/recipe_model.dart';
 import 'package:flutter/material.dart';
 
 class RecipeManager extends StatefulWidget {
   final Function(Recipe) onAddRecipe;
 
-  const RecipeManager({super.key, required this.onAddRecipe});
+  const RecipeManager({Key? key, required this.onAddRecipe}) : super(key: key);
 
   @override
   State<RecipeManager> createState() => _RecipeManagerState();
@@ -31,13 +31,12 @@ class _RecipeManagerState extends State<RecipeManager> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => RecipeDetail(
-                    recipe: recipes[index],
-                    onAddRecipe: (updatedRecipe) {
-                      setState(() {
-                        recipes[index] = updatedRecipe;
-                      });
-                    },
-                  ),
+                      recipe: recipes[index],
+                      onAddRecipe: (updatedRecipe) {
+                        setState(() {
+                          recipes[index] = updatedRecipe;
+                        });
+                      }),
                 ),
               );
             },

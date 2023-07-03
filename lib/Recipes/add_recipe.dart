@@ -1,8 +1,8 @@
-import 'package:crafted_manager/Models/ingredients_model.dart';
+import 'package:crafted_manager/models/ingredients_model.dart';
 import 'package:flutter/material.dart';
 
-import '../../../Models/recipe_model.dart';
 import '../../../Recipes/recipe_db_manager.dart';
+import '../../../models/recipe_model.dart';
 
 class AddRecipe extends StatefulWidget {
   final Function(Recipe) onAddRecipe;
@@ -158,13 +158,13 @@ class _AddRecipeState extends State<AddRecipe> {
           ),
         ),
       ),
-      FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           final recipe = Recipe(
             id: '0',
             name: name,
             ingredients: ingredients,
-            amounts: ingredients.map((i) => i.qtyInStock).toList(),
+            amounts: ingredients.map((i) => i.qty).toList(),
             costs: ingredients.map((i) => i.perGramCost).toList(),
             pieces: totalPieces,
             steps: [],
