@@ -2,6 +2,9 @@ import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Orders/create_order_screen.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/divider.dart';
+import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
 import 'package:flutter/material.dart';
 
 import '../config.dart';
@@ -48,12 +51,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
   
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.dark().copyWith(
-        appBarTheme: const AppBarTheme(color: Colors.black),
-        scaffoldBackgroundColor: Colors.black,
-      ),
-      home: Scaffold(
+    return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text('Search People'),
@@ -66,6 +64,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
               color: Colors.lightBlueAccent,
             ),
           ),
+          bottom: searchField(context, findPeople),
         ),
         body: SafeArea(
           child: Column(
@@ -116,7 +115,6 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

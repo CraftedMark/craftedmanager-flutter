@@ -1,4 +1,5 @@
 import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
 import 'package:crafted_manager/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,27 +45,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       appBar: AppBar(
         backgroundColor: UIConstants.GREY_MEDIUM,
         title: const Text('Search Product'),
-        bottom: PreferredSize(
-          preferredSize: const Size(double.infinity, 64),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            child: SizedBox(
-              height: 46,
-              child: TextField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                onChanged: _filterProducts,
-                decoration: InputDecoration(
-                    filled: true,
-                    fillColor: UIConstants.SEARCH_BAR_COLOR,
-                    // prefix: Icon(Icons.search),
-                    labelText: 'Search product',
-                    enabledBorder: UIConstants.FIELD_BORDER,
-                  focusedBorder:  UIConstants.FIELD_BORDER,
-                ),
-              ),
-            ),
-          ),
-        ),
+        bottom: searchField(context, _filterProducts)
       ),
       body: SafeArea(
         child: Column(
