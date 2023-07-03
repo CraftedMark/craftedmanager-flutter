@@ -54,6 +54,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+          backgroundColor: UIConstants.GREY_MEDIUM,
           title: const Text('Search People'),
           leading: GestureDetector(
             onTap: () {
@@ -69,22 +70,9 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  onChanged: findPeople,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    hintText: 'Search',
-                  ),
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.search,
-                ),
-              ),
               Expanded(
-                child: ListView.builder(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   itemCount: _searchResults.length,
                   itemBuilder: (context, index) {
                     People person = _searchResults[index];
@@ -99,16 +87,16 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Colors.grey),
-                          ),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        child: Text(
+                          '${person.firstName} ${person.lastName}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
                         ),
-                        child: Text('${person.firstName} ${person.lastName}'),
                       ),
                     );
+                  },
+                  separatorBuilder: (_,__){
+                    return const DividerCustom();
                   },
                 ),
               ),
