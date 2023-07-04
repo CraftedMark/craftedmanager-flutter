@@ -7,7 +7,8 @@ class EditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.edit, color: Colors.white),
+      splashRadius: 28,
+      icon: const Icon(Icons.edit, color: Colors.white),
       onPressed: onPressed,
     );
   }

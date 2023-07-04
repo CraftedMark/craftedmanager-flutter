@@ -77,6 +77,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
                   itemBuilder: (context, index) {
                     People person = _searchResults[index];
                     return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -87,7 +88,7 @@ class _SearchPeopleScreenState extends State<SearchPeopleScreen> {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         child: Text(
                           '${person.firstName} ${person.lastName}',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),

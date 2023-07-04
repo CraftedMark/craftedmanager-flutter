@@ -17,7 +17,7 @@ class Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       height: height,
       decoration: BoxDecoration(
         color: UIConstants.GREY_MEDIUM,
