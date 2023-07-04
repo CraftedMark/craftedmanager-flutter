@@ -4,6 +4,7 @@ import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/Providers/people_provider.dart';
+import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:flutter/material.dart';
@@ -93,19 +94,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
   }
 
-  Future<List<Product>> getAllProduct() async {//TODO: Move to Provider
-    var products = <Product>[];
-
-    if (AppConfig.ENABLE_WOOSIGNAL) {
-      products = await WooSignalService.getProducts();
-    } else {
-      products = await ProductPostgres.getAllProductsExceptIngredients();
-    }
-    return products;
+  List<Product> getAllProduct()  {//TODO: Move to Provider
+    return Provider.of<ProductProvider>(context).allProducts;
   }
 
   void addItemToOrder() async {
-    var products = await getAllProduct();
+    var products = getAllProduct();
 
     final selectedProduct = await showDialog<Product>(
       context: context,
@@ -268,7 +262,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       appBar: AppBar(
         leading: _appBarBackButton(),
         title: const Text('Create Order'),
-        backgroundColor: Colors.black,
         actions: [_appBarSaveOrderButton()],
       ),
       body: SafeArea(
