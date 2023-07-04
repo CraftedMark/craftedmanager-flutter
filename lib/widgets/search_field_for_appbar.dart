@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../assets/ui.dart';
 
-PreferredSizeWidget searchField(BuildContext context,Function(String) onChanged,){
+PreferredSizeWidget searchField(
+  BuildContext context,
+  Function(String) onChanged, {
+  EdgeInsets padding = const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+}) {
   return PreferredSize(
     preferredSize: const Size(double.infinity, 64),
     child: Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      padding: padding,
       child: SizedBox(
         height: 46,
         child: TextField(
