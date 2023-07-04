@@ -1,4 +1,5 @@
 import 'package:crafted_manager/Models/ordered_item_model.dart';
+import 'package:crafted_manager/ProductionList/production_list_details.dart';
 import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/main.dart';
@@ -25,6 +26,20 @@ class ProductionList extends StatefulWidget {
 
 class _ProductionListState extends State<ProductionList> {
   List<OrderedItem> filteredItems = [];
+  List<OrderedItem> unitedItems = [];
+  Map<int, Set<String>> ordersGroupedByOrderedItemId = {};
+
+  void createMap(){
+    for(final i in unitedItems){
+      final key = i.productId;
+      if(ordersGroupedByOrderedItemId.containsKey(key)){
+        ordersGroupedByOrderedItemId.update(key, (value) => {...value,i.orderId});
+      }
+      else{
+        ordersGroupedByOrderedItemId.addAll({key: {i.orderId}});
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +54,21 @@ class _ProductionListState extends State<ProductionList> {
       body: SafeArea(
         child: Consumer<OrderProvider>(builder: (_, provider, __) {
           filteredItems = provider.getFilteredOrderedItems(widget.itemSource);
+          unitedItems = filteredItems;
+          unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
+
+          createMap();
+
+          for(var i = 1; i<unitedItems.length;i++){
+            var prev = unitedItems[i-1];
+            var current = unitedItems[i];
+            if(prev.productId == current.productId){
+              unitedItems[i-1] = prev.copyWith(quantity: prev.quantity+current.quantity);
+              unitedItems.removeAt(i);
+              i--;
+            }
+          }
+
           return SliderDrawer(
             appBar: null,
             key: widget._sliderDrawerKey,
@@ -50,7 +80,7 @@ class _ProductionListState extends State<ProductionList> {
               color: Theme.of(context).scaffoldBackgroundColor,
               child: provider.isLoading
                   ? _loadingIndicator()
-                  : filteredItems.isNotEmpty
+                  : unitedItems.isNotEmpty
                       ? _productionList()
                       : _emptyListPlaceHolder(),
             ),
@@ -72,10 +102,13 @@ class _ProductionListState extends State<ProductionList> {
   Widget _productionList() {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: filteredItems.length,
+      itemCount: unitedItems.length,
       itemBuilder: (context, index) {
-        OrderedItem item = filteredItems[index];
-        return _ProductionListItem(item: item);
+        OrderedItem item = unitedItems[index];
+        return _ProductionListItem(
+          item: item,
+          ordersIds:ordersGroupedByOrderedItemId[item.productId]!,
+        );
       },
     );
   }
@@ -113,30 +146,61 @@ class _AppBarMenuButton extends StatelessWidget {
 
 class _ProductionListItem extends StatelessWidget {
   final OrderedItem item;
-  const _ProductionListItem({Key? key, required this.item}) : super(key: key);
+  final Set<String> ordersIds;
+  const _ProductionListItem({Key? key, required this.item, required this.ordersIds}) : super(key: key);
+
+
 
   @override
   Widget build(BuildContext context) {
-    return Tile(
-      height: 110,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.productName,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
-            overflow: TextOverflow.ellipsis,
+
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductionListDetails(
+              productName: item.productName,
+              productId: item.productId,
+              ordersIds: ordersIds.toList(),
+              expectedProductAmount: item.quantity,
+            ),
           ),
-          Text(
-            'Product ID: ${item.productId}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          Text(
-            'Quantity: ${item.quantity}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          Text('Status ${item.status}'),
-        ],
+        );
+      },
+      child: Tile(
+        height: 110,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    item.productName,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Product ID: ${item.productId}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  Text(
+                    'Quantity: ${item.quantity}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  Text('Status ${item.status}'),
+                ],
+              ),
+            ),
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.info_outline)],
+            )
+          ],
+        ),
       ),
     );
   }
