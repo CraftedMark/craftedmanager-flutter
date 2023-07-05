@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
+import '../widgets/edit_product_alert.dart';
 import '../widgets/tile.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -49,13 +50,39 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         var flavorCtrl = TextEditingController(text: item.flavor);
         var packagingCtrl = TextEditingController(text: item.packaging);
 
-        return editProductParams(
-            'Edit Ordered Item',
-          [
-            TextInputField(
-              labelText: 'Quantity',
-              controller: quantityCtrl,
-              keyboardType: TextInputType.number,
+        return EditProductParamsAlert(
+          title:'Edit Ordered Item',
+          rightButton: BigButton(
+            text: 'Edit',
+            onPressed: () {
+              item.quantity = int.parse(quantityCtrl.text);
+              item.price = double.parse(priceCtrl.text);
+              item.flavor = flavorCtrl.text;
+              item.dose = double.parse(dosageCtrl.text);
+              item.packaging = packagingCtrl.text;
+              setState(() {});
+              Navigator.pop(context);
+            },
+          ),
+          children: [
+            Row(
+              children: [
+                Flexible(
+                  child: TextInputField(
+                    labelText: 'Quantity',
+                    controller: quantityCtrl,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: TextInputField(
+                    controller: dosageCtrl,
+                    keyboardType: TextInputType.number,
+                    labelText: 'Dosage',
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             TextInputField(
@@ -70,28 +97,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             ),
             const SizedBox(height: 8),
             TextInputField(
-              controller: dosageCtrl,
-              keyboardType: TextInputType.number,
-              labelText: 'Dosage',
-            ),
-            const SizedBox(height: 8),
-            TextInputField(
               labelText: 'Packaging',
               controller: packagingCtrl,
             ),
           ],
-          BigButton(
-            text: 'Edit',
-            onPressed: () {
-              item.quantity = int.parse(quantityCtrl.text);
-              item.price = double.parse(priceCtrl.text);
-              item.flavor = flavorCtrl.text;
-              item.dose = double.parse(dosageCtrl.text);
-              item.packaging = packagingCtrl.text;
-              setState(() {});
-              Navigator.pop(context);
-            },
-          ),
         );
       },
     );
@@ -245,20 +254,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     return showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
-        return editProductParams(
-            'Enter Quantity, Item Source, Flavor, Dosage and Packaging',
-          [
-            TextInputField(labelText: 'Quantity', controller: quantityCtrl, keyboardType: TextInputType.number),
-            const SizedBox(height: 8),
-            TextInputField(labelText: 'Item Source', controller: itemSourceCtrl, keyboardType: TextInputType.text),
-            const SizedBox(height: 8),
-            TextInputField(labelText: 'Flavor', controller: flavorCtrl, keyboardType: TextInputType.text),
-            const SizedBox(height: 8),
-            TextInputField(labelText: 'Dosage', controller: dosageCtrl, keyboardType: TextInputType.number),
-            const SizedBox(height: 8),
-            TextInputField(labelText: 'Packaging', controller: packagingCtrl, keyboardType: TextInputType.text),
-          ],
-            BigButton(
+        return EditProductParamsAlert(
+          title: 'Enter Quantity, Item Source, Flavor, Dosage and Packaging',
+          rightButton: BigButton(
               text: 'Add',
               onPressed: () {
                 Navigator.pop(
@@ -272,43 +270,36 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   },
                 );
               },
-            )
+            ),
+          children: [
+            Row(
+              children: [
+                Flexible(child: TextInputField(labelText: 'Quantity', controller: quantityCtrl, keyboardType: TextInputType.number)),
+                const SizedBox(width: 8),
+                Flexible(child: TextInputField(labelText: 'Dosage', controller: dosageCtrl, keyboardType: TextInputType.number)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextInputField(
+              labelText: 'Flavor',
+              controller: flavorCtrl,
+              keyboardType: TextInputType.text,
+            ),
+            const SizedBox(height: 8),
+            TextInputField(
+              labelText: 'Item Source',
+              controller: itemSourceCtrl,
+              keyboardType: TextInputType.text,
+            ),
+            const SizedBox(height: 8),
+            TextInputField(
+              labelText: 'Packaging',
+              controller: packagingCtrl,
+              keyboardType: TextInputType.text,
+            ),
+          ]
         );
       },
-    );
-  }
-
-  AlertDialog editProductParams(String title, List<Widget> children, BigButton rightButton){
-    return AlertDialog(
-      insetPadding: const EdgeInsets.all(24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      backgroundColor: UIConstants.BACKGROUND_COLOR,
-      title: Text(title),
-      content: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        ),
-      ),
-      actions: [
-        Row(
-          children: [
-            Flexible(
-              child: BigButton(
-                text: 'Cancel',
-                color: UIConstants.GREY,
-                onPressed: () {Navigator.pop(context);},
-              ),
-            ),
-            const SizedBox(width: 16),
-            Flexible(
-              child: rightButton,
-            ),
-          ],
-        )
-      ],
-      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     );
   }
 
