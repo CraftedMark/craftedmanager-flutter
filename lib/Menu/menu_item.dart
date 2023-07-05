@@ -110,10 +110,7 @@ List<MenuItem> menuItems = [
       MenuItem(
         title: "Production List",
         iconData: Icons.book,
-        destination: ProductionList(
-          itemSource: 'Production',
-          orderedItems: const [],
-        ),
+        destination: ProductionList(),
       ),
       MenuItem(
         title: "Assembly Items",
