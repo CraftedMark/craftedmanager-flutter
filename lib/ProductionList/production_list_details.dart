@@ -56,10 +56,6 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _expectedAndProducedInfo(
-              widget.expectedProductAmount,
-              producedAmount,
-            ),
             ListView.builder(
               physics: const BouncingScrollPhysics(),
               itemCount: widget.ordersIds.length,
@@ -70,6 +66,11 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
                 );
               }
             ),
+            _expectedAndProducedInfo(
+              widget.expectedProductAmount,
+              producedAmount,
+            ),
+
           ],
         ),
       )
