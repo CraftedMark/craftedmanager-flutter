@@ -29,8 +29,6 @@ void main() async {
 
   // Initialize the providers before runApp is called.
   final OrderProvider orderProvider = OrderProvider();
-  final PeopleProvider peopleProvider = PeopleProvider();
-  final ProductProvider productProvider = ProductProvider();
 
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
@@ -48,7 +46,6 @@ void main() async {
   }
   if(AppConfig.ENABLE_WOOSIGNAL){
     await WooSignalService.init();//TODO: enable WooSignal
-
   }
   runApp(
     MultiProvider(
@@ -62,7 +59,7 @@ void main() async {
         ChangeNotifierProvider<EmployeeProvider>(
             create: (context) => EmployeeProvider()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -75,14 +72,29 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+
+  bool isLoading = true;
+
+  Future<void> initApp() async {
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    final peopleProvider = Provider.of<PeopleProvider>(context, listen: false);
+    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+    // final employeeProvider = Provider.of<EmployeeProvider>(context, listen: false);
+
+    await orderProvider.fetchOrders();
+    await peopleProvider.fetchPeople();
+    await productProvider.fetchProducts();
+    //await employeeProvider.fetchEmployees();
+
+    isLoading = false;
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    Provider.of<OrderProvider>(context, listen: false).fetchOrders();
-    Provider.of<PeopleProvider>(context, listen: false).fetchPeople();
-    Provider.of<ProductProvider>(context, listen: false).fetchProducts();
-    //Provider.of<EmployeeProvider>(context, listen: false).fetchEmployees();
+    initApp();
   }
 
   @override
@@ -136,15 +148,35 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ),
         iconTheme: const IconThemeData(color: UIConstants.ICON_COLOR),
       ),
-      home: Builder(
-        builder: (context) => ProductionList(
-          orderedItems: const [],
-          itemSource: 'Production',
+      home: isLoading
+          ?const InitScreenDemo()
+          :ProductionList(),
+    );
+  }
+
+}
+
+class InitScreenDemo extends StatelessWidget {
+  const InitScreenDemo({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading data from server...'),
+          ],
         ),
       ),
     );
   }
 }
+
+
 
 class SliderView extends StatelessWidget {
   final Function(String)? onItemClick;
