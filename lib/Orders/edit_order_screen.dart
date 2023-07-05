@@ -79,33 +79,17 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     }
   }
 
-  void addOrderedItem(Product product, int quantity) {
+  void addOrderedItem(Product product, OrderedItem item) {
     final existingIndex = _orderedItems
         .indexWhere((orderedItem) => orderedItem.productId == product.id);
 
     if (existingIndex != -1) {
       _orderedItems[existingIndex] = _orderedItems[existingIndex].copyWith(
-        quantity: _orderedItems[existingIndex].quantity + quantity,
+        quantity: _orderedItems[existingIndex].quantity + item.quantity,
       );
       _subTotal = calculateSubtotal();
     } else {
-      _orderedItems.add(OrderedItem(
-        orderId: widget.order.id,
-        product: product,
-        productName: product.name,
-        productId: product.id!,
-        name: product.name,
-        quantity: quantity,
-        price: product.retailPrice,
-        discount: 0,
-        productDescription: product.description,
-        productRetailPrice: product.retailPrice,
-        status: 'Processing',
-        itemSource: '',
-        packaging: '',
-        dose: 0.0,
-        flavor: '',
-      ));
+      _orderedItems.add(item);
       _subTotal = calculateSubtotal();
     }
     getOrderedItemsByOrderId();
@@ -192,7 +176,10 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     if (result != null) {
                       final product = result['product'] as Product;
                       final quantity = result['quantity'];
-                      addOrderedItem(product, result['quantity']);
+                      final dose = result['dose'];
+                      final flavor = result['flavor'];
+                      final itemSource = result['itemSource'];
+                      final packing = result['packing'];
 
 
                       final orderedItem = OrderedItem(
@@ -201,18 +188,19 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                         productName: product.name,
                         productId: product.id!,
                         name: product.name,
-                        quantity: quantity,
                         price: product.retailPrice,
                         discount: 0,
                         productDescription: product.description,
                         productRetailPrice: product.retailPrice,
                         status: AppConfig.ORDERED_ITEM_STATUSES.first,
-                        itemSource: product.itemSource,
-                        packaging: product.packaging ?? '',
-                        dose: product.dose?? 0.1,
-                        flavor: product.flavor,
+                        quantity: quantity,
+                        dose: dose,
+                        flavor: flavor,
+                        itemSource: itemSource,
+                        packaging: packing,
                       );
-                      _provider.addOrderedItemToOrderForUpdateUI(widget.order.id, orderedItem);
+                      addOrderedItem(product, orderedItem);
+
                     }
                   });
                 },
@@ -233,6 +221,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                 text: 'Save',
                 onPressed: () async {
                   await updateOrder();
+                  // _provider.addOrderedItemToOrderForUpdateUI(widget.order.id, orderedItem);
+
                   // Navigator.pop(context);
                 },
               ),
