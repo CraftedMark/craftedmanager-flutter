@@ -77,7 +77,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     _changeOrderStateButton(),
                     const SizedBox(height: 24),
                     _OrderedItemList(items: orderedItems),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 90),
                   ],
                 ),
               ),
@@ -296,7 +296,9 @@ class _OrderedItemListState extends State<_OrderedItemList> {
                 child: itemTilePicture(),
               ),
               Flexible(
+                fit: FlexFit.tight,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     itemTileRow('Quantity', item.quantity.toString()),
                     const SizedBox(height: 4),
@@ -310,8 +312,6 @@ class _OrderedItemListState extends State<_OrderedItemList> {
                     itemTileRow('Dose', item.dose.toString()),
                     const SizedBox(height: 4),
                     itemTileRow('Packaging', item.packaging),
-                    const SizedBox(height: 4),
-                    itemTileRow('Price', item.price.toString()),
                   ],
                 ),
               )
@@ -323,15 +323,18 @@ class _OrderedItemListState extends State<_OrderedItemList> {
   }
 
   Widget itemTileRow(String field, String value, {Color? valuColor}) {
-    return Row(
-      children: [
-        Text('$field: '),
-        Text(value,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT)),
-      ],
+    return FittedBox(
+      child: Row(
+        children: [
+          Text('$field: '),
+          Text(value,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT),
+          overflow: TextOverflow.ellipsis,),
+        ],
+      ),
     );
   }
 
