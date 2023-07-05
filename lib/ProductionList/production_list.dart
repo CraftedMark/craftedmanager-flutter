@@ -44,19 +44,13 @@ class _ProductionListState extends State<ProductionList> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      filteredItems = Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems('');
-      setState(() {});
+      searchOrderedItemsByItemSource('');
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var _provider = Provider.of<OrderProvider>(context);
+  void uniteOrderedItemsById(){
     unitedItems = filteredItems;
     unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
-
-    createMap();
-
     for(var i = 1; i<unitedItems.length;i++){
       var prev = unitedItems[i-1];
       var current = unitedItems[i];
@@ -66,6 +60,19 @@ class _ProductionListState extends State<ProductionList> {
         i--;
       }
     }
+  }
+
+  void searchOrderedItemsByItemSource(String query){
+    filteredItems = Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query);
+    uniteOrderedItemsById();
+    createMap();
+    setState(() {});
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         leading: _AppBarMenuButton(menuKey:widget._sliderDrawerKey),
@@ -75,10 +82,7 @@ class _ProductionListState extends State<ProductionList> {
         ),
         bottom: searchField(
           context,
-          (query) {
-            filteredItems = Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query);
-            setState(() {});
-          },
+          searchOrderedItemsByItemSource,
           label: 'Filter by item source',
         ),
       ),
@@ -92,22 +96,11 @@ class _ProductionListState extends State<ProductionList> {
             }),
             child: ColoredBox(
               color: Theme.of(context).scaffoldBackgroundColor,
-              child: _provider.isLoading
-                  ? _loadingIndicator()
-                  : unitedItems.isNotEmpty
+              child: unitedItems.isNotEmpty
                       ? _productionList()
                       : _emptyListPlaceHolder(),
             ),
           ),
-      ),
-    );
-  }
-
-
-  Widget _loadingIndicator() {
-    return Center(
-      child: CircularProgressIndicator(
-        color: Theme.of(context).colorScheme.secondary,
       ),
     );
   }
