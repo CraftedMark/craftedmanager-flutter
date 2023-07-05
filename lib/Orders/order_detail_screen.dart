@@ -45,9 +45,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
-    orderedItems = _provider.orders
-        .firstWhere((o) => o.id == widget.order.id)
-        .orderedItems;
+    final order = _provider.orders
+        .firstWhere((o) => o.id == widget.order.id);
+    orderedItems = order.orderedItems;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -84,8 +84,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
             Column(
               children: [
-                const Expanded(child: SizedBox.shrink()),
-                _orderCost(),
+                const Spacer(),
+                _OrderTotalAndPaid(
+                  total: order.totalAmount,
+                  paid: order.paidAmount,
+                ),
               ],
             ),
           ],
@@ -348,4 +351,63 @@ class _OrderedItemListState extends State<_OrderedItemList> {
       height: 140,
     );
   } //TODO: implement
+}
+
+class _OrderTotalAndPaid extends StatelessWidget {
+  const _OrderTotalAndPaid({
+    Key? key,
+    required this.total,
+    required this.paid
+  }) : super(key: key);
+
+  final double total;
+  final double paid;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: UIConstants.GREY_MEDIUM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total Amount:',
+                ),
+                Text(
+                  '\$ $total',
+                  style:
+                  const TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Paid Amount:',
+                ),
+                Text(
+                  '\$ $paid',
+                  // assuming 'paidAmount' exists in 'Order' class
+                  style:
+                  const TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
 }

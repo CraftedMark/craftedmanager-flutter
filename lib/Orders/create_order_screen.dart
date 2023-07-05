@@ -37,6 +37,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   Future<void> onSaveButtonPressed() async{
     await saveOrder();
     Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   void onEditButtonPressed(int orderedItemIndex) {
@@ -255,7 +256,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       context: context,
       builder: (BuildContext context) {
         return EditProductParamsAlert(
-          title: 'Enter Quantity, Item Source, Flavor, Dosage and Packaging',
+          title: product.name,
           rightButton: BigButton(
               text: 'Add',
               onPressed: () {
