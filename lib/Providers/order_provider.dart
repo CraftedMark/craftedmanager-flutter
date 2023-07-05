@@ -41,7 +41,7 @@ class OrderProvider extends ChangeNotifier {
     // Assuming that your Order object has an 'itemSource' property
     return _orders
         .expand((order) => order.orderedItems)
-        .where((item) => item.itemSource == itemSource)
+        .where((item) => item.itemSource.toLowerCase().contains(itemSource.toLowerCase()))
         .toList();
   }
 
