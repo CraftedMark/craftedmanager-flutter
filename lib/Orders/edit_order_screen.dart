@@ -58,11 +58,13 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   double calculateSubtotal() {
-    return _orderedItems.fold(
+    final res = _orderedItems.fold(
       0.0,
-      (previousValue, element) =>
-          previousValue + (element.price * element.quantity),
+          (previousValue, element) =>
+      previousValue + (element.price * element.quantity),
     );
+    print('calcutale $res');
+    return res;
   }
 
   void editOrderedItem(int index) {
@@ -154,80 +156,102 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
-    _subTotal = calculateSubtotal();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Order')),
-      body: GreyScrollablePanel(
-        child: Column(
+      body: Stack(
+        children: [
+          GreyScrollablePanel(
+            child: Column(
+                children: [
+                  _OrderInformation(customer: widget.customer),
+                  const SizedBox(height: 16),
+                  BigButton(
+                    text: 'Add Item',
+                    onPressed: () async {
+                      List<Product> products = [];
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductSearchScreen(),
+                        ),
+                      ).then((result) async {
+                        if (result != null) {
+                          final product = result['product'] as Product;
+                          final quantity = result['quantity'];
+                          final dose = result['dose'];
+                          final flavor = result['flavor'];
+                          final itemSource = result['itemSource'];
+                          final packing = result['packing'];
+
+
+                          final orderedItem = OrderedItem(
+                            orderId: widget.order.id,
+                            product: product,
+                            productName: product.name,
+                            productId: product.id!,
+                            name: product.name,
+                            price: product.retailPrice,
+                            discount: 0,
+                            productDescription: product.description,
+                            productRetailPrice: product.retailPrice,
+                            status: AppConfig.ORDERED_ITEM_STATUSES.first,
+                            quantity: quantity,
+                            dose: dose,
+                            flavor: flavor,
+                            itemSource: itemSource,
+                            packaging: packing,
+                          );
+                          addOrderedItem(product, orderedItem);
+
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _orderedItems.length,
+                    itemBuilder: (context, index) {
+                      return _productTile(_orderedItems[index], index);
+                    },
+                  ),
+                  const SizedBox(height: 90),
+
+                ],
+              ),
+          ),
+          Column(
             children: [
-              _OrderInformation(customer: widget.customer),
-              const SizedBox(height: 16),
-              BigButton(
-                text: 'Add Item',
-                onPressed: () async {
-                  List<Product> products = [];
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductSearchScreen(),
+              const Spacer(),
+              Container(
+                decoration: const BoxDecoration(
+                  color: UIConstants.GREY_LIGHT,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    _OrderSubtotal(subtotal: _subTotal),
+                    const SizedBox(height: 16),
+                    BigButton(
+                      text: 'Save',
+                      onPressed: () async {
+                        await updateOrder();
+                        // _provider.addOrderedItemToOrderForUpdateUI(widget.order.id, orderedItem);
+
+                        // Navigator.pop(context);
+                      },
                     ),
-                  ).then((result) async {
-                    if (result != null) {
-                      final product = result['product'] as Product;
-                      final quantity = result['quantity'];
-                      final dose = result['dose'];
-                      final flavor = result['flavor'];
-                      final itemSource = result['itemSource'];
-                      final packing = result['packing'];
-
-
-                      final orderedItem = OrderedItem(
-                        orderId: widget.order.id,
-                        product: product,
-                        productName: product.name,
-                        productId: product.id!,
-                        name: product.name,
-                        price: product.retailPrice,
-                        discount: 0,
-                        productDescription: product.description,
-                        productRetailPrice: product.retailPrice,
-                        status: AppConfig.ORDERED_ITEM_STATUSES.first,
-                        quantity: quantity,
-                        dose: dose,
-                        flavor: flavor,
-                        itemSource: itemSource,
-                        packaging: packing,
-                      );
-                      addOrderedItem(product, orderedItem);
-
-                    }
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _orderedItems.length,
-                itemBuilder: (context, index) {
-                  return _productTile(_orderedItems[index], index);
-                },
-              ),
-              const SizedBox(height: 16),
-              _subtotalField(),
-              const SizedBox(height: 16),
-              BigButton(
-                text: 'Save',
-                onPressed: () async {
-                  await updateOrder();
-                  // _provider.addOrderedItemToOrderForUpdateUI(widget.order.id, orderedItem);
-
-                  // Navigator.pop(context);
-                },
+                  ],
+                ),
               ),
             ],
           ),
+        ],
       ),
     );
   }
@@ -262,10 +286,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
               labelText: 'Price',
               keyboardType: TextInputType.number,
               onChange: (value) {
-                updateOrderedItem(
-                  index: itemIndex,
-                  price: double.parse(value),
-                );
+                if(value.isNotEmpty){
+                  updateOrderedItem(
+                    index: itemIndex,
+                    price: double.parse(value),
+                  );
+                }
               },
             ),
             const SizedBox(height: itemPadding),
@@ -277,10 +303,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     labelText: 'Quantity',
                     keyboardType: TextInputType.number,
                     onChange: (value) {
-                      updateOrderedItem(
-                        index: itemIndex,
-                        quantity: int.parse(value),
-                      );
+                      if(value.isNotEmpty){
+                        updateOrderedItem(
+                          index: itemIndex,
+                          quantity: int.parse(value),
+                        );
+                      }
                     },
                   ),
                 ),
@@ -291,10 +319,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     labelText: 'Dose',
                     keyboardType: TextInputType.number,
                     onChange: (value) {
-                      updateOrderedItem(
-                        index: itemIndex,
-                        dose: double.parse(value),
-                      );
+                      if(value.isNotEmpty) {
+                        updateOrderedItem(
+                          index: itemIndex,
+                          dose: double.parse(value),
+                        );
+                      }
                     },
                   ),
                 ),
@@ -348,14 +378,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       ),
     );
   }
-
-  Widget _subtotalField(){
-    return TextInputField(
-      enabled: false,
-      labelText: 'Sub Total:',
-      initialValue: '\$ ${_subTotal.toStringAsFixed(2)}',
-    );
-  }
 }
 
 class _OrderInformation extends StatelessWidget {
@@ -385,6 +407,29 @@ class _OrderInformation extends StatelessWidget {
     );
   }
 }
+
+class _OrderSubtotal extends StatelessWidget {
+  const _OrderSubtotal({Key? key, required this.subtotal}) : super(key: key);
+
+  final double subtotal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('Sub total:'),
+        Text(subtotal.toStringAsFixed(2)),
+      ],
+    );
+    return TextInputField(
+      enabled: false,
+      labelText: 'Sub Total:',
+      initialValue: '\$ ${subtotal.toStringAsFixed(2)}',
+    );
+  }
+}
+
 
 class _OrderedItemStatusPicker extends StatefulWidget {
   const _OrderedItemStatusPicker({Key? key, required this.initStatus, this.onChange}) : super(key: key);
@@ -518,3 +563,4 @@ class _AddOrderedItemDialogState extends State<AddOrderedItemDialog> {
     );
   }
 }
+
