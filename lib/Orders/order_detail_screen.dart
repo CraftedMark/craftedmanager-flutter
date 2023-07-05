@@ -185,53 +185,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _orderCost() {
-    return ColoredBox(
-      color: UIConstants.GREY_MEDIUM,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total Amount:',
-                ),
-                Text(
-                  '\$ ${widget.order.totalAmount}',
-                  style:
-                      TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Paid Amount:',
-                ),
-                Text(
-                  '\$ ${widget.order.paidAmount}',
-                  // assuming 'paidAmount' exists in 'Order' class
-                  style:
-                      TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
   void displayLoading() {
     showDialog(
       barrierDismissible: false,
@@ -307,12 +260,14 @@ class _OrderedItemListState extends State<_OrderedItemList> {
                     const SizedBox(height: 4),
                     itemTileRow('Price', item.price.toString()),
                     const SizedBox(height: 4),
+                    itemTileRow('Dose', item.dose.toString()),
+                    const SizedBox(height: 4),
                     itemTileRow('Flavor', item.flavor),
                     const SizedBox(height: 4),
                     itemTileRow('Status', item.status,
                         valuColor: StatusColor.getColor(item.status)),
                     const SizedBox(height: 4),
-                    itemTileRow('Dose', item.dose.toString()),
+                    itemTileRow('Item source', item.itemSource),
                     const SizedBox(height: 4),
                     itemTileRow('Packaging', item.packaging),
                   ],
