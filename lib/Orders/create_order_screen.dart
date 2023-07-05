@@ -37,6 +37,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   Future<void> onSaveButtonPressed() async{
     await saveOrder();
     Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   void onEditButtonPressed(int orderedItemIndex) {
