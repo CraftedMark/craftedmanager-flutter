@@ -169,7 +169,6 @@ class _ProductionListItem extends StatelessWidget {
         );
       },
       child: Tile(
-        height: 110,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -178,19 +177,24 @@ class _ProductionListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    item.productName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
-                    overflow: TextOverflow.ellipsis,
+                  FittedBox(
+                    child: Text(
+                      item.productName,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     'Product ID: ${item.productId}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     'Quantity: ${item.quantity}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  const SizedBox(height: 4),
                   Text('Status ${item.status}'),
                 ],
               ),
