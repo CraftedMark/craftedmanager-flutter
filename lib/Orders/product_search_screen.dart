@@ -8,6 +8,7 @@ import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
 import '../../Providers/product_provider.dart';
 import '../widgets/big_button.dart';
+import '../widgets/edit_product_alert.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   @override
@@ -56,27 +57,148 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 shrinkWrap: true,
                 itemCount: filteredProducts.length,
                 itemBuilder: (context, index) {
+                  var currentProduct = filteredProducts[index];
                   return _productTile(
-                    name: filteredProducts[index].name,
-                    price: filteredProducts[index].retailPrice,
-                    description: filteredProducts[index].description,
+                    name: currentProduct.name,
+                    price: currentProduct.retailPrice,
+                    description: currentProduct.description,
                     onTap: () {
-                      TextEditingController quantityController =
-                          TextEditingController(text: '1');
-                          TextEditingController itemSourceController =
-                          TextEditingController(text: '');
-                          TextEditingController packagingController =
-                          TextEditingController(text: '');
-                          TextEditingController doseController =
-                          TextEditingController(text: '0.1');
+                      final quantityCtrl = TextEditingController(text: '1');
+                      final doseCtrl = TextEditingController(text: '0.1');
+                      final flavorCtrl = TextEditingController(text: currentProduct.flavor);
+                      final itemSourceCtrl = TextEditingController(text: currentProduct.itemSource);
+                      final packagingCtrl = TextEditingController(text: currentProduct.packaging);
                     showDialog(
                       barrierDismissible: false,
                       context: context,
                       builder: (BuildContext context) {
                        bool isNeedPacking = true;
+                       // return EditProductParamsAlert(
+                       //   title: 'Add to Order',
+                       //   rightButton: BigButton(
+                       //     onPressed: () {
+                       //       selectedQuantity =
+                       //           int.parse(quantityController.text);
+                       //       final orderedItem = OrderedItem(
+                       //         orderId: 'order_id',
+                       //         // Replace with the actual order ID
+                       //         product: filteredProducts[index],
+                       //         // this is the required product object
+                       //         productName: filteredProducts[index].name,
+                       //         productId:
+                       //         filteredProducts[index].id ?? 0,
+                       //         name: filteredProducts[index].name,
+                       //         quantity: selectedQuantity,
+                       //         price:
+                       //         filteredProducts[index].retailPrice,
+                       //         discount: 0.0,
+                       //         productDescription:
+                       //         filteredProducts[index].description,
+                       //         productRetailPrice:
+                       //         filteredProducts[index].retailPrice,
+                       //         status: 'status',
+                       //         // replace this with your actual status
+                       //         itemSource: itemSourceController.text,
+                       //         packaging: packagingController.text,
+                       //         flavor: '',
+                       //         // replace this with your actual flavor
+                       //         dose: double.parse(doseController.text),
+                       //       );
+                       //       // Provider.of<OrderProvider>(context,
+                       //       //         listen: false)
+                       //       //     .addOrderedItem(orderedItem);
+                       //       Navigator.pop(context);
+                       //       Navigator.pop(
+                       //         context,
+                       //         {
+                       //           'product': filteredProducts[index],
+                       //           'quantity': selectedQuantity,
+                       //         },
+                       //       );
+                       //     },
+                       //     text: 'Add',
+                       //   ),
+                       //   children: [
+                       //     StatefulBuilder (
+                       //         builder: (context, changeState) {
+                       //           final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT);
+                       //           return SingleChildScrollView(
+                       //             physics: const BouncingScrollPhysics(),
+                       //             child: SizedBox(
+                       //               width: 1000,
+                       //               child: Column(
+                       //                 crossAxisAlignment: CrossAxisAlignment.start,
+                       //                 mainAxisSize: MainAxisSize.min,
+                       //                 children: [
+                       //                   Text(
+                       //                     filteredProducts[index].name,
+                       //                     style: textStyle,
+                       //                   ),
+                       //                   const SizedBox(height: 12),
+                       //                   Text(
+                       //                     filteredProducts[index].description,
+                       //                     style: textStyle,
+                       //                   ),
+                       //                   const SizedBox(height: 24),
+                       //                   Row(
+                       //                     children: [
+                       //                       Flexible(
+                       //                         child: TextInputField(
+                       //                           enabled: true,
+                       //                           controller: quantityController,
+                       //                           keyboardType: TextInputType.number,
+                       //                           labelText: 'Quantity',
+                       //                         ),
+                       //                       ),
+                       //                       const SizedBox(width: 8),
+                       //                       Flexible(
+                       //                         child: TextInputField(
+                       //                           enabled: true,
+                       //                           controller: doseController,
+                       //                           keyboardType: TextInputType.number,
+                       //                           labelText: 'Dose',
+                       //                         ),
+                       //                       ),
+                       //                     ],
+                       //                   ),
+                       //                   const SizedBox(height: 8),
+                       //                   TextInputField(
+                       //                     enabled: true,
+                       //                     controller: itemSourceController,
+                       //                     labelText: 'Item Source',
+                       //                   ),
+                       //                   const SizedBox(height: 8),
+                       //                   Row(
+                       //                     children: [
+                       //                       Checkbox(
+                       //                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                       //                         value: isNeedPacking,
+                       //                         onChanged: (value){
+                       //                           isNeedPacking = !isNeedPacking;
+                       //                           changeState(() {});
+                       //                         },
+                       //                       ),
+                       //                       Text('Packing',style: textStyle),
+                       //                     ],
+                       //                   ),
+                       //
+                       //                   const SizedBox(height: 8),
+                       //                   TextInputField(
+                       //                     enabled: isNeedPacking,
+                       //                     labelText: 'Packaging',
+                       //                     controller: packagingController,
+                       //                   ),
+                       //                 ],
+                       //               ),
+                       //             ),
+                       //           );
+                       //         }
+                       //     )
+                       //   ],
+                       // );
                         return AlertDialog(
                           insetPadding: const EdgeInsets.fromLTRB(8,0,8,24),
-                          contentPadding: EdgeInsets.zero,
+                          contentPadding: const EdgeInsets.all(24),
                           actionsPadding: const EdgeInsets.all(24),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -88,8 +210,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                 final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT);
                                 return SingleChildScrollView(
                                   physics: const BouncingScrollPhysics(),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(24),
+                                  child: SizedBox(
+                                    width: 1000,
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
@@ -109,29 +231,32 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                             Flexible(
                                               child: TextInputField(
                                                 enabled: true,
-                                                controller: quantityController,
+                                                controller: quantityCtrl,
                                                 keyboardType: TextInputType.number,
                                                 labelText: 'Quantity',
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
+                                            const SizedBox(width: 8),
                                             Flexible(
                                               child: TextInputField(
                                                 enabled: true,
-                                                controller: doseController,
+                                                controller: doseCtrl,
                                                 keyboardType: TextInputType.number,
                                                 labelText: 'Dose',
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: 8),
                                         TextInputField(
-                                          enabled: true,
-                                          controller: itemSourceController,
+                                          controller: flavorCtrl,
+                                          labelText: 'Flavor',
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextInputField(
+                                          controller: itemSourceCtrl,
                                           labelText: 'Item Source',
                                         ),
-                                        const SizedBox(height: 16),
                                         Row(
                                           children: [
                                             Checkbox(
@@ -145,12 +270,10 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                             Text('Packing',style: textStyle),
                                           ],
                                         ),
-
-                                        const SizedBox(height: 16),
                                         TextInputField(
                                           enabled: isNeedPacking,
                                           labelText: 'Packaging',
-                                          controller: packagingController,
+                                          controller: packagingCtrl,
                                         ),
                                       ],
                                     ),
@@ -175,41 +298,18 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                   child: BigButton(
                                     onPressed: () {
                                       selectedQuantity =
-                                          int.parse(quantityController.text);
-                                      final orderedItem = OrderedItem(
-                                        orderId: 'order_id',
-                                        // Replace with the actual order ID
-                                        product: filteredProducts[index],
-                                        // this is the required product object
-                                        productName: filteredProducts[index].name,
-                                        productId:
-                                        filteredProducts[index].id ?? 0,
-                                        name: filteredProducts[index].name,
-                                        quantity: selectedQuantity,
-                                        price:
-                                        filteredProducts[index].retailPrice,
-                                        discount: 0.0,
-                                        productDescription:
-                                        filteredProducts[index].description,
-                                        productRetailPrice:
-                                        filteredProducts[index].retailPrice,
-                                        status: 'status',
-                                        // replace this with your actual status
-                                        itemSource: itemSourceController.text,
-                                        packaging: packagingController.text,
-                                        flavor: '',
-                                        // replace this with your actual flavor
-                                        dose: double.parse(doseController.text),
-                                      );
-                                      // Provider.of<OrderProvider>(context,
-                                      //         listen: false)
-                                      //     .addOrderedItem(orderedItem);
+                                          int.parse(quantityCtrl.text);
+
                                       Navigator.pop(context);
                                       Navigator.pop(
                                         context,
                                         {
                                           'product': filteredProducts[index],
                                           'quantity': selectedQuantity,
+                                          'dose': double.parse(doseCtrl.text),
+                                          'flavor': flavorCtrl.text,
+                                          'itemSource': itemSourceCtrl.text,
+                                          'packing': packagingCtrl.text,
                                         },
                                       );
                                     },
