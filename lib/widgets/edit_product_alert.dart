@@ -20,13 +20,16 @@ class EditProductParamsAlert extends StatelessWidget {
     return AlertDialog(
       insetPadding: const EdgeInsets.all(24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      backgroundColor: UIConstants.BACKGROUND_COLOR,
+      backgroundColor: UIConstants.GREY_LIGHT,
       title: Text(title),
       content: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
+        child: SizedBox(
+          width: 1000,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
         ),
       ),
       actions: [
