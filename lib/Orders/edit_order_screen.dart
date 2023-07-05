@@ -233,7 +233,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
   }
 
   Widget _productTile(OrderedItem item, int itemIndex){
-    const double itemPadding = 16;
+    const double itemPadding = 12;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -248,10 +248,66 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             TextInputField(
               initialValue: item.productName,
               labelText: 'Product Name',
+              keyboardType: TextInputType.text,
               onChange: (value) {
                 updateOrderedItem(
                   index: itemIndex,
                   name: value,
+                );
+              },
+            ),
+            const SizedBox(height: itemPadding),
+            TextInputField(
+              initialValue: item.price.toStringAsFixed(2),
+              labelText: 'Price',
+              keyboardType: TextInputType.number,
+              onChange: (value) {
+                updateOrderedItem(
+                  index: itemIndex,
+                  price: double.parse(value),
+                );
+              },
+            ),
+            const SizedBox(height: itemPadding),
+            Row(
+              children: [
+                Flexible(
+                  child: TextInputField(
+                    initialValue: item.quantity.toString(),
+                    labelText: 'Quantity',
+                    keyboardType: TextInputType.number,
+                    onChange: (value) {
+                      updateOrderedItem(
+                        index: itemIndex,
+                        quantity: int.parse(value),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: TextInputField(
+                    initialValue: item.dose.toStringAsFixed(2),
+                    labelText: 'Dose',
+                    keyboardType: TextInputType.number,
+                    onChange: (value) {
+                      updateOrderedItem(
+                        index: itemIndex,
+                        dose: double.parse(value),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: itemPadding),
+            TextInputField(
+              initialValue: item.flavor,
+              labelText: 'Flavor',
+              onChange: (value) {
+                updateOrderedItem(
+                  index: itemIndex,
+                  flavor: value,
                 );
               },
             ),
@@ -268,45 +324,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
             ),
             const SizedBox(height: itemPadding),
             TextInputField(
-              initialValue: item.flavor,
-              labelText: 'Flavor',
-              onChange: (value) {
-                updateOrderedItem(
-                  index: itemIndex,
-                  flavor: value,
-                );
-              },
-            ),
-            const SizedBox(height: itemPadding),
-            TextInputField(
-              initialValue: item.dose.toStringAsFixed(2),
-              labelText: 'Dose',
-              onChange: (value) {
-                updateOrderedItem(
-                  index: itemIndex,
-                  dose: double.parse(value),
-                );
-              },
-            ),
-            const SizedBox(height: itemPadding),
-            TextInputField(
               initialValue: item.packaging,
               labelText: 'Packaging',
               onChange: (value) {
                 updateOrderedItem(
                   index: itemIndex,
                   packaging: value,
-                );
-              },
-            ),
-            const SizedBox(height: itemPadding),
-            TextInputField(
-              initialValue: item.price.toStringAsFixed(2),
-              labelText: 'Price',
-              onChange: (value) {
-                updateOrderedItem(
-                  index: itemIndex,
-                  price: double.parse(value),
                 );
               },
             ),
