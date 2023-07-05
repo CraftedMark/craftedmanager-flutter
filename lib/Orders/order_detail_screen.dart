@@ -77,7 +77,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     _changeOrderStateButton(),
                     const SizedBox(height: 24),
                     _OrderedItemList(items: orderedItems),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 90),
                   ],
                 ),
               ),
