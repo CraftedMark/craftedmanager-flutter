@@ -28,7 +28,7 @@ class _ProductionListState extends State<ProductionList> {
 
   void createMap(){
     var map = <int, Set<String>>{};
-    for(final i in unitedItems){
+    for(final i in filteredItems){
       final key = i.productId;
       if(map.containsKey(key)){
         map.update(key, (value) => {...value,i.orderId});
@@ -49,8 +49,10 @@ class _ProductionListState extends State<ProductionList> {
   }
 
   void uniteOrderedItemsById(){
+
     unitedItems = filteredItems;
     unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
+    unitedItems.forEach((element) {print(element.productId);});
     for(var i = 1; i<unitedItems.length;i++){
       var prev = unitedItems[i-1];
       var current = unitedItems[i];
@@ -63,11 +65,10 @@ class _ProductionListState extends State<ProductionList> {
   }
 
   void searchOrderedItemsByItemSource(String query){
-    filteredItems = Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query);
-    uniteOrderedItemsById();
+    filteredItems = List.from(Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query));
     createMap();
+    uniteOrderedItemsById();
     setState(() {});
-
   }
 
   @override
