@@ -54,9 +54,9 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Stack(
-          fit: StackFit.expand,
           children: [
             ListView.builder(
+              padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
               itemCount: widget.ordersIds.length,
               itemBuilder: (_,index){
