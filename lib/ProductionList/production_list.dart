@@ -27,15 +27,17 @@ class _ProductionListState extends State<ProductionList> {
   Map<int, Set<String>> ordersGroupedByOrderedItemId = {};
 
   void createMap(){
+    var map = <int, Set<String>>{};
     for(final i in unitedItems){
       final key = i.productId;
-      if(ordersGroupedByOrderedItemId.containsKey(key)){
-        ordersGroupedByOrderedItemId.update(key, (value) => {...value,i.orderId});
+      if(map.containsKey(key)){
+        map.update(key, (value) => {...value,i.orderId});
       }
       else{
-        ordersGroupedByOrderedItemId.addAll({key: {i.orderId}});
+        map.addAll({key: {i.orderId}});
       }
     }
+    ordersGroupedByOrderedItemId = map;
   }
 
   @override
