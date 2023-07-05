@@ -1,4 +1,5 @@
 import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/widgets/divider.dart';
 import 'package:crafted_manager/widgets/order_id_field.dart';
@@ -60,26 +61,12 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
               producedAmount,
             ),
             ListView.builder(
+              physics: const BouncingScrollPhysics(),
               itemCount: widget.ordersIds.length,
               itemBuilder: (_,index){
-                final orderId = widget.ordersIds[index];
-                final order = Provider.of<OrderProvider>(context, listen: false).orders.firstWhere((o) => o.id == orderId);
-                final orderedItem = order.orderedItems.firstWhere((i) => i.productId == widget.productId);
-                return Tile(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: [
-                      OrderIdField(orderId: orderId),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Need to produce:'),
-                          Text('${orderedItem.quantity}'),
-                        ],
-                      )
-                    ],
-                  ),
+                return _OrderTile(
+                  productId: widget.productId,
+                  orderId: widget.ordersIds[index],
                 );
               }
             ),
@@ -121,3 +108,74 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     );
   }
 }
+
+class _OrderTile extends StatelessWidget {
+  const _OrderTile({
+    Key? key,
+    required this.orderId,
+    required this.productId
+  }) : super(key: key);
+
+  final String orderId;
+  final int productId;
+
+
+  @override
+  Widget build(BuildContext context) {
+    final order = Provider.of<OrderProvider>(context, listen: false).orders.firstWhere((o) => o.id == orderId);
+    final orderedItem = order.orderedItems.firstWhere((i) => i.productId == productId);
+    final customer = Provider.of<PeopleProvider>(context).people.firstWhere((p) => p.id == order.customerId);
+
+    return Tile(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        children: [
+          OrderIdField(orderId: orderId),
+          const SizedBox(height: 8),
+          const DividerCustom(),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Need to produce:'),
+              Text('${orderedItem.quantity}'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Customer:'),
+              Text('${customer.firstName} ${customer.lastName}'),//TODO: add
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Flavor:'),
+              Text(orderedItem.flavor),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Dose:'),
+              Text('${orderedItem.dose}'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Packaging:'),
+              Text(orderedItem.packaging),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
