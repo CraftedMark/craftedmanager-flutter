@@ -7,7 +7,7 @@ class AppConfig {
   static const ONESIGNAL_APP_KEY = "fed52d24-522d-4653-ae54-3c23d0a735ac";
   static const ENABLE_WOOSIGNAL = false;
 
-  static const ORDERED_ITEM_STATUSES = ['Pending', 'In-Progress', 'Completed'];
+  static const ORDERED_ITEM_STATUSES = ['Pending', 'Started', 'In-Progress', 'Completed'];
   static const ORDER_STATUSES_WOOSIGNAL = [
     'pending',
     'processing',
