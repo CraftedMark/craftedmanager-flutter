@@ -152,15 +152,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         onPressed: () {
           showModalBottomSheet(
             context: context,
+            backgroundColor: UIConstants.GREY_MEDIUM,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),topRight: Radius.circular(24),
+              )
+            ),
             builder: (BuildContext context) {
               return Container(
-                color: Colors.black,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24)
+                ),
                 child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   itemCount: orderStatuses.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(orderStatuses[index],
-                          style: TextStyle(color: Colors.white)),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        orderStatuses[index],
+                        style: const TextStyle(color: UIConstants.WHITE_LIGHT)
+                      ),
                       onTap: () async {
                         //TODO:replace with OrderProvider.updateOrderStatus
                         final orderForSend = widget.order
