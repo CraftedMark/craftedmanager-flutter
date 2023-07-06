@@ -26,20 +26,6 @@ class _ProductionListState extends State<ProductionList> {
   List<OrderedItem> unitedItems = [];
   Map<int, Set<String>> ordersGroupedByOrderedItemId = {};
 
-  void createMap(){
-    var map = <int, Set<String>>{};
-    for(final i in filteredItems){
-      final key = i.productId;
-      if(map.containsKey(key)){
-        map.update(key, (value) => {...value,i.orderId});
-      }
-      else{
-        map.addAll({key: {i.orderId}});
-      }
-    }
-    ordersGroupedByOrderedItemId = map;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -52,7 +38,6 @@ class _ProductionListState extends State<ProductionList> {
 
     unitedItems = filteredItems;
     unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
-    unitedItems.forEach((element) {print(element.productId);});
     for(var i = 1; i<unitedItems.length;i++){
       var prev = unitedItems[i-1];
       var current = unitedItems[i];
@@ -62,6 +47,20 @@ class _ProductionListState extends State<ProductionList> {
         i--;
       }
     }
+  }
+
+  void createMap(){
+    var map = <int, Set<String>>{};
+    for(final i in filteredItems){
+      final key = i.productId;
+      if(map.containsKey(key)){
+        map.update(key, (value) => {...value,i.orderId});
+      }
+      else{
+        map.addAll({key: {i.orderId}});
+      }
+    }
+    ordersGroupedByOrderedItemId = map;
   }
 
   void searchOrderedItemsByItemSource(String query){

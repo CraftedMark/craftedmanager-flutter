@@ -45,7 +45,7 @@ void main() async {
     });
   }
   if(AppConfig.ENABLE_WOOSIGNAL){
-    await WooSignalService.init();//TODO: enable WooSignal
+    await WooSignalService.init();//TODO: refactor service
   }
   runApp(
     MultiProvider(
