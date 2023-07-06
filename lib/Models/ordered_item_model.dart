@@ -1,4 +1,5 @@
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/config.dart';
 
 class OrderedItem {
   String orderId;
@@ -92,7 +93,7 @@ class OrderedItem {
       discount: parseNum(map['discount']).toDouble(),
       productDescription: map['description'] as String? ?? '',
       productName: map['product_name'] as String? ?? 'Unknown',
-      status: map['status'] ?? "Unknown",
+      status: map['status'] ?? AppConfig.ORDERED_ITEM_STATUSES.first,
       itemSource: map['item_source'] ?? "Unknown",
       flavor: map['flavor'] ?? "Unknown",
       dose: double.parse(map['dose'].toString() ?? '0.0'),
