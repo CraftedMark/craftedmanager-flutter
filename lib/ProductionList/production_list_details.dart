@@ -32,10 +32,9 @@ class ProductionListDetails extends StatefulWidget {
 }
 
 class _ProductionListDetailsState extends State<ProductionListDetails> {
-  List<OrderedItem> orderedItems = [];
   int producedAmount = 0;
 
-  Future<int> getProducedAmount() async {
+  Future<int> getProducedAmount() async {//TODO: make api
     //fake API call
     await Future.delayed(Duration(milliseconds: 300));
     return 0;
@@ -127,7 +126,8 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final order = Provider.of<OrderProvider>(context, listen: false).orders.firstWhere((o) => o.id == orderId);
+    final provider = Provider.of<OrderProvider>(context);
+    final order = provider.orders.firstWhere((o) => o.id == orderId);
     final orderedItem = order.orderedItems.firstWhere((i) => i.productId == productId);
     final customer = Provider.of<PeopleProvider>(context).people.firstWhere((p) => p.id == order.customerId);
 
@@ -152,7 +152,7 @@ class _OrderTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Customer:'),
-              Text('${customer.firstName} ${customer.lastName}'),//TODO: add
+              Text('${customer.firstName} ${customer.lastName}'),
             ],
           ),
           const SizedBox(height: 8),
@@ -187,7 +187,7 @@ class _OrderTile extends StatelessWidget {
               Flexible(
                 child: DropdownMenuCustom(
                   isCollapsed: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   label: '',
                   value: orderedItem.status,
                   items: List.generate(
@@ -198,10 +198,8 @@ class _OrderTile extends StatelessWidget {
                     )
                   ),
                   onChanged: (newStatus) {
+                    if(newStatus == orderedItem.status) return;
                     orderedItem.status = newStatus!;
-                    print('try to update ordered item (id: ${orderedItem.productId}) with status: $newStatus');
-                    final provider = Provider.of<OrderProvider>(context, listen: false);
-
                     provider.updateOrder(order);
                   },
                 ),

@@ -297,19 +297,16 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                 Flexible(
                                   child: BigButton(
                                     onPressed: () {
-                                      selectedQuantity =
-                                          int.parse(quantityCtrl.text);
-
                                       Navigator.pop(context);
                                       Navigator.pop(
                                         context,
                                         {
                                           'product': filteredProducts[index],
-                                          'quantity': selectedQuantity,
-                                          'dose': double.parse(doseCtrl.text),
+                                          'quantity': int.parse(quantityCtrl.text),
+                                          'dosage': double.parse(doseCtrl.text),
                                           'flavor': flavorCtrl.text,
                                           'itemSource': itemSourceCtrl.text,
-                                          'packing': packagingCtrl.text,
+                                          'packaging': packagingCtrl.text,
                                         },
                                       );
                                     },
