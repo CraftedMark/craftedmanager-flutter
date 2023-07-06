@@ -138,8 +138,8 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
           }}');
           await ctx.query('''
 INSERT INTO ordered_items
-(order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging)
-VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource, @flavor, @dose, @packaging)
+(order_id, product_id, product_name, quantity, price, discount, description, item_source, flavor, dose, packaging, status)
+VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @description, @itemSource, @flavor, @dose, @packaging, @status)
 ''', substitutionValues: {
             ...item.toMap(),
             'orderId': order.id,
@@ -149,6 +149,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
             'flavor': item.flavor,
             'dose': item.dose,
             'packaging': item.packaging,
+            'status':item.status,
           });
           print('Updated ordered item inserted');
         }

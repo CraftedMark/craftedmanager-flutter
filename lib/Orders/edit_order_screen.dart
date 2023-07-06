@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
 import '../widgets/big_button.dart';
+import '../widgets/dropdown_menu.dart';
 
 
 class EditOrderScreen extends StatefulWidget {
@@ -418,14 +419,9 @@ class _OrderSubtotal extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Sub total:'),
+        const Text('Sub total:'),
         Text(subtotal.toStringAsFixed(2)),
       ],
-    );
-    return TextInputField(
-      enabled: false,
-      labelText: 'Sub Total:',
-      initialValue: '\$ ${subtotal.toStringAsFixed(2)}',
     );
   }
 }
@@ -453,18 +449,8 @@ class _OrderedItemStatusPickerState extends State<_OrderedItemStatusPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
-      dropdownColor: UIConstants.GREY_LIGHT,
-      decoration: InputDecoration(
-        enabledBorder: UIConstants.FIELD_BORDER,
-        disabledBorder: UIConstants.FIELD_BORDER,
-        focusedBorder: UIConstants.FIELD_BORDER,
-        labelText: 'Order Status:',
-        labelStyle: Theme.of(context).textTheme.bodyMedium,
-        filled: true,
-        fillColor: UIConstants.GREY_LIGHT,
-      ),
+    return DropdownMenuCustom(
+      label: 'Order Status',
       value: status,
       items: List.generate(
         AppConfig.ORDERED_ITEM_STATUSES.length,
@@ -474,7 +460,7 @@ class _OrderedItemStatusPickerState extends State<_OrderedItemStatusPicker> {
           ),
         ),
       ),
-      onChanged: (String? newValue) {
+      onChanged: (newValue) {
         status = newValue!;
         widget.onChange?.call(newValue);
         setState(() {});
