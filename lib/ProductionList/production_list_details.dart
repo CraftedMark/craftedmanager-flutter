@@ -1,12 +1,16 @@
 import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
+import 'package:crafted_manager/config.dart';
 import 'package:crafted_manager/widgets/divider.dart';
 import 'package:crafted_manager/widgets/order_id_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
+import '../widgets/big_button.dart';
+import '../widgets/dropdown_menu.dart';
 import '../widgets/tile.dart';
 
 class ProductionListDetails extends StatefulWidget {
@@ -127,6 +131,7 @@ class _OrderTile extends StatelessWidget {
     final orderedItem = order.orderedItems.firstWhere((i) => i.productId == productId);
     final customer = Provider.of<PeopleProvider>(context).people.firstWhere((p) => p.id == order.customerId);
 
+
     return Tile(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -172,6 +177,35 @@ class _OrderTile extends StatelessWidget {
             children: [
               const Text('Packaging:'),
               Text(orderedItem.packaging),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Flexible(child: Text('Item status')),
+              Flexible(
+                child: DropdownMenuCustom(
+                  isCollapsed: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  label: '',
+                  value: orderedItem.status,
+                  items: List.generate(
+                    AppConfig.ORDERED_ITEM_STATUSES.length,
+                    (index) => DropdownMenuItem<String>(
+                      value: AppConfig.ORDERED_ITEM_STATUSES[index],
+                      child: Text(AppConfig.ORDERED_ITEM_STATUSES[index]),
+                    )
+                  ),
+                  onChanged: (newStatus) {
+                    orderedItem.status = newStatus!;
+                    print('try to update ordered item (id: ${orderedItem.productId}) with status: $newStatus');
+                    final provider = Provider.of<OrderProvider>(context, listen: false);
+
+                    provider.updateOrder(order);
+                  },
+                ),
+              ),
             ],
           ),
         ],
