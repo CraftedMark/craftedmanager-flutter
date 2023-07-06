@@ -450,6 +450,7 @@ class _OrderedItemStatusPickerState extends State<_OrderedItemStatusPicker> {
   @override
   Widget build(BuildContext context) {
     return DropdownMenuCustom(
+      label: 'Order Status',
       value: status,
       items: List.generate(
         AppConfig.ORDERED_ITEM_STATUSES.length,

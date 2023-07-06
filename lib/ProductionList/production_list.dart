@@ -114,7 +114,7 @@ class _ProductionListState extends State<ProductionList> {
         OrderedItem item = unitedItems[index];
         return _ProductionListItem(
           item: item,
-          ordersIds:ordersGroupedByOrderedItemId[item.productId]!,
+          idOfOrdersWithSpecificOrderedItem:ordersGroupedByOrderedItemId[item.productId]!,
         );
       },
     );
@@ -148,8 +148,8 @@ class _AppBarMenuButton extends StatelessWidget {
 
 class _ProductionListItem extends StatelessWidget {
   final OrderedItem item;
-  final Set<String> ordersIds;
-  const _ProductionListItem({Key? key, required this.item, required this.ordersIds}) : super(key: key);
+  final Set<String> idOfOrdersWithSpecificOrderedItem;
+  const _ProductionListItem({Key? key, required this.item, required this.idOfOrdersWithSpecificOrderedItem}) : super(key: key);
 
 
 
@@ -164,7 +164,7 @@ class _ProductionListItem extends StatelessWidget {
             builder: (context) => ProductionListDetails(
               productName: item.productName,
               productId: item.productId,
-              ordersIds: ordersIds.toList(),
+              ordersIds: idOfOrdersWithSpecificOrderedItem.toList(),
               expectedProductAmount: item.quantity,
             ),
           ),
@@ -172,12 +172,10 @@ class _ProductionListItem extends StatelessWidget {
       },
       child: Tile(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   FittedBox(
                     child: Text(
@@ -187,17 +185,9 @@ class _ProductionListItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'Product ID: ${item.productId}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  Text('Product ID: ${item.productId}'),
                   const SizedBox(height: 4),
-                  Text(
-                    'Quantity: ${item.quantity}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text('Status ${item.status}'),
+                  Text('Quantity: ${item.quantity}'),
                 ],
               ),
             ),
