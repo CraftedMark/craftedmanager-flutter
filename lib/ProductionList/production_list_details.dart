@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
+import '../Models/product_model.dart';
 import '../widgets/big_button.dart';
 import '../widgets/dropdown_menu.dart';
 import '../widgets/tile.dart';
@@ -34,10 +35,24 @@ class ProductionListDetails extends StatefulWidget {
 class _ProductionListDetailsState extends State<ProductionListDetails> {
   int producedAmount = 0;
 
+  List<OrderWithOrderedItem> ordersWithItems =[];
+
   Future<int> getProducedAmount() async {//TODO: make api
     //fake API call
     await Future.delayed(Duration(milliseconds: 300));
     return 0;
+  }
+
+  void createMap(){
+    final openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
+    for(final id in widget.ordersIds){
+      final currentOrder = openOrders.firstWhere((o) => o.id == id);
+
+      var orderedItems = currentOrder.orderedItems.where((item) => item.productId == widget.productId);
+      for(final item in orderedItems){
+        ordersWithItems.add(OrderWithOrderedItem(currentOrder, item));
+      }
+    }
   }
 
   @override
@@ -45,6 +60,7 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       producedAmount =  await getProducedAmount();
+      createMap();
       setState(() {});
     });
   }
@@ -52,6 +68,8 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<OrderProvider>(context);
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.productName)),
       body: Padding(
@@ -61,11 +79,10 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
             ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
-              itemCount: widget.ordersIds.length,
+              itemCount: ordersWithItems.length,
               itemBuilder: (_,index){
                 return _OrderTile(
-                  productId: widget.productId,
-                  orderId: widget.ordersIds[index],
+                  orderAndItem: ordersWithItems[index],
                 );
               }
             ),
@@ -116,27 +133,26 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
 class _OrderTile extends StatelessWidget {
   const _OrderTile({
     Key? key,
-    required this.orderId,
-    required this.productId
+    required this.orderAndItem,
   }) : super(key: key);
 
-  final String orderId;
-  final int productId;
+  final OrderWithOrderedItem orderAndItem;
 
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<OrderProvider>(context);
-    final order = provider.orders.firstWhere((o) => o.id == orderId);
-    final orderedItem = order.orderedItems.firstWhere((i) => i.productId == productId);
-    final customer = Provider.of<PeopleProvider>(context).people.firstWhere((p) => p.id == order.customerId);
+    final order = orderAndItem.order;
+    final orderedItem = orderAndItem.item;
+    
+    final provider = Provider.of<OrderProvider>(context, listen: false);
+    final customer = Provider.of<PeopleProvider>(context, listen: false).people.firstWhere((p) => p.id == order.customerId);
 
 
     return Tile(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
-          OrderIdField(orderId: orderId),
+          OrderIdField(orderId: order.id),
           const SizedBox(height: 8),
           const DividerCustom(),
           const SizedBox(height: 8),
@@ -212,3 +228,10 @@ class _OrderTile extends StatelessWidget {
   }
 }
 
+
+class OrderWithOrderedItem{
+  final Order order;
+  final OrderedItem item;
+
+  OrderWithOrderedItem(this.order,this.item);
+}
