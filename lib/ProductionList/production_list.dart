@@ -14,14 +14,13 @@ class ProductionList extends StatefulWidget {
   final GlobalKey<SliderDrawerState> _sliderDrawerKey =
       GlobalKey<SliderDrawerState>();
 
-  ProductionList({Key? key}): super(key: key);
+  ProductionList({Key? key}) : super(key: key);
 
   @override
   _ProductionListState createState() => _ProductionListState();
 }
 
 class _ProductionListState extends State<ProductionList> {
-
   List<OrderedItem> filteredItems = [];
   List<OrderedItem> unitedItems = [];
   Map<int, Set<String>> ordersGroupedByOrderedItemId = {};
@@ -34,37 +33,48 @@ class _ProductionListState extends State<ProductionList> {
     });
   }
 
-  void uniteOrderedItemsById(){
-
+  void uniteOrderedItemsById() {
     unitedItems = filteredItems;
     unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
-    for(var i = 1; i<unitedItems.length;i++){
-      var prev = unitedItems[i-1];
+    for (var i = 1; i < unitedItems.length; i++) {
+      var prev = unitedItems[i - 1];
       var current = unitedItems[i];
-      if(prev.productId == current.productId){
-        unitedItems[i-1] = prev.copyWith(quantity: prev.quantity+current.quantity);
+      if (prev.productId == current.productId) {
+        unitedItems[i - 1] =
+            prev.copyWith(quantity: prev.quantity + current.quantity);
         unitedItems.removeAt(i);
         i--;
       }
     }
   }
 
-  void createMap(){
+  ///Create a map with [productId] as key
+  ///
+  ///and [orderId] as list of orders with this product
+  void createMap() {
     var map = <int, Set<String>>{};
-    for(final i in filteredItems){
+    for (final i in filteredItems) {
       final key = i.productId;
-      if(map.containsKey(key)){
-        map.update(key, (value) => {...value,i.orderId});
-      }
-      else{
-        map.addAll({key: {i.orderId}});
+      if (map.containsKey(key)) {
+        map.update(key, (value) => {...value, i.orderId});
+      } else {
+        map.addAll({
+          key: {i.orderId}
+        });
       }
     }
     ordersGroupedByOrderedItemId = map;
   }
 
-  void searchOrderedItemsByItemSource(String query){
-    filteredItems = List.from(Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query));
+  void searchOrderedItemsByItemSource(String rawQuery) {
+    final query = rawQuery.toLowerCase().trim();
+
+    final orders =
+        Provider.of<OrderProvider>(context, listen: false).openOrders;
+    filteredItems = orders
+        .expand((order) => order.orderedItems)
+        .where((item) => item.itemSource.toLowerCase().trim().contains(query))
+        .toList();
     createMap();
     uniteOrderedItemsById();
     setState(() {});
@@ -72,10 +82,10 @@ class _ProductionListState extends State<ProductionList> {
 
   @override
   Widget build(BuildContext context) {
-
+    final provider = Provider.of<OrderProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        leading: _AppBarMenuButton(menuKey:widget._sliderDrawerKey),
+        leading: _AppBarMenuButton(menuKey: widget._sliderDrawerKey),
         title: Text(
           'Production List',
           style: Theme.of(context).textTheme.titleMedium,
@@ -88,19 +98,19 @@ class _ProductionListState extends State<ProductionList> {
       ),
       body: SafeArea(
         child: SliderDrawer(
-            appBar: null,
-            key: widget._sliderDrawerKey,
-            sliderOpenSize: 250,
-            slider: SliderView(onItemClick: (title) {
-              // Handle the menu item click as necessary
-            }),
-            child: ColoredBox(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: unitedItems.isNotEmpty
-                      ? _productionList()
-                      : _emptyListPlaceHolder(),
-            ),
+          appBar: null,
+          key: widget._sliderDrawerKey,
+          sliderOpenSize: 250,
+          slider: SliderView(onItemClick: (title) {
+            // Handle the menu item click as necessary
+          }),
+          child: ColoredBox(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: unitedItems.isNotEmpty
+                ? _productionList()
+                : _emptyListPlaceHolder(),
           ),
+        ),
       ),
     );
   }
@@ -114,7 +124,8 @@ class _ProductionListState extends State<ProductionList> {
         OrderedItem item = unitedItems[index];
         return _ProductionListItem(
           item: item,
-          idOfOrdersWithSpecificOrderedItem:ordersGroupedByOrderedItemId[item.productId]!,
+          idOfOrdersWithSpecificOrderedItem:
+              ordersGroupedByOrderedItemId[item.productId]!,
         );
       },
     );
@@ -137,9 +148,8 @@ class _AppBarMenuButton extends StatelessWidget {
     return IconButton(
       icon: Icon(Icons.menu, color: Colors.white),
       onPressed: () {
-        if(!menuKey.currentState!.isDrawerOpen){
+        if (!menuKey.currentState!.isDrawerOpen) {
           menuKey.currentState?.toggle();
-
         }
       },
     );
@@ -149,15 +159,16 @@ class _AppBarMenuButton extends StatelessWidget {
 class _ProductionListItem extends StatelessWidget {
   final OrderedItem item;
   final Set<String> idOfOrdersWithSpecificOrderedItem;
-  const _ProductionListItem({Key? key, required this.item, required this.idOfOrdersWithSpecificOrderedItem}) : super(key: key);
-
-
+  const _ProductionListItem(
+      {Key? key,
+      required this.item,
+      required this.idOfOrdersWithSpecificOrderedItem})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -180,7 +191,10 @@ class _ProductionListItem extends StatelessWidget {
                   FittedBox(
                     child: Text(
                       item.productName,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: UIConstants.WHITE_LIGHT),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: UIConstants.WHITE_LIGHT),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -201,5 +215,3 @@ class _ProductionListItem extends StatelessWidget {
     );
   }
 }
-
-
