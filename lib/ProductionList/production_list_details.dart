@@ -20,13 +20,11 @@ class ProductionListDetails extends StatefulWidget {
     required this.productName,
     required this.productId,
     required this.ordersIds,
-    required this.expectedProductAmount
   }) : super(key: key);
 
   final String productName;
   final int productId;
   final List<String> ordersIds;
-  final int expectedProductAmount;
 
   @override
   State<ProductionListDetails> createState() => _ProductionListDetailsState();
@@ -34,14 +32,16 @@ class ProductionListDetails extends StatefulWidget {
 
 class _ProductionListDetailsState extends State<ProductionListDetails> {
   int producedAmount = 0;
+  int expextedAmount = 0;
+  List<OrderWithOrderedItem> ordersWithItem =[];
 
-  List<OrderWithOrderedItem> ordersWithItems =[];
-
+  ///fake API call
   Future<int> getProducedAmount() async {//TODO: make api
-    //fake API call
+
     await Future.delayed(Duration(milliseconds: 300));
     return 0;
   }
+
 
   void createMap(){
     final openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
@@ -50,10 +50,17 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
 
       var orderedItems = currentOrder.orderedItems.where((item) => item.productId == widget.productId);
       for(final item in orderedItems){
-        ordersWithItems.add(OrderWithOrderedItem(currentOrder, item));
+        ordersWithItem.add(OrderWithOrderedItem(currentOrder, item));
       }
     }
   }
+
+  int getExpectedAmount() {
+    final orderedItems = ordersWithItem.map((e) => e.item).toList();
+
+    return orderedItems.fold(0, (prev, item) => prev+=item.quantity);
+  }
+
 
   @override
   void initState() {
@@ -61,6 +68,7 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       producedAmount =  await getProducedAmount();
       createMap();
+      expextedAmount = getExpectedAmount();
       setState(() {});
     });
   }
@@ -79,15 +87,15 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
             ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
-              itemCount: ordersWithItems.length,
+              itemCount: ordersWithItem.length,
               itemBuilder: (_,index){
                 return _OrderTile(
-                  orderAndItem: ordersWithItems[index],
+                  orderAndItem: ordersWithItem[index],
                 );
               }
             ),
             _expectedAndProducedInfo(
-              widget.expectedProductAmount,
+              expextedAmount,
               producedAmount,
             ),
 
