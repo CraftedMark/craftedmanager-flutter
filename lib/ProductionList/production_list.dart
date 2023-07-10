@@ -1,13 +1,16 @@
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/ProductionList/production_list_details.dart';
 import 'package:crafted_manager/Providers/order_provider.dart';
+import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/main.dart';
 import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../Models/order_model.dart';
 import '../widgets/tile.dart';
 
 class ProductionList extends StatefulWidget {
@@ -21,39 +24,78 @@ class ProductionList extends StatefulWidget {
 }
 
 class _ProductionListState extends State<ProductionList> {
+  List<Order> openOrders = [];
   List<OrderedItem> filteredItems = [];
-  List<OrderedItem> unitedItems = [];
-  Map<int, Set<String>> ordersGroupedByOrderedItemId = {};
+
+  List<DateProductIdOrdersId> sortedByDateAndGroupedByProductIdsOrders = [];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      searchOrderedItemsByItemSource('');
+      openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
+      search('');
     });
   }
 
-  void uniteOrderedItemsById() {
-    unitedItems = filteredItems;
-    unitedItems.sort((a, b) => a.productId.compareTo(b.productId));
-    for (var i = 1; i < unitedItems.length; i++) {
-      var prev = unitedItems[i - 1];
-      var current = unitedItems[i];
-      if (prev.productId == current.productId) {
-        unitedItems[i - 1] =
-            prev.copyWith(quantity: prev.quantity + current.quantity);
-        unitedItems.removeAt(i);
-        i--;
-      }
+  void search(String query) {
+    filteredItems = getFilteredOrderedItems(query);
+
+    if(filteredItems.isEmpty) {
+      setState(() {});
+      return;
     }
+
+    final dateWithOrderedItems = getDateWithOrderedItemsSorted();
+
+    //create list of ProductId:[OrderId,..]
+    var listOfOrdersGroupedByOrderedItemId = dateWithOrderedItems.map((e) => createOrderedItemIdWithOrdersId(e.orderedItems)).toList();
+
+    List<DateProductIdOrdersId> result = [];
+    for(int i= 0; i<dateWithOrderedItems.length; i++){
+      final date = dateWithOrderedItems[i].date;
+      final productIdWithOrdersIds = listOfOrdersGroupedByOrderedItemId[i];
+      result.add(DateProductIdOrdersId(date: date, itemsWithOrderIds: productIdWithOrdersIds));
+    }
+
+    sortedByDateAndGroupedByProductIdsOrders = result;
+    setState(() {});
   }
 
-  ///Create a map with [productId] as key
+  List<OrderedItem> getFilteredOrderedItems(String query){
+    return Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query);
+  }
+
+  ///Create a list with elements: { date : orderedItem, orderedItem.. }
   ///
-  ///and [orderId] as list of orders with this product
-  void createMap() {
+  /// OrderedItems sorted by date
+  List<DateWithOrderedItems> getDateWithOrderedItemsSorted(){
+    //create orderedItems with orderDate
+    Map<DateTime, List<OrderedItem>> map = {};
+    for(final item in filteredItems){
+      final itemOrder = openOrders.firstWhere((o) => o.id == item.orderId);
+      final key = itemOrder.orderDate;
+
+      if(map.containsKey(key)){
+        map.update(key, (value) => List.from([...value, item]));
+      }
+      else{
+        map.addAll({key: [item]});
+      }
+    }
+    var orderedItemsGroupedByDate = map.entries.map(
+            (e) => DateWithOrderedItems(date: e.key, orderedItems: e.value)
+    ).toList();
+
+    //sort elements by orderDate
+    orderedItemsGroupedByDate.sort((a, b) => a.date.compareTo(b.date));
+    return orderedItemsGroupedByDate;
+  }
+
+  ///Create a list with elements: { orderedItemId : orderId, orderId.. }
+  List<OrderedItemIdWithOrdersIds> createOrderedItemIdWithOrdersId(List<OrderedItem> items) {
     var map = <int, Set<String>>{};
-    for (final i in filteredItems) {
+    for (final i in items) {
       final key = i.productId;
       if (map.containsKey(key)) {
         map.update(key, (value) => {...value, i.orderId});
@@ -63,21 +105,14 @@ class _ProductionListState extends State<ProductionList> {
         });
       }
     }
-    ordersGroupedByOrderedItemId = map;
-  }
 
-  void searchOrderedItemsByItemSource(String rawQuery) {
-    final query = rawQuery.toLowerCase().trim();
 
-    final orders =
-        Provider.of<OrderProvider>(context, listen: false).openOrders;
-    filteredItems = orders
-        .expand((order) => order.orderedItems)
-        .where((item) => item.itemSource.toLowerCase().trim().contains(query))
-        .toList();
-    createMap();
-    uniteOrderedItemsById();
-    setState(() {});
+    return map.entries.map(
+            (e) => OrderedItemIdWithOrdersIds(
+            orderedItemId: e.key,
+            ordersIds: e.value
+        )
+    ).toList();
   }
 
   @override
@@ -92,7 +127,7 @@ class _ProductionListState extends State<ProductionList> {
         ),
         bottom: searchField(
           context,
-          searchOrderedItemsByItemSource,
+          search,
           label: 'Filter by item source',
         ),
       ),
@@ -106,7 +141,7 @@ class _ProductionListState extends State<ProductionList> {
           }),
           child: ColoredBox(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: unitedItems.isNotEmpty
+            child: filteredItems.isNotEmpty
                 ? _productionList()
                 : _emptyListPlaceHolder(),
           ),
@@ -119,15 +154,9 @@ class _ProductionListState extends State<ProductionList> {
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
-      itemCount: unitedItems.length,
-      itemBuilder: (context, index) {
-        OrderedItem item = unitedItems[index];
-        return _ProductionListItem(
-          item: item,
-          idOfOrdersWithSpecificOrderedItem:
-              ordersGroupedByOrderedItemId[item.productId]!,
-        );
-      },
+      itemCount: sortedByDateAndGroupedByProductIdsOrders.length,
+      itemBuilder: (_, index) =>
+          _ProductionListItem(dateProductIdOrdersId: sortedByDateAndGroupedByProductIdsOrders[index]),
     );
   }
 
@@ -136,7 +165,10 @@ class _ProductionListState extends State<ProductionList> {
       child: Text('No items to show'),
     );
   }
+
 }
+
+
 
 class _AppBarMenuButton extends StatelessWidget {
   final GlobalKey<SliderDrawerState> menuKey;
@@ -156,32 +188,73 @@ class _AppBarMenuButton extends StatelessWidget {
   }
 }
 
-class _ProductionListItem extends StatelessWidget {
-  final OrderedItem item;
-  final Set<String> idOfOrdersWithSpecificOrderedItem;
-  const _ProductionListItem(
-      {Key? key,
-      required this.item,
-      required this.idOfOrdersWithSpecificOrderedItem})
-      : super(key: key);
+class _ProductionListItem extends StatefulWidget {
+  const _ProductionListItem({
+    Key? key,
+    required this.dateProductIdOrdersId,
+  }) : super(key: key);
+
+  final DateProductIdOrdersId dateProductIdOrdersId;
 
   @override
+  State<_ProductionListItem> createState() => _ProductionListItemState();
+}
+
+class _ProductionListItemState extends State<_ProductionListItem> {
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductionListDetails(
-              productName: item.productName,
-              productId: item.productId,
-              ordersIds: idOfOrdersWithSpecificOrderedItem.toList(),
-              expectedProductAmount: item.quantity,
-            ),
+    final item = widget.dateProductIdOrdersId;
+
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    final String date = formatter.format(item.date);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(date.toString()),
+        Tile(
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: item.itemsWithOrderIds.length,
+            itemBuilder: (_, index){
+              final productIdWithOrdersIds = item.itemsWithOrderIds[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: _itemWidget(
+                  productIdWithOrdersIds.orderedItemId,
+                  productIdWithOrdersIds.ordersIds.toList(),
+                ),
+              );
+            },
           ),
-        );
-      },
-      child: Tile(
+        ),
+      ],
+    );
+  }
+
+
+  Widget _itemWidget(int productId, List<String> ordersId){
+    final currentProduct = Provider.of<ProductProvider>(context).allProducts.firstWhere((p) => p.id == productId);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: UIConstants.GREY_LIGHT,
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductionListDetails(
+                productName: currentProduct.name,
+                productId: productId,//TODO: fix
+                ordersIds: ordersId,
+              ),
+            ),
+          );
+        },
         child: Row(
           children: [
             Expanded(
@@ -190,7 +263,7 @@ class _ProductionListItem extends StatelessWidget {
                 children: [
                   FittedBox(
                     child: Text(
-                      item.productName,
+                      currentProduct.name,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
@@ -199,9 +272,7 @@ class _ProductionListItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Product ID: ${item.productId}'),
-                  const SizedBox(height: 4),
-                  Text('Quantity: ${item.quantity}'),
+                  Text('Product ID: $productId'),
                 ],
               ),
             ),
@@ -214,4 +285,43 @@ class _ProductionListItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class DateWithOrderedItems{
+  final DateTime date;
+  final List<OrderedItem> orderedItems;
+
+  DateWithOrderedItems({
+    required this.date,
+    required this.orderedItems,
+  });
+}
+
+class OrderedItemIdWithOrdersIds{
+  final int orderedItemId;
+  final Set<String> ordersIds;
+
+  OrderedItemIdWithOrdersIds({
+    required this.orderedItemId,
+    required this.ordersIds,
+  });
+  @override
+  String toString(){
+    return '$orderedItemId: ${ordersIds.toString()}';
+  }
+}
+
+class DateProductIdOrdersId{
+  final DateTime date;
+  List<OrderedItemIdWithOrdersIds> itemsWithOrderIds;
+
+  DateProductIdOrdersId({required this.date, required this.itemsWithOrderIds});
+
+  @override
+  String toString() {
+    final items = itemsWithOrderIds.map((element)  => element.toString()).toString();
+
+    return '$date $items';
+  }
+
 }
