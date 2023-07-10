@@ -29,7 +29,7 @@ void main() async {
 
   // Initialize the providers before runApp is called.
   final OrderProvider orderProvider = OrderProvider();
-
+  final PeopleProvider peopleProvider = PeopleProvider();
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
     OneSignal.shared.promptUserForPushNotificationPermission();
@@ -40,7 +40,9 @@ void main() async {
     });
 
     OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
-      print('___________update orders___________');
+      print('___________update orders___________ $event');
+      //TODO: check event usage
+      await peopleProvider.fetchPeople();
       await orderProvider.fetchOrders();
     });
   }
@@ -53,7 +55,7 @@ void main() async {
         ChangeNotifierProvider<OrderProvider>(
             create: (context) => orderProvider),
         ChangeNotifierProvider<PeopleProvider>(
-            create: (context) => PeopleProvider()),
+            create: (context) => peopleProvider),
         ChangeNotifierProvider<ProductProvider>(
             create: (context) => ProductProvider()),
         ChangeNotifierProvider<EmployeeProvider>(

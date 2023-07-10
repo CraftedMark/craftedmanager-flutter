@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../config.dart';
 import '../services/PostgreApi.dart';
+import '../services/one_signal_api.dart';
 
 class PeopleProvider with ChangeNotifier {
   List<People> _people = [];
@@ -37,6 +38,8 @@ class PeopleProvider with ChangeNotifier {
     person = person.copyWith(id: id);
     _people.add(person);
     notifyListeners();
+    final nameSurname = '${person.firstName} ${person.lastName}';
+    OneSignalAPI.sendNotification('Added new customer: $nameSurname');
   }
 
   Future<void> updatePerson(People person) async {
