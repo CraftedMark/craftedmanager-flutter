@@ -53,7 +53,8 @@ class People {
 
   factory People.empty() {
     return People(
-      id: Uuid().v4(),
+      id: '',
+      // id: Uuid().v4(),
       wooSignalId: 0,
       firstName: '',
       lastName: '',
