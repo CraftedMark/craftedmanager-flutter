@@ -174,10 +174,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         style: const TextStyle(color: UIConstants.WHITE_LIGHT)
                       ),
                       onTap: () async {
-                        //TODO:replace with OrderProvider.updateOrderStatus
-                        final orderForSend = widget.order
+                        if(widget.order.orderStatus == orderStatuses[index]){
+                          Navigator.pop(context);
+                          return;
+                        }
+
+                        Order orderForSend = widget.order
                             .copyWith(orderStatus: orderStatuses[index]);
-                        Navigator.pop(context);
+
+                        if(orderStatuses[index]==AppConfig.ORDER_STATUSES_POSTGRES[5]){
+                          var items = widget.order.orderedItems.map(
+                              (i) => i..status = AppConfig.ORDER_STATUSES_POSTGRES[5]).toList();
+
+                          orderForSend.copyWith(orderedItems:items);
+                        }
+
                         // displayLoading();
                         final result = await _provider.updateOrder(orderForSend,
                             status: WSOrderStatus.values[index]);
@@ -185,6 +196,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         if (result) {
                           updateOrderStatusInUI(orderStatuses[index]);
                         }
+                        Navigator.pop(context);
                       },
                     );
                   },
