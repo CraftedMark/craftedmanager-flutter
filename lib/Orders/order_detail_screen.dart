@@ -4,6 +4,7 @@ import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/utils/getColorByStatus.dart';
+import 'package:crafted_manager/widgets/alert.dart';
 import 'package:crafted_manager/widgets/grey_scrollable_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -45,8 +46,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<OrderProvider>(context);
-    final order = _provider.orders
-        .firstWhere((o) => o.id == widget.order.id);
+    final order = _provider.orders.firstWhere((o) => o.id == widget.order.id);
     orderedItems = order.orderedItems;
     return Scaffold(
       appBar: AppBar(
@@ -154,27 +154,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             context: context,
             backgroundColor: UIConstants.GREY_MEDIUM,
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(24),topRight: Radius.circular(24),
-              )
-            ),
+                borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            )),
             builder: (BuildContext context) {
               return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24)
-                ),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(24)),
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   itemCount: orderStatuses.length,
                   itemBuilder: (context, index) {
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        orderStatuses[index],
-                        style: const TextStyle(color: UIConstants.WHITE_LIGHT)
-                      ),
+                      title: Text(orderStatuses[index],
+                          style:const TextStyle(color: UIConstants.WHITE_LIGHT)),
                       onTap: () async {
-                        if(widget.order.orderStatus == orderStatuses[index]){
+                        if (widget.order.orderStatus == orderStatuses[index]) {
                           Navigator.pop(context);
                           return;
                         }
@@ -182,11 +180,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         Order orderForSend = widget.order
                             .copyWith(orderStatus: orderStatuses[index]);
 
-                        if(orderStatuses[index]==AppConfig.ORDER_STATUSES_POSTGRES[5]){
-                          var items = widget.order.orderedItems.map(
-                              (i) => i..status = AppConfig.ORDER_STATUSES_POSTGRES[5]).toList();
-
-                          orderForSend.copyWith(orderedItems:items);
+                        if (orderStatuses[index] == AppConfig.ORDER_STATUSES_POSTGRES[5]) {
+                          await showDialog(
+                            context: context,
+                            builder: (_) => AlertCustom(
+                              title:
+                                  'Change status to \'Complete\' for all ordered items?',
+                              rightButton: BigButton(
+                                text: 'Yes',
+                                onPressed: () {
+                                  var items = widget.order.orderedItems
+                                      .map((i) => i
+                                        ..status = AppConfig
+                                            .ORDER_STATUSES_POSTGRES[5])
+                                      .toList();
+                                  orderForSend.copyWith(orderedItems: items);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              children: const [],
+                            ),
+                          );
                         }
 
                         // displayLoading();
@@ -309,12 +323,14 @@ class _OrderedItemListState extends State<_OrderedItemList> {
       child: Row(
         children: [
           Text('$field: '),
-          Text(value,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT),
-          overflow: TextOverflow.ellipsis,),
+          Text(
+            value,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: valuColor ?? UIConstants.WHITE_LIGHT),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -333,11 +349,8 @@ class _OrderedItemListState extends State<_OrderedItemList> {
 }
 
 class _OrderTotalAndPaid extends StatelessWidget {
-  const _OrderTotalAndPaid({
-    Key? key,
-    required this.total,
-    required this.paid
-  }) : super(key: key);
+  const _OrderTotalAndPaid({Key? key, required this.total, required this.paid})
+      : super(key: key);
 
   final double total;
   final double paid;
@@ -360,8 +373,8 @@ class _OrderTotalAndPaid extends StatelessWidget {
                 ),
                 Text(
                   '\$ $total',
-                  style:
-                  const TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                  style: const TextStyle(
+                      color: UIConstants.WHITE_LIGHT, fontSize: 19),
                 ),
               ],
             ),
@@ -378,8 +391,8 @@ class _OrderTotalAndPaid extends StatelessWidget {
                 Text(
                   '\$ $paid',
                   // assuming 'paidAmount' exists in 'Order' class
-                  style:
-                  const TextStyle(color: UIConstants.WHITE_LIGHT, fontSize: 19),
+                  style: const TextStyle(
+                      color: UIConstants.WHITE_LIGHT, fontSize: 19),
                 ),
               ],
             ),

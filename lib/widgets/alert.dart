@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../assets/ui.dart';
 import 'big_button.dart';
 
-class EditProductParamsAlert extends StatelessWidget {
-  const EditProductParamsAlert({
+class AlertCustom extends StatelessWidget {
+  const AlertCustom({
     Key? key,
     required this.title,
     required this.children,

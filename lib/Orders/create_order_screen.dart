@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/order_provider.dart';
-import '../widgets/edit_product_alert.dart';
+import '../widgets/alert.dart';
 import '../widgets/tile.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -52,7 +52,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         var flavorCtrl = TextEditingController(text: item.flavor);
         var packagingCtrl = TextEditingController(text: item.packaging);
 
-        return EditProductParamsAlert(
+        return AlertCustom(
           title:'Edit Ordered Item',
           rightButton: BigButton(
             text: 'Edit',

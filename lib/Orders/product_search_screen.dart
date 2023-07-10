@@ -8,7 +8,7 @@ import '../../Models/ordered_item_model.dart';
 import '../../Models/product_model.dart';
 import '../../Providers/product_provider.dart';
 import '../widgets/big_button.dart';
-import '../widgets/edit_product_alert.dart';
+import '../widgets/alert.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   @override
@@ -71,7 +71,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     bool isNeedPacking = true;
-                    return EditProductParamsAlert(
+                    return AlertCustom(
                       title: 'Add to Order',
                       rightButton: BigButton(
                         onPressed: () {

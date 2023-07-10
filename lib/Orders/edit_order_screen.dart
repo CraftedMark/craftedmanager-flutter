@@ -109,6 +109,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     String? packaging,
     double? dose,
     String? flavor,
+    String? status,
   }) {
     final updatedItem = _orderedItems[index].copyWith(
       productName: name,
@@ -118,6 +119,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       packaging: packaging,
       dose: dose,
       flavor: flavor,
+      status: status,
     );
     // _provider.updateOrder(widget.order);
     _orderedItems[index] = updatedItem;
@@ -369,8 +371,12 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   ?item.status
                   :AppConfig.ORDERED_ITEM_STATUSES.first,
               onChange: (String? newValue) {//TODO: add implementation
+                updateOrderedItem(
+                  index: itemIndex,
+                  status: newValue,
+                );
                 // _status = newValue!;
-                // setState(() {});
+                setState(() {});
               },
             ),
           ],
