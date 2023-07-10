@@ -169,7 +169,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   BigButton(
                     text: 'Add Item',
                     onPressed: () async {
-                      List<Product> products = [];
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -179,7 +178,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                         if (result != null) {
                           final product = result['product'] as Product;
                           final quantity = result['quantity'];
-                          final dose = result['dose'];
+                          final dose = result['dosage'];
                           final flavor = result['flavor'];
                           final itemSource = result['itemSource'];
                           final packing = result['packing'];

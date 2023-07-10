@@ -36,12 +36,18 @@ class OrderProvider extends ChangeNotifier {
 
   List<Order> get orders => _orders;
 
+  List<Order> get openOrders =>
+      List.of(_orders.where((o) => o.orderStatus != 'Archived'));
+
   // Define the filterOrderedItems method
   List<OrderedItem> getFilteredOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
-    return _orders
+    return openOrders
         .expand((order) => order.orderedItems)
-        .where((item) => item.itemSource.toLowerCase().trim().contains(itemSource.toLowerCase().trim()))
+        .where((item) => item.itemSource
+            .toLowerCase()
+            .trim()
+            .contains(itemSource.toLowerCase().trim()))
         .toList();
   }
 

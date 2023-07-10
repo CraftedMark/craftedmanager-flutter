@@ -2,6 +2,7 @@ import 'package:crafted_manager/Models/order_model.dart';
 import 'package:crafted_manager/Models/ordered_item_model.dart';
 import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/Models/product_model.dart';
+import 'package:crafted_manager/Orders/product_search_screen.dart';
 import 'package:crafted_manager/Products/product_db_manager.dart';
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
@@ -107,35 +108,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
   }
 
-  Future<void> addOrderedItem(Product product, int quantity, String itemSource,
-      String flavor, double dose, String packaging) async {
-    // double? customPrice = await CustomerBasedPricingDbManager.instance
-    //     .getCustomProductPrice(product.id!, widget.client.id);
 
-    var newOrderItemStatus = 'Processing - Pending Payment';
-
-    orderedItems.add(OrderedItem(
-        orderId: "0",
-        productName: product.name,
-        productId: product.id!,
-        name: product.name,
-        price: product
-            .retailPrice, //customPrice ?? product.retailPrice, TODO:FIX
-        discount: 0.0,
-        productDescription: product.description,
-        productRetailPrice: product.retailPrice,
-        status: newOrderItemStatus,
-
-        quantity: quantity,
-        itemSource:
-            itemSource.isNotEmpty ? itemSource : product.itemSource,
-        flavor: flavor,
-        dose: dose,
-        packaging: packaging,
-
-        product: product)); // Pass an actual product instance instead of null
-    setState(() {});
-  }
 
   Future<void> saveOrder() async {
     double subTotal = orderedItems.fold(
@@ -180,147 +153,52 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
   }
 
-  List<Product> getAllProduct() {
-    return Provider.of<ProductProvider>(context, listen: false).allProducts;
+  Future<void> onAddButtonPressed() async {
+    final result = await getProductFromUser();
+
+    if (result == null) {return;}
+
+    await addOrderedItemToOrder(result);
   }
 
-  Future<Product?> selectProductAlert(BuildContext context) async {
-    return showDialog<Product>(
-      context: context,
-      builder: (BuildContext context) {
-        List<Product> allProducts = getAllProduct();
-        List<Product> filteredProducts = allProducts;
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24)),
-              backgroundColor: UIConstants.BACKGROUND_COLOR,
-              titlePadding: const EdgeInsets.all(24),
-              title: searchField(
-                context,
-                (value) {
-                  filteredProducts = allProducts
-                      .where((product) => product.name
-                          .toLowerCase()
-                          .contains(value.toLowerCase()))
-                      .toList();
-                  setState(() {});
-                },
-                padding: EdgeInsets.zero,
-              ),
-              contentPadding: const EdgeInsets.fromLTRB(24,0,24,24),
-              content: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    filteredProducts.length,
-                    (index) {
-                      return SizedBox(
-                        width: double.infinity,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => Navigator.pop(context, filteredProducts[index]),
-                          child: Tile(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              filteredProducts[index].name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: UIConstants.WHITE_LIGHT),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+  Future<Map<String, dynamic>?> getProductFromUser() async {
+    return Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductSearchScreen(),
+      ),
     );
   }
 
-  Future<Map<String, dynamic>?> addProductParamsAlert(Product product) async {
-    var quantityCtrl = TextEditingController(text: '1');
-    var itemSourceCtrl = TextEditingController(text: product.itemSource ?? '');
-    var flavorCtrl = TextEditingController(text: product.flavor ?? '');
-    var dosageCtrl = TextEditingController(text: (product.dose?.toString() ?? '0.1'));
-    var packagingCtrl = TextEditingController(text: (product.packaging?.toString() ?? 'OEM'));
+  Future<void> addOrderedItemToOrder(Map<String, dynamic> orderedItemMap) async {
+    // double? customPrice = await CustomerBasedPricingDbManager.instance
+    //     .getCustomProductPrice(product.id!, widget.client.id);
 
-    return showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (BuildContext context) {
-        return EditProductParamsAlert(
-          title: product.name,
-          rightButton: BigButton(
-              text: 'Add',
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  {
-                    'quantity': int.parse(quantityCtrl.text),
-                    'itemSource': itemSourceCtrl.text,
-                    'flavor': flavorCtrl.text, // Added this
-                    'dosage': dosageCtrl.text, // Added this
-                    'packaging': packagingCtrl.text,
-                  },
-                );
-              },
-            ),
-          children: [
-            Row(
-              children: [
-                Flexible(child: TextInputField(labelText: 'Quantity', controller: quantityCtrl, keyboardType: TextInputType.number)),
-                const SizedBox(width: 8),
-                Flexible(child: TextInputField(labelText: 'Dosage', controller: dosageCtrl, keyboardType: TextInputType.number)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextInputField(
-              labelText: 'Flavor',
-              controller: flavorCtrl,
-              keyboardType: TextInputType.text,
-            ),
-            const SizedBox(height: 8),
-            TextInputField(
-              labelText: 'Item Source',
-              controller: itemSourceCtrl,
-              keyboardType: TextInputType.text,
-            ),
-            const SizedBox(height: 8),
-            TextInputField(
-              labelText: 'Packaging',
-              controller: packagingCtrl,
-              keyboardType: TextInputType.text,
-            ),
-          ]
-        );
-      },
-    );
-  }
+    final product = orderedItemMap['product'] as Product;
+    final String itemSource = orderedItemMap['itemSource'];
+    var newOrderItemStatus = 'Processing - Pending Payment';
 
-  void addItemToOrder() async {
-    final selectedProduct = await selectProductAlert(context);
+    orderedItems.add(OrderedItem(
+        orderId: "0",
+        productName: product.name,
+        productId: product.id!,
+        name: product.name,
+        price: product
+            .retailPrice, //customPrice ?? product.retailPrice, TODO:FIX
+        discount: 0.0,
+        productDescription: product.description,
+        productRetailPrice: product.retailPrice,
+        status: newOrderItemStatus,
 
-    if(selectedProduct == null) return;
+        quantity: orderedItemMap['quantity'],
+        itemSource:
+        itemSource.isNotEmpty ? itemSource : product.itemSource,
+        flavor: orderedItemMap['flavor'],
+        dose: orderedItemMap['dosage'],
+        packaging: orderedItemMap['packaging'],
 
-    final result = await addProductParamsAlert(selectedProduct);
-
-    if(result == null) return;
-
-    await addOrderedItem(
-        selectedProduct, // First argument
-        result['quantity'], // Second argument
-        result['itemSource'], // Third argument
-        result['flavor'], // Fourth argument
-        double.parse(result['dosage']), // Fifth argument
-        result['packaging'] ?? '' // Sixth argument
-    );
+        product: product)); // Pass an actual product instance instead of null
+    setState(() {});
   }
 
   @override
@@ -337,7 +215,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           child: Column(
             children: [
               Expanded(child: _listOfOrderedItem()),
-              BigButton(text: 'Add Item', onPressed: addItemToOrder),
+              BigButton(text: 'Add Item', onPressed: onAddButtonPressed),
               const SizedBox(height: 16),
               _orderCostWidget()
             ],
