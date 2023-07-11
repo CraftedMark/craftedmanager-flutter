@@ -98,7 +98,7 @@ class OrderedItem {
       flavor: map['flavor'] ?? "Unknown",
       dose: double.parse(map['dose'].toString() ?? '0.0'),
       packaging: map['packaging'] ?? "Unknown",
-      name: map['status'] ?? 'Unknown',
+      name: map['product_name'] as String? ?? 'Unknown',
       productRetailPrice: 0,
       product: Product.fromMap(map),
     );
