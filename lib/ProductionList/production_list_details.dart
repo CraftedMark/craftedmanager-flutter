@@ -101,7 +101,9 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
         padding: const EdgeInsets.all(16),
         child: Stack(
           children: [
-            ListView.builder(
+            items.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            :ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
               itemCount: items.length,
