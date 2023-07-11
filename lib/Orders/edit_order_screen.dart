@@ -183,7 +183,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                           final dose = result['dosage'];
                           final flavor = result['flavor'];
                           final itemSource = result['itemSource'];
-                          final packing = result['packing'];
+                          final packaging = result['packaging'];
 
 
                           final orderedItem = OrderedItem(
@@ -201,7 +201,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             dose: dose,
                             flavor: flavor,
                             itemSource: itemSource,
-                            packaging: packing,
+                            packaging: packaging,
                           );
                           addOrderedItem(product, orderedItem);
 
