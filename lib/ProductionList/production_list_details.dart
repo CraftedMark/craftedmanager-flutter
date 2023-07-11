@@ -2,6 +2,7 @@ import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/config.dart';
+import 'package:crafted_manager/services/PostgreApi.dart';
 import 'package:crafted_manager/widgets/divider.dart';
 import 'package:crafted_manager/widgets/order_id_field.dart';
 import 'package:flutter/material.dart';
@@ -20,17 +21,21 @@ class ProductionListDetails extends StatefulWidget {
     required this.productName,
     required this.productId,
     required this.ordersIds,
+    required this.flavor,
   }) : super(key: key);
 
   final String productName;
   final int productId;
   final List<String> ordersIds;
+  final String flavor;
 
   @override
   State<ProductionListDetails> createState() => _ProductionListDetailsState();
 }
 
 class _ProductionListDetailsState extends State<ProductionListDetails> {
+  List<OrderedItem> items = [];
+
   int producedAmount = 0;
   int expextedAmount = 0;
   List<OrderWithOrderedItem> ordersWithItem =[];
@@ -42,32 +47,44 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     return 0;
   }
 
-
-  void createMap(){
-    final openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
-    for(final id in widget.ordersIds){
-      final currentOrder = openOrders.firstWhere((o) => o.id == id);
-
-      var orderedItems = currentOrder.orderedItems.where((item) => item.productId == widget.productId);
-      for(final item in orderedItems){
-        ordersWithItem.add(OrderWithOrderedItem(currentOrder, item));
-      }
-    }
-  }
-
   int getExpectedAmount() {
-    final orderedItems = ordersWithItem.map((e) => e.item).toList();
 
-    return orderedItems.fold(0, (prev, item) => prev+=item.quantity);
+    // final orderedItems = ordersWithItem.map((e) => e.item).toList();
+
+    return items.fold(0, (prev, item) => prev+=item.quantity);
   }
+
+  Future<void> getOrderedItems() async {
+    for(final id in widget.ordersIds){
+      final orderedItems = await PostgresOrderedItemAPI.getOrderedItemsForOrderByProductIdAndFlavor(id, widget.productId, widget.flavor);
+      print('orderedItems amount: ${orderedItems.length} for order $id');
+      items.addAll(orderedItems);
+    }
+
+  }
+
+
+  // void createMap(){
+  //   final openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
+  //   for(final id in widget.ordersIds){
+  //     final currentOrder = openOrders.firstWhere((o) => o.id == id);
+  //
+  //     var orderedItems = currentOrder.orderedItems.where((item) => item.productId == widget.productId);
+  //     for(final item in orderedItems){
+  //       ordersWithItem.add(OrderWithOrderedItem(currentOrder, item));
+  //     }
+  //   }
+  // }
+
 
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      // createMap();
+      await getOrderedItems();
       producedAmount =  await getProducedAmount();
-      createMap();
       expextedAmount = getExpectedAmount();
       setState(() {});
     });
@@ -77,7 +94,7 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<OrderProvider>(context);
-
+    final orders = provider.openOrders;
     return Scaffold(
       appBar: AppBar(title: Text(widget.productName)),
       body: Padding(
@@ -87,10 +104,13 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
             ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
-              itemCount: ordersWithItem.length,
+              itemCount: items.length,
               itemBuilder: (_,index){
+                final orderId = items[index].orderId;
+                final order = orders.firstWhere((o) => o.id == orderId);
+
                 return _OrderTile(
-                  orderAndItem: ordersWithItem[index],
+                  orderAndItem: OrderWithOrderedItem(order, items[index]),
                 );
               }
             ),
@@ -98,7 +118,6 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
               expextedAmount,
               producedAmount,
             ),
-
           ],
         ),
       )
