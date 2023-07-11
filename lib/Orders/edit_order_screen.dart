@@ -49,14 +49,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     _setInitialOrderedItems();
     _subTotal = calculateSubtotal();
     _status = widget.order.orderStatus;
-    if (!['Pending', 'In-Progress', 'Completed'].contains(_status)) {
+    if (!AppConfig.ORDER_STATUSES_POSTGRES.contains(_status)) {
       _status = 'Pending';
     }
   }
 
-  Future<List<OrderedItem>> getOrderedItemsByOrderId() async {
-    return _provider.orders.where((o) => o.id == widget.order.id).first.orderedItems;
-  }
 
   double calculateSubtotal() {
     final res = _orderedItems.fold(
@@ -84,8 +81,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
   void addOrderedItem(Product product, OrderedItem item) {
     final existingIndex = _orderedItems
-        .indexWhere((orderedItem) => orderedItem.productId == product.id);
-
+        .indexWhere((orderedItem) => orderedItem.productId == product.id && orderedItem.flavor == item.flavor);
     if (existingIndex != -1) {
       _orderedItems[existingIndex] = _orderedItems[existingIndex].copyWith(
         quantity: _orderedItems[existingIndex].quantity + item.quantity,
@@ -95,7 +91,6 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       _orderedItems.add(item);
       _subTotal = calculateSubtotal();
     }
-    getOrderedItemsByOrderId();
     setState(() {});
     print('_orderedItems: $_orderedItems');
   }
