@@ -110,19 +110,11 @@ class _ProductionListState extends State<ProductionList> {
       }
     }
 
+    var groupedItems = getGroupedByProductIdAndFlavor(items);
 
-    for(var i = 1; i<items.length;i++){
-      var prev = items[i-1];
-      var current = items[i];
-      if(prev.productId == current.productId && prev.flavor == current.flavor){
-        prev.quantity += current.quantity;
-        items.removeAt(i);
-        i--;
-      }
-    }
 
-    return List.generate(items.length, (index) {
-      final item = items[index];
+    return List.generate(groupedItems.length, (index) {
+      final item = groupedItems[index];
       final itemShort = OrderedItemShort(productId: item.productId,name: item.name, flavor: item.flavor, quantity: item.quantity);
       var ordersIds = productIdWithOrdersIds[item.productId]!;
       return OrderedItemWithOrdersIds(orderedItemShort: itemShort, ordersIds: ordersIds);
@@ -152,6 +144,27 @@ class _ProductionListState extends State<ProductionList> {
     //     )
     // ).toList();
   }
+
+  List<OrderedItem> getGroupedByProductIdAndFlavor(List<OrderedItem> items){
+    List<OrderedItem> groupedItems = [];
+
+    for(int i = 0; i<items.length; i++){
+      var currentItem = items[i];
+      var sameProducts = items.where((p) => p.productId == currentItem.productId && p.flavor == currentItem.flavor).skip(1);
+      if(sameProducts.isNotEmpty){
+        final additionQuantity = sameProducts.fold(0, (prev, item) => prev += item.quantity);
+        groupedItems.add(currentItem.copyWith(quantity: currentItem.quantity+additionQuantity));
+        items.removeWhere((p) =>  p.productId == currentItem.productId && p.flavor == currentItem.flavor);
+      }
+      else{
+        groupedItems.add(currentItem);
+      }
+    }
+
+    return groupedItems;
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -274,15 +287,6 @@ class _ProductionListItemState extends State<_ProductionListItem> {
 
   Widget _itemWidget(OrderedItemShort item, List<String> ordersId, ){
 
-
-    Future<int> getProducedAmount() async {//TODO: make api
-      await Future.delayed(const Duration(milliseconds: 300));
-      return 0;
-    }
-
-
-
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
@@ -292,13 +296,12 @@ class _ProductionListItemState extends State<_ProductionListItem> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () async {
-          // addProducedQuantity();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ProductionListDetails(
                 productName: item.name,
-                productId: item.productId,//TODO: fix
+                productId: item.productId,
                 ordersIds: ordersId,
                 flavor: item.flavor,
               ),
@@ -325,6 +328,9 @@ class _ProductionListItemState extends State<_ProductionListItem> {
                   Text('Product ID: ${item.productId}'),
                   const SizedBox(height: 4),
                   Text('Flavor: ${item.flavor}'),
+                  const SizedBox(height: 4),
+                  Text('Quantity: ${item.quantity}'),
+
 
                 ],
               ),

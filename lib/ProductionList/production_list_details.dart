@@ -36,14 +36,12 @@ class ProductionListDetails extends StatefulWidget {
 }
 
 class _ProductionListDetailsState extends State<ProductionListDetails> {
+  final amountCtrl = TextEditingController(text: '0');
   List<OrderedItem> items = [];
+  List<OrderWithOrderedItem> ordersWithItem =[];
 
   int producedAmount = 0;
   int expextedAmount = 0;
-  List<OrderWithOrderedItem> ordersWithItem =[];
-
-  final amountCtrl = TextEditingController(text: '0');
-
 
   ///fake API call
   Future<int> getProducedAmount() async {//TODO: make api
@@ -62,7 +60,6 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
   Future<void> getOrderedItems() async {
     for(final id in widget.ordersIds){
       final orderedItems = await PostgresOrderedItemAPI.getOrderedItemsForOrderByProductIdAndFlavor(id, widget.productId, widget.flavor);
-      print('orderedItems amount: ${orderedItems.length} for order $id');
       items.addAll(orderedItems);
     }
 
@@ -85,12 +82,15 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
               onPressed: onAddButtonPressed,
             ),
             children: [
-              Text('${items.first.name}'),
-              Text('Expected amount: ${expextedAmount}',
-                style: Theme.of(context).textTheme.bodyMedium,),
+              Text(items.first.name),
               const SizedBox(height: 8),
-              Text('Produced amount: $producedAmount',
-                style: Theme.of(context).textTheme.bodyMedium,),
+              Text('( ${items.first.flavor} )', style: Theme.of(context).textTheme.bodyMedium),
+              // const SizedBox(height: 8),
+              // Text('Expected amount: $expextedAmount',
+              //   style: Theme.of(context).textTheme.bodyMedium,),
+              // const SizedBox(height: 8),
+              // Text('Produced amount: $producedAmount',
+              //   style: Theme.of(context).textTheme.bodyMedium,),
               const SizedBox(height: 8),
               TextInputField(
                 labelText: 'Produced amount',
