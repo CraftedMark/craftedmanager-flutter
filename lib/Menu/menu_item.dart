@@ -1,6 +1,7 @@
 import 'package:crafted_manager/Admin/create_user.dart';
 import 'package:crafted_manager/CBP/cbp_people_search.dart';
 import 'package:crafted_manager/Calculators/chocolate_calculator.dart';
+import 'package:crafted_manager/Calculators/material_calc.dart';
 import 'package:crafted_manager/Employee/employee_list.dart';
 import 'package:crafted_manager/Ingredients/ingredient_list.dart';
 import 'package:crafted_manager/Invoice/invoice_screen.dart';
@@ -38,6 +39,11 @@ List<MenuItem> menuItems = [
         title: "Calculator",
         iconData: Icons.calculate_outlined,
         destination: ChocoBarCalc(),
+      ),
+      MenuItem(
+        title: "Dosing Calculator",
+        iconData: Icons.calculate_outlined,
+        destination: MaterialCalculator(),
       ),
     ],
   ),
