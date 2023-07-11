@@ -11,8 +11,10 @@ import 'package:provider/provider.dart';
 import '../Models/order_model.dart';
 import '../Models/ordered_item_model.dart';
 import '../Models/product_model.dart';
+import '../widgets/alert.dart';
 import '../widgets/big_button.dart';
 import '../widgets/dropdown_menu.dart';
+import '../widgets/text_input_field.dart';
 import '../widgets/tile.dart';
 
 class ProductionListDetails extends StatefulWidget {
@@ -40,6 +42,9 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
   int expextedAmount = 0;
   List<OrderWithOrderedItem> ordersWithItem =[];
 
+  final amountCtrl = TextEditingController(text: '0');
+
+
   ///fake API call
   Future<int> getProducedAmount() async {//TODO: make api
 
@@ -61,6 +66,41 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
       items.addAll(orderedItems);
     }
 
+  }
+
+
+  void onAddButtonPressed(){
+    //Provider.updateProducedAmount(productId, flavor, amount);//TODO:add
+    print(amountCtrl.text);
+  }
+
+  Future<void> addProducedQuantity() async {
+    showDialog(
+        context: context,
+        builder: (_){
+          return AlertCustom(
+            title: 'Enter produced amount',
+            rightButton: BigButton(
+              text: 'Add',
+              onPressed: onAddButtonPressed,
+            ),
+            children: [
+              Text('${items.first.name}'),
+              Text('Expected amount: ${expextedAmount}',
+                style: Theme.of(context).textTheme.bodyMedium,),
+              const SizedBox(height: 8),
+              Text('Produced amount: $producedAmount',
+                style: Theme.of(context).textTheme.bodyMedium,),
+              const SizedBox(height: 8),
+              TextInputField(
+                labelText: 'Produced amount',
+                controller: amountCtrl,
+                keyboardType: TextInputType.number,
+              )
+            ],
+          );
+        }
+    );
   }
 
 
@@ -127,6 +167,9 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
   }
 
   Widget _expectedAndProducedInfo(int expected, int produced){
+
+
+
     return Column(
       children: [
         const Spacer(),
@@ -135,6 +178,8 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
           child:  Column(
             children: [
               const DividerCustom(),
+              BigButton(onPressed: addProducedQuantity, text: 'Add Produced Amount'),
+
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

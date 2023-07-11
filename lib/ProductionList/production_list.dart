@@ -4,7 +4,10 @@ import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/main.dart';
+import 'package:crafted_manager/widgets/alert.dart';
+import 'package:crafted_manager/widgets/big_button.dart';
 import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
+import 'package:crafted_manager/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:intl/intl.dart';
@@ -49,7 +52,7 @@ class _ProductionListState extends State<ProductionList> {
     final dateWithOrderedItems = getDateWithOrderedItemsSorted();
 
     //create list of ProductId:[OrderId,..]
-    var listOfOrdersGroupedByOrderedItemId = dateWithOrderedItems.map((e) => createOrderedItemIdWithOrdersId(e.orderedItems)).toList();
+    var listOfOrdersGroupedByOrderedItemId = dateWithOrderedItems.map((e) => createOrderedItemWithOrdersId(List.from(e.orderedItems))).toList();
 
     List<DateProductIdOrdersId> result = [];
     for(int i= 0; i<dateWithOrderedItems.length; i++){
@@ -92,27 +95,62 @@ class _ProductionListState extends State<ProductionList> {
     return orderedItemsGroupedByDate;
   }
 
-  ///Create a list with elements: { orderedItemId : orderId, orderId.. }
-  List<OrderedItemIdWithOrdersIds> createOrderedItemIdWithOrdersId(List<OrderedItem> items) {
-    var map = <int, Set<String>>{};
+  List<OrderedItemWithOrdersIds> createOrderedItemWithOrdersId(List<OrderedItem> items) {
+    items.sort((a, b) => a.productId.compareTo(b.productId));
+
+    var productIdWithOrdersIds = <int, Set<String>>{};
     for (final i in items) {
       final key = i.productId;
-      if (map.containsKey(key)) {
-        map.update(key, (value) => {...value, i.orderId});
+      if (productIdWithOrdersIds.containsKey(key)) {
+        productIdWithOrdersIds.update(key, (value) => {...value, i.orderId});
       } else {
-        map.addAll({
+        productIdWithOrdersIds.addAll({
           key: {i.orderId}
         });
       }
     }
 
 
-    return map.entries.map(
-            (e) => OrderedItemIdWithOrdersIds(
-            orderedItemId: e.key,
-            ordersIds: e.value
-        )
-    ).toList();
+    for(var i = 1; i<items.length;i++){
+      var prev = items[i-1];
+      var current = items[i];
+      if(prev.productId == current.productId && prev.flavor == current.flavor){
+        prev.quantity += current.quantity;
+        items.removeAt(i);
+        i--;
+      }
+    }
+
+    return List.generate(items.length, (index) {
+      final item = items[index];
+      final itemShort = OrderedItemShort(productId: item.productId,name: item.name, flavor: item.flavor, quantity: item.quantity);
+      var ordersIds = productIdWithOrdersIds[item.productId]!;
+      return OrderedItemWithOrdersIds(orderedItemShort: itemShort, ordersIds: ordersIds);
+    });
+
+
+    ///Create a list with elements: { orderedItemId : orderId, orderId.. }
+
+    //uniq ordered items ids
+    // var map = <int, Set<String>>{};
+    // for (final i in items) {
+    //   final key = i.productId;
+    //   if (map.containsKey(key)) {
+    //     map.update(key, (value) => {...value, i.orderId});
+    //   } else {
+    //     map.addAll({
+    //       key: {i.orderId}
+    //     });
+    //   }
+    // }
+
+
+    // return map.entries.map(
+    //         (e) => OrderedItemIdWithOrdersIds(
+    //         orderedItemId: e.key,
+    //         ordersIds: e.value
+    //     )
+    // ).toList();
   }
 
   @override
@@ -218,10 +256,11 @@ class _ProductionListItemState extends State<_ProductionListItem> {
             itemCount: item.itemsWithOrderIds.length,
             itemBuilder: (_, index){
               final productIdWithOrdersIds = item.itemsWithOrderIds[index];
+
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: _itemWidget(
-                  productIdWithOrdersIds.orderedItemId,
+                  productIdWithOrdersIds.orderedItemShort,
                   productIdWithOrdersIds.ordersIds.toList(),
                 ),
               );
@@ -233,8 +272,17 @@ class _ProductionListItemState extends State<_ProductionListItem> {
   }
 
 
-  Widget _itemWidget(int productId, List<String> ordersId){
-    final currentProduct = Provider.of<ProductProvider>(context).allProducts.firstWhere((p) => p.id == productId);
+  Widget _itemWidget(OrderedItemShort item, List<String> ordersId, ){
+
+
+    Future<int> getProducedAmount() async {//TODO: make api
+      await Future.delayed(const Duration(milliseconds: 300));
+      return 0;
+    }
+
+
+
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
@@ -243,14 +291,16 @@ class _ProductionListItemState extends State<_ProductionListItem> {
       ),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
+        onTap: () async {
+          // addProducedQuantity();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ProductionListDetails(
-                productName: currentProduct.name,
-                productId: productId,//TODO: fix
+                productName: item.name,
+                productId: item.productId,//TODO: fix
                 ordersIds: ordersId,
+                flavor: item.flavor,
               ),
             ),
           );
@@ -263,7 +313,7 @@ class _ProductionListItemState extends State<_ProductionListItem> {
                 children: [
                   FittedBox(
                     child: Text(
-                      currentProduct.name,
+                      item.name,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
@@ -272,7 +322,10 @@ class _ProductionListItemState extends State<_ProductionListItem> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Product ID: $productId'),
+                  Text('Product ID: ${item.productId}'),
+                  const SizedBox(height: 4),
+                  Text('Flavor: ${item.flavor}'),
+
                 ],
               ),
             ),
@@ -297,23 +350,37 @@ class DateWithOrderedItems{
   });
 }
 
-class OrderedItemIdWithOrdersIds{
-  final int orderedItemId;
+class OrderedItemWithOrdersIds{
+  final OrderedItemShort orderedItemShort;
   final Set<String> ordersIds;
 
-  OrderedItemIdWithOrdersIds({
-    required this.orderedItemId,
+  OrderedItemWithOrdersIds({
+    required this.orderedItemShort,
     required this.ordersIds,
   });
   @override
   String toString(){
-    return '$orderedItemId: ${ordersIds.toString()}';
+    return '${orderedItemShort.productId}: ${ordersIds.toString()}';
   }
+}
+
+class OrderedItemShort{
+  final int productId;
+  final String flavor;
+  int quantity;
+  final String name;
+
+  OrderedItemShort({
+    required this.productId,
+    required this.flavor,
+    required this.quantity,
+    required this.name,
+  });
 }
 
 class DateProductIdOrdersId{
   final DateTime date;
-  List<OrderedItemIdWithOrdersIds> itemsWithOrderIds;
+  List<OrderedItemWithOrdersIds> itemsWithOrderIds;
 
   DateProductIdOrdersId({required this.date, required this.itemsWithOrderIds});
 
