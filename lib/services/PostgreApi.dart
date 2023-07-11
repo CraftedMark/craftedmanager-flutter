@@ -228,6 +228,20 @@ class PostgresOrderedItemAPI {
     return items;
   }
 
+  static Future<List<OrderedItem>> getOrderedItemsForOrderByProductIdAndFlavor(String orderId, int productId, String flavor) async {
+    final connection = PostgreSQLConnectionManager.connection;
+
+    var items = <OrderedItem>[];
+    await connection.transaction((ctx) async {
+      final result = await ctx.query('''
+        SELECT * FROM ordered_items WHERE order_id = @order_id AND product_id = @product_id AND flavor = @flavor
+      ''', substitutionValues: {"order_id":orderId, "product_id":productId, "flavor":flavor});
+
+      items = result.map((item)=>OrderedItem.fromMap(item.toColumnMap())).toList();
+    });
+    return items;
+  }
+
 
   static Future<void> updateOrderedItemStatus(int orderedItemId, String status) async {
     final connection = PostgreSQLConnectionManager.connection;
