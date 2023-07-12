@@ -47,7 +47,9 @@ class OrderProvider extends ChangeNotifier {
         .where((item) => item.itemSource
             .toLowerCase()
             .trim()
-            .contains(itemSource.toLowerCase().trim()))
+            .contains(itemSource.toLowerCase().trim())
+            && item.status != AppConfig.ORDERED_ITEM_STATUSES[3]
+        )
         .toList();
   }
 
@@ -102,6 +104,8 @@ class OrderProvider extends ChangeNotifier {
     fetchOrders();
     return result;
   }
+
+
 
   //TODO: if order deleted from one device should refresh orders on others devices
   void deleteOrder(Order order) async {
