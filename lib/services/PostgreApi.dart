@@ -153,7 +153,6 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
             'status':item.status,
           });
           print('Updated ordered item inserted');
-          print(item.status);
         }
       });
 

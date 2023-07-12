@@ -11,9 +11,12 @@ import 'package:crafted_manager/widgets/text_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:intl/intl.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/order_model.dart';
+import '../config.dart';
+import '../services/one_signal_api.dart';
 import '../widgets/tile.dart';
 
 class ProductionList extends StatefulWidget {
@@ -29,26 +32,14 @@ class ProductionList extends StatefulWidget {
 class _ProductionListState extends State<ProductionList> {
   List<Order> openOrders = [];
   List<OrderedItem> filteredItems = [];
-
   List<DateProductIdOrdersId> sortedByDateAndGroupedByProductIdsOrders = [];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
-      search('');
-    });
-  }
 
-  void search(String query) {
-    filteredItems = getFilteredOrderedItems(query);
 
+  void groupOrderedItems(){
     if(filteredItems.isEmpty) {
-      setState(() {});
       return;
     }
-
     final dateWithOrderedItems = getDateWithOrderedItemsSorted();
 
     //create list of ProductId:[OrderId,..]
@@ -62,11 +53,6 @@ class _ProductionListState extends State<ProductionList> {
     }
 
     sortedByDateAndGroupedByProductIdsOrders = result;
-    setState(() {});
-  }
-
-  List<OrderedItem> getFilteredOrderedItems(String query){
-    return Provider.of<OrderProvider>(context, listen: false).getFilteredOrderedItems(query);
   }
 
   ///Create a list with elements: { date : orderedItem, orderedItem.. }
@@ -165,39 +151,65 @@ class _ProductionListState extends State<ProductionList> {
 
   }
 
+  void search(OrderProvider provider, String query) {
+    provider.filterOrderedItems(query);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<OrderProvider>(context, listen: false).filterOrderedItems('');
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<OrderProvider>(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: _AppBarMenuButton(menuKey: widget._sliderDrawerKey),
-        title: Text(
-          'Production List',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        bottom: searchField(
-          context,
-          search,
-          label: 'Filter by item source',
-        ),
-      ),
-      body: SafeArea(
-        child: SliderDrawer(
-          appBar: null,
-          key: widget._sliderDrawerKey,
-          sliderOpenSize: 250,
-          slider: SliderView(onItemClick: (title) {
-            // Handle the menu item click as necessary
-          }),
-          child: ColoredBox(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: filteredItems.isNotEmpty
-                ? _productionList()
-                : _emptyListPlaceHolder(),
+    return Consumer<OrderProvider>(
+      builder: (_, provider, __) {
+        openOrders = provider.openOrders;
+        filteredItems = provider.filteredOrderedItems;
+        groupOrderedItems();
+        return Scaffold(
+          appBar: AppBar(
+            leading: _AppBarMenuButton(menuKey: widget._sliderDrawerKey),
+            title: Text(
+              'Production List',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            actions: [
+              TextButton(
+                child: Text('test'),
+                onPressed: (){
+                  OneSignalAPI.sendNotificationWithData();
+                },
+              )
+            ],
+            bottom: searchField(
+              context,
+              (query)=>search(provider, query),
+              label: 'Filter by item source',
+            ),
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: SliderDrawer(
+              appBar: null,
+              key: widget._sliderDrawerKey,
+              sliderOpenSize: 250,
+              slider: SliderView(onItemClick: (title) {
+                // Handle the menu item click as necessary
+              }),
+              child: ColoredBox(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: filteredItems.isNotEmpty
+                    ? _productionList()
+                    : _emptyListPlaceHolder(),
+              ),
+            ),
+          ),
+        );
+      }
     );
   }
 

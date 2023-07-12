@@ -53,9 +53,14 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     return items.fold(0, (prev, item) => prev+=item.quantity);
   }
 
+
+
   Future<void> getOrderedItems() async {
+    final orders = Provider.of<OrderProvider>(context, listen: false).openOrders;
     for(final id in widget.ordersIds){
-      final orderedItems = await PostgresOrderedItemAPI.getOrderedItemsForOrderByProductIdAndFlavor(id, widget.productId, widget.flavor);
+      final order = orders.firstWhere((o) => o.id == id);
+      final orderedItems = order.orderedItems.where((item) =>item.flavor == widget.flavor && item.productId == widget.productId);
+      // final orderedItems = await PostgresOrderedItemAPI.getOrderedItemsForOrderByProductIdAndFlavor(id, widget.productId, widget.flavor);
       items.addAll(orderedItems);
     }
 
@@ -83,12 +88,6 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
               Text(items.first.name),
               const SizedBox(height: 8),
               Text('( ${items.first.flavor} )', style: Theme.of(context).textTheme.bodyMedium),
-              // const SizedBox(height: 8),
-              // Text('Expected amount: $expextedAmount',
-              //   style: Theme.of(context).textTheme.bodyMedium,),
-              // const SizedBox(height: 8),
-              // Text('Produced amount: $producedAmount',
-              //   style: Theme.of(context).textTheme.bodyMedium,),
               const SizedBox(height: 8),
               TextInputField(
                 labelText: 'Produced amount',
@@ -118,14 +117,17 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     final provider = Provider.of<OrderProvider>(context);
     final orders = provider.openOrders;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text(widget.productName)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Stack(
           children: [
             items.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            :ListView.builder(
+            ? const _LoadingIndicator(text: 'Loading data')
+            : provider.isLoading
+            ?const _LoadingIndicator(text: 'Synchronize with DB')
+            : ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
               physics: const BouncingScrollPhysics(),
               itemCount: items.length,
@@ -248,6 +250,30 @@ class _OrderTile extends StatelessWidget {
     );
   }
 }
+
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator({Key? key, required this.text}) : super(key: key);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 80),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(text),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 class _BottomPanel extends StatelessWidget{
   const _BottomPanel({
