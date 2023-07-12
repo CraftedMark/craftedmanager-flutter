@@ -1,4 +1,5 @@
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
+import 'package:crafted_manager/config.dart';
 import 'package:postgres/postgres.dart';
 
 import '../Models/order_model.dart';
@@ -152,6 +153,7 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
             'status':item.status,
           });
           print('Updated ordered item inserted');
+          print(item.status);
         }
       });
 
@@ -234,8 +236,8 @@ class PostgresOrderedItemAPI {
     var items = <OrderedItem>[];
     await connection.transaction((ctx) async {
       final result = await ctx.query('''
-        SELECT * FROM ordered_items WHERE order_id = @order_id AND product_id = @product_id AND flavor = @flavor
-      ''', substitutionValues: {"order_id":orderId, "product_id":productId, "flavor":flavor});
+        SELECT * FROM ordered_items WHERE order_id = @order_id AND product_id = @product_id AND flavor = @flavor AND status != @status
+      ''', substitutionValues: {"order_id":orderId, "product_id":productId, "flavor":flavor, "status": AppConfig.ORDERED_ITEM_STATUSES[3]});
 
       items = result.map((item)=>OrderedItem.fromMap(item.toColumnMap())).toList();
     });

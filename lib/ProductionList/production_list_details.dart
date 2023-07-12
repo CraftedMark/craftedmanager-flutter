@@ -45,15 +45,11 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
 
   ///fake API call
   Future<int> getProducedAmount() async {//TODO: make api
-
     await Future.delayed(Duration(milliseconds: 300));
     return 0;
   }
 
   int getExpectedAmount() {
-
-    // final orderedItems = ordersWithItem.map((e) => e.item).toList();
-
     return items.fold(0, (prev, item) => prev+=item.quantity);
   }
 
@@ -65,10 +61,12 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
 
   }
 
-
   void onAddButtonPressed(){
     //Provider.updateProducedAmount(productId, flavor, amount);//TODO:add
-    print(amountCtrl.text);
+    final producedAmount = int.parse(amountCtrl.text);
+    if(producedAmount > 0){
+      print(amountCtrl.text);
+    }
   }
 
   Future<void> addProducedQuantity() async {
@@ -103,26 +101,10 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
     );
   }
 
-
-  // void createMap(){
-  //   final openOrders = Provider.of<OrderProvider>(context, listen: false).openOrders;
-  //   for(final id in widget.ordersIds){
-  //     final currentOrder = openOrders.firstWhere((o) => o.id == id);
-  //
-  //     var orderedItems = currentOrder.orderedItems.where((item) => item.productId == widget.productId);
-  //     for(final item in orderedItems){
-  //       ordersWithItem.add(OrderWithOrderedItem(currentOrder, item));
-  //     }
-  //   }
-  // }
-
-
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      // createMap();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await getOrderedItems();
       producedAmount =  await getProducedAmount();
       expextedAmount = getExpectedAmount();
@@ -156,50 +138,14 @@ class _ProductionListDetailsState extends State<ProductionListDetails> {
                 );
               }
             ),
-            _expectedAndProducedInfo(
-              expextedAmount,
-              producedAmount,
+            _BottomPanel(
+              expectedOrderedItemsAmount: expextedAmount,
+              producedOrderedItemsAmount: producedAmount,
+              onAddButtonPressed: addProducedQuantity,
             ),
           ],
         ),
       )
-    );
-  }
-
-  Widget _expectedAndProducedInfo(int expected, int produced){
-
-
-
-    return Column(
-      children: [
-        const Spacer(),
-        Container(
-          color: UIConstants.BACKGROUND_COLOR,
-          child:  Column(
-            children: [
-              const DividerCustom(),
-              BigButton(onPressed: addProducedQuantity, text: 'Add Produced Amount'),
-
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Produced:'),
-                  Text('$produced'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Expected:'),
-                  Text('$expected'),
-                ],
-              ),
-            ],
-          ),
-        )
-      ],
     );
   }
 }
@@ -216,8 +162,9 @@ class _OrderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final order = orderAndItem.order;
-    final orderedItem = orderAndItem.item;
-    
+
+    final orderedItem = order.orderedItems.firstWhere((oi) => oi.flavor == orderAndItem.item.flavor && oi.productId == orderAndItem.item.productId);
+
     final provider = Provider.of<OrderProvider>(context, listen: false);
     final customer = Provider.of<PeopleProvider>(context, listen: false).people.firstWhere((p) => p.id == order.customerId);
 
@@ -302,6 +249,54 @@ class _OrderTile extends StatelessWidget {
   }
 }
 
+class _BottomPanel extends StatelessWidget{
+  const _BottomPanel({
+    super.key,
+    required this.expectedOrderedItemsAmount,
+    required this.producedOrderedItemsAmount,
+    required this.onAddButtonPressed,
+  });
+
+  final int expectedOrderedItemsAmount;
+  final int producedOrderedItemsAmount;
+  final void Function() onAddButtonPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Spacer(),
+        Container(
+          color: UIConstants.BACKGROUND_COLOR,
+          child:  Column(
+            children: [
+              const DividerCustom(),
+              BigButton(onPressed: onAddButtonPressed, text: 'Add Produced Amount'),
+
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Produced:'),
+                  Text('$producedOrderedItemsAmount'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Expected:'),
+                  Text('$expectedOrderedItemsAmount'),
+                ],
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+}
 
 class OrderWithOrderedItem{
   final Order order;
