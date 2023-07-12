@@ -22,7 +22,7 @@ class FullOrder {
 class OrderProvider extends ChangeNotifier {
   bool isLoading = true;
   List<Order> _orders = [];
-
+  List<OrderedItem> _filteredOrderedItems = [];
   Future<void> fetchOpenOrders() async {
     // Fetch orders from your database
     final List<Order> fetchedOrders = []; // Result from your database
@@ -35,22 +35,27 @@ class OrderProvider extends ChangeNotifier {
   }
 
   List<Order> get orders => _orders;
-
   List<Order> get openOrders =>
       List.of(_orders.where((o) => o.orderStatus != 'Archived' && o.orderStatus != 'Cancelled'));
+  List<OrderedItem> get filteredOrderedItems => _filteredOrderedItems;
 
+
+  void updateLoadingStatus(bool newStatus){
+    isLoading = newStatus;
+    notifyListeners();
+  }
   // Define the filterOrderedItems method
-  List<OrderedItem> getFilteredOrderedItems(String itemSource) {
+  void filterOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
-    return openOrders
+    _filteredOrderedItems =  openOrders
         .expand((order) => order.orderedItems)
         .where((item) => item.itemSource
             .toLowerCase()
             .trim()
             .contains(itemSource.toLowerCase().trim())
             && item.status != AppConfig.ORDERED_ITEM_STATUSES[3]
-        )
-        .toList();
+        ).toList();
+    notifyListeners();
   }
 
   Future<void> fetchOrders() async {
@@ -68,6 +73,7 @@ class OrderProvider extends ChangeNotifier {
     } catch (e) {
       print('Error fetching orders: $e');
     }
+    filterOrderedItems('');
     isLoading = false;
     notifyListeners();
   }
@@ -94,6 +100,7 @@ class OrderProvider extends ChangeNotifier {
   Future<bool> updateOrder(Order updatedOrder,
       {WSOrderStatus status = WSOrderStatus.Processing,
       List<OrderedItem> newItems = const []}) async {
+    updateLoadingStatus(true);
     var result = false;
     if (AppConfig.ENABLE_WOOSIGNAL) {
       result =
