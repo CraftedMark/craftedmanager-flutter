@@ -164,7 +164,7 @@ class _OrderWidgetState extends State<_OrderWidget> {
 
   People getCustomer() {
     return Provider.of<PeopleProvider>(context)
-        .people
+        .peoples
         .firstWhere((c) => c.id == widget.order.customerId);
   }
 

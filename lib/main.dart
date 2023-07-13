@@ -52,7 +52,7 @@ void main() async {
       }
       else if(event is CustomersEvent){
         print('update customers');
-        await peopleProvider.fetchPeople();
+        await peopleProvider.fetchPeoples();
       }
       else if (event is ProductsEvent){
         print('update products');
@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // final employeeProvider = Provider.of<EmployeeProvider>(context, listen: false);
 
     await orderProvider.fetchOrders();
-    await peopleProvider.fetchPeople();
+    await peopleProvider.fetchPeoples();
     await productProvider.fetchProducts();
     //await employeeProvider.fetchEmployees();
 
