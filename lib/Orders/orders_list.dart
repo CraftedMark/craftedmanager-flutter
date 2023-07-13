@@ -34,13 +34,10 @@ class OrdersList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _OrdersListState createState() => _OrdersListState();
+  State<OrdersList> createState() => _OrdersListState();
 }
 
 class _OrdersListState extends State<OrdersList> {
-  Future<void> _refreshOrdersList() async {
-    setState(() {});
-  }
 
   String getListTitle() {
     switch (widget.listType) {
@@ -58,7 +55,18 @@ class _OrdersListState extends State<OrdersList> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if(widget.listType == OrderListType.archived){
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<OrderProvider>(context, listen: false).fetchClosedOrders();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final listType = widget.listType;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -83,20 +91,20 @@ class _OrdersListState extends State<OrdersList> {
       body: SafeArea(
         child: Consumer<OrderProvider>(
           builder: (ctx, orderProvider, _) {
-            final orders = orderProvider.orders;
 
+            final orders = listType == OrderListType.productionAndCancelled
+                ?orderProvider.orders
+                :orderProvider.closedOrders;
+
+            if(orderProvider.isLoading){
+              return const Center(child: CircularProgressIndicator());
+            }
             if (orders.isEmpty) {
               return const Center(child: Text('No orders found'));
             }
 
             var sortedOrders = <Order>[];
-            if (widget.listType == OrderListType.archived) {
-              var archivedOrders = _getArchivedOrders(orders);
-              _sortOrderByDate(archivedOrders);
-              sortedOrders = archivedOrders;
-            } else {
-              sortedOrders = _sortOrder(orders);
-            }
+            sortedOrders = _sortOrder(orders);
 
             return EasyRefresh(
               child: ListView.builder(
@@ -105,18 +113,17 @@ class _OrdersListState extends State<OrdersList> {
                 itemBuilder: (BuildContext context, int index) {
                   return _OrderWidget(
                     order: sortedOrders[index],
-                    onStateChanged: () async {
-                      await orderProvider
-                          .fetchOrders(); // Refresh the orders from the provider
-                      _refreshOrdersList();
-                    },
                   );
                 },
               ),
               onRefresh: () async {
-                await orderProvider
-                    .fetchOrders(); // Refresh the orders from the provider
-                _refreshOrdersList();
+                // Refresh the orders from the provider
+                if(listType == OrderListType.archived){
+                  await orderProvider.fetchClosedOrders();
+                }
+                else{
+                  await orderProvider.fetchOpenOrders();
+                }
               },
             );
           },
@@ -125,22 +132,26 @@ class _OrdersListState extends State<OrdersList> {
     );
   }
 
-  List<Order> _getArchivedOrders(List<Order> orders) {
-    return orders.where((o) => o.orderStatus == "Archived").toList();
-  }
 
   List<Order> _sortOrder(List<Order> orders) {
-    var otherOrders = orders
+    var openOrders = orders
         .where(
-            (o) => o.orderStatus != "Cancelled" && o.orderStatus != "Archived")
+            (o) => o.orderStatus != "Completed" && o.orderStatus != "Cancelled" && o.orderStatus !="Archived")
         .toList();
-    var cancelledOrders =
-        orders.where((o) => o.orderStatus == "Cancelled").toList();
 
-    _sortOrderByDate(otherOrders);
-    _sortOrderByDate(cancelledOrders);
+    var completed =
+    orders.where((o) => o.orderStatus == "Completed").toList();
 
-    return [...otherOrders, ...cancelledOrders];
+    var closedOrders = orders
+        .where(
+            (o) => o.orderStatus == "Cancelled" || o.orderStatus == "Archived")
+        .toList();
+
+    _sortOrderByDate(openOrders);
+    _sortOrderByDate(completed);
+    _sortOrderByDate(closedOrders);
+
+    return [...openOrders, ...completed, ...closedOrders];
   }
 
   void _sortOrderByDate(List<Order> orders) {
@@ -150,9 +161,8 @@ class _OrdersListState extends State<OrdersList> {
 
 class _OrderWidget extends StatefulWidget {
   final Order order;
-  final VoidCallback onStateChanged;
   const _OrderWidget(
-      {Key? key, required this.order, required this.onStateChanged})
+      {Key? key, required this.order})
       : super(key: key);
 
   @override

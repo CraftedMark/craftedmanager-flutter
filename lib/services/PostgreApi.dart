@@ -68,6 +68,37 @@ VALUES (@orderId, @productId, @productName, @quantity, @price, @discount, @descr
     }
   }
 
+  static Future<List<Order>> getOpenOrders() async {
+    try {
+      final connection = PostgreSQLConnectionManager.connection;
+      List<Map<String, Map<String, dynamic>>> results =
+      await connection.mappedResultsQuery('''
+    SELECT * FROM orders WHERE order_status != @archived AND order_status != @completed
+  ''', substitutionValues: {"archived": "Archived", "completed": "Completed"});
+//WHERE order_status = \'Open\'
+      return results.map((e) => Order.fromMap(e.values.first)).toList();
+    } catch (e) {
+      print(e.toString());
+      return [];
+    }
+  }
+
+  static Future<List<Order>> getClosedOrders() async {
+    try {
+      final connection = PostgreSQLConnectionManager.connection;
+      List<Map<String, Map<String, dynamic>>> results =
+      await connection.mappedResultsQuery('''
+    SELECT * FROM orders WHERE order_status = @archived OR order_status = @completed
+  ''', substitutionValues: {"archived": "Archived", "completed": "Completed"});
+//WHERE order_status = \'Open\'
+      return results.map((e) => Order.fromMap(e.values.first)).toList();
+    } catch (e) {
+      print(e.toString());
+      return [];
+    }
+  }
+
+
   static Future<Order?> getOrderById(String id) async {
     try {
       final connection = PostgreSQLConnectionManager.connection;

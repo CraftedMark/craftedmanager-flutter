@@ -32,6 +32,7 @@ void main() async {
   // Initialize the providers before runApp is called.
   final OrderProvider orderProvider = OrderProvider();
   final PeopleProvider peopleProvider = PeopleProvider();
+
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
     OneSignal.shared.promptUserForPushNotificationPermission();
@@ -48,7 +49,7 @@ void main() async {
 
       if(event is OrdersEvent){
         print('update orders');
-        await orderProvider.fetchOrders();
+        await orderProvider.fetchOpenOrders();
       }
       else if(event is CustomersEvent){
         print('update customers');
@@ -66,6 +67,7 @@ void main() async {
   if(AppConfig.ENABLE_WOOSIGNAL){
     await WooSignalService.init();//TODO: refactor service
   }
+
   runApp(
     MultiProvider(
       providers: [
@@ -100,7 +102,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final productProvider = Provider.of<ProductProvider>(context, listen: false);
     // final employeeProvider = Provider.of<EmployeeProvider>(context, listen: false);
 
-    await orderProvider.fetchOrders();
+    await orderProvider.fetchOpenOrders();
     await peopleProvider.fetchPeoples();
     await productProvider.fetchProducts();
     //await employeeProvider.fetchEmployees();

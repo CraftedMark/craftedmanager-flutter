@@ -89,8 +89,6 @@ class OrderedItem {
       }
     }
 
-    print(map);
-
     return OrderedItem(
       orderId: map['order_id'] as String,
       orderedItemId: map['ordered_item_id'],
