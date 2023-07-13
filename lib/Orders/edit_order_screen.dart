@@ -183,6 +183,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
 
                           final orderedItem = OrderedItem(
                             orderId: widget.order.id,
+                            orderedItemId: 0,
                             product: product,
                             productName: product.name,
                             productId: product.id!,
