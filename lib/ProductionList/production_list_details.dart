@@ -239,7 +239,7 @@ class _OrderTile extends StatelessWidget {
                   onChanged: (newStatus) {
                     if(newStatus == orderedItem.status) return;
                     orderedItem.status = newStatus!;
-                    provider.updateOrder(order);
+                    provider.updateOrderedItemStatus(orderedItem.orderedItemId, orderedItem.status);
                   },
                 ),
               ),

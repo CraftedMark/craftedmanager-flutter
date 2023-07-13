@@ -135,6 +135,12 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateOrderedItemStatus(int orderedItemId, String status) async {
+    updateLoadingStatus(true);
+    await PostgresOrderedItemAPI.updateOrderedItemStatus(orderedItemId, status);
+    fetchOrders();
+  }
+
   Future<List<Employee>> fetchEmployeesByOrderId(String orderId) async {
     final connection = PostgreSQLConnectionManager.connection;
 
