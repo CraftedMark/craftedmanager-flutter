@@ -180,6 +180,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     orderedItems.add(OrderedItem(
         orderId: "0",
+        orderedItemId: 0,
         productName: product.name,
         productId: product.id!,
         name: product.name,

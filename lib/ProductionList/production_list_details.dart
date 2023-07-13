@@ -168,7 +168,7 @@ class _OrderTile extends StatelessWidget {
     final orderedItem = order.orderedItems.firstWhere((oi) => oi.flavor == orderAndItem.item.flavor && oi.productId == orderAndItem.item.productId);
 
     final provider = Provider.of<OrderProvider>(context, listen: false);
-    final customer = Provider.of<PeopleProvider>(context, listen: false).people.firstWhere((p) => p.id == order.customerId);
+    final customer = Provider.of<PeopleProvider>(context, listen: false).peoples.firstWhere((p) => p.id == order.customerId);
 
 
     return Tile(
@@ -239,7 +239,7 @@ class _OrderTile extends StatelessWidget {
                   onChanged: (newStatus) {
                     if(newStatus == orderedItem.status) return;
                     orderedItem.status = newStatus!;
-                    provider.updateOrder(order);
+                    provider.updateOrderedItemStatus(orderedItem.orderedItemId, orderedItem.status);
                   },
                 ),
               ),

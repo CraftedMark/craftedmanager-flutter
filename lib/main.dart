@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:crafted_manager/Menu/menu_item.dart';
 import 'package:crafted_manager/PostresqlConnection/postqresql_connection_manager.dart';
@@ -9,6 +10,7 @@ import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/config.dart';
+import 'package:crafted_manager/services/OneSignal/notification_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -30,25 +32,42 @@ void main() async {
   // Initialize the providers before runApp is called.
   final OrderProvider orderProvider = OrderProvider();
   final PeopleProvider peopleProvider = PeopleProvider();
+
   if (!Platform.isWindows) {
     await OneSignal.shared.setAppId(AppConfig.ONESIGNAL_APP_KEY);
     OneSignal.shared.promptUserForPushNotificationPermission();
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {
-      print("new notification + $result");
+      print('new notification opened');
+      print("notification + ${result.notification.jsonRepresentation()}");
     });
 
-    OneSignal.shared.setNotificationWillShowInForegroundHandler((event) async {
-      print('___________update orders___________ $event');
-      //TODO: check event usage
-      await peopleProvider.fetchPeople();
-      await orderProvider.fetchOrders();
+
+    OneSignal.shared.setNotificationWillShowInForegroundHandler((receivedEvent) async {
+      final event = createEventFromNotification(receivedEvent);
+
+      if(event is OrdersEvent){
+        print('update orders');
+        await orderProvider.fetchOpenOrders();
+      }
+      else if(event is CustomersEvent){
+        print('update customers');
+        await peopleProvider.fetchPeoples();
+      }
+      else if (event is ProductsEvent){
+        print('update products');
+        //products
+      }else if (event is EmployeesEvent){
+        print('update employees');
+        //employees
+      }
     });
   }
   if(AppConfig.ENABLE_WOOSIGNAL){
     await WooSignalService.init();//TODO: refactor service
   }
+
   runApp(
     MultiProvider(
       providers: [
@@ -83,8 +102,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final productProvider = Provider.of<ProductProvider>(context, listen: false);
     // final employeeProvider = Provider.of<EmployeeProvider>(context, listen: false);
 
-    await orderProvider.fetchOrders();
-    await peopleProvider.fetchPeople();
+    await orderProvider.fetchOpenOrders();
+    await peopleProvider.fetchPeoples();
     await productProvider.fetchProducts();
     //await employeeProvider.fetchEmployees();
 

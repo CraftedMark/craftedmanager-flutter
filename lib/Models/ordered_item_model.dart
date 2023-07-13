@@ -3,6 +3,7 @@ import 'package:crafted_manager/config.dart';
 
 class OrderedItem {
   String orderId;
+  int orderedItemId;
   Product product;
   String productName;
   int productId;
@@ -20,6 +21,7 @@ class OrderedItem {
 
   OrderedItem({
     required this.orderId,
+    required this.orderedItemId,
     required this.product,
     required this.productName,
     required this.productId,
@@ -38,6 +40,7 @@ class OrderedItem {
 
   OrderedItem copyWith({
     String? orderId,
+    int? orderedItemId,
     Product? product,
     String? productName,
     int? productId,
@@ -55,6 +58,7 @@ class OrderedItem {
   }) {
     return OrderedItem(
       orderId: orderId ?? this.orderId,
+      orderedItemId: orderedItemId ?? this.orderedItemId,
       product: product ?? this.product,
       productName: productName ?? this.productName,
       productId: productId ?? this.productId,
@@ -87,6 +91,7 @@ class OrderedItem {
 
     return OrderedItem(
       orderId: map['order_id'] as String,
+      orderedItemId: map['ordered_item_id'],
       productId: map['product_id'] ?? 0,
       quantity: map['quantity'] ?? 0,
       price: parseNum(map['price']).toDouble(),
@@ -107,6 +112,7 @@ class OrderedItem {
   factory OrderedItem.fromJson(Map<String, dynamic> json) {
     return OrderedItem(
       orderId: json['order_id'] as String,
+      orderedItemId: json['ordered_item_id'],
       product: Product.fromJson(json['product']),
       productName: json['product_name'] as String,
       productId: json['product_id'] ?? 0,
@@ -127,6 +133,7 @@ class OrderedItem {
   Map<String, dynamic> toJson() {
     return {
       'order_id': orderId,
+      'ordered_item_id': orderedItemId,
       'product': product.toJson(),
       'product_name': productName,
       'product_id': productId,
@@ -147,6 +154,7 @@ class OrderedItem {
   Map<String, dynamic> toMap() {
     return {
       'order_id': orderId,
+      'ordered_item_id': orderedItemId,
       'product': product.toMap(),
       'product_name': productName,
       'product_id': productId,

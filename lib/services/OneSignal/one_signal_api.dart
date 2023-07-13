@@ -2,13 +2,17 @@ import 'package:crafted_manager/config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'notification_type.dart';
+
 class OneSignalAPI {
   static const _url = "https://onesignal.com/api/v1/notifications";
 
   static const String _companyName = "CraftedManager";
 
-  static Future<void> sendNotification(String message) async {
+  static Future<void> sendNotification({required String message, required NotificationEventType type}) async {
     var uri = Uri.parse(_url);
+
+    final event = type.name;
 
     var payload = {
       "included_segments": "Subscribed Users",
@@ -17,6 +21,7 @@ class OneSignalAPI {
         "en": message,
       },
       "name": _companyName,
+      "data":{"event":event},
     };
     var headers = {
       "accept": "application/json",
@@ -32,4 +37,11 @@ class OneSignalAPI {
     }
 
   }
+}
+
+enum NotificationType{
+  orders,
+  customers,
+  products,
+  employees
 }
