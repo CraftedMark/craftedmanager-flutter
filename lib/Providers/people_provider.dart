@@ -56,9 +56,9 @@ class PeopleProvider with ChangeNotifier {
     person = person.copyWith(id: id);
     _peoples.add(person);
     notifyListeners();
-    final nameSurname = '${person.firstName} ${person.lastName}';
-    OneSignalAPI.sendNotification(
-        message: 'Added new customer: $nameSurname', type: CustomersEvent());
+
+    final fullName = '${person.firstName} ${person.lastName}';
+    _sendPushNotification('Added new customer: $fullName');
   }
 
   Future<void> updatePerson(People person) async {
@@ -69,16 +69,27 @@ class PeopleProvider with ChangeNotifier {
         _peoples[index] = updatedPerson;
       }
     }
-    notifyListeners();
+
+    final fullName = '${person.firstName} ${person.lastName}';
+    _sendPushNotification('Info about $fullName has been updated');
   }
 
-  Future<void> deletePerson(String id) async {
-    await PeoplePostgres.deleteCustomer(id);
-    _peoples.removeWhere((p) => p.id == id);
+  Future<void> deletePerson(People person) async {
+    await PeoplePostgres.deleteCustomer(person.id);
+    _peoples.removeWhere((p) => p.id == person.id);
     notifyListeners();
+
+    final fullName = '${person.firstName} ${person.lastName}';
+    _sendPushNotification('Customer $fullName has been deleted');
+
   }
 
   Future<Map<String, dynamic>?> getUserAddressById(String id) async {
     return PostgreCustomersAPI.getAddressForUserById(id);
   }
 }
+
+Future<void> _sendPushNotification(String payload) async {
+  await OneSignalAPI.sendNotification(message: payload, type: CustomersEvent());
+}
+

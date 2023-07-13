@@ -60,7 +60,7 @@ class _ContactsListState extends State<ContactsList> {
   }
 
   Future<void> deleteCustomer(PeopleProvider provider, People customer) async {
-    await provider.deletePerson(customer.id);
+    await provider.deletePerson(customer);
   }
 
 
