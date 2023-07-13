@@ -1,4 +1,5 @@
 import 'package:crafted_manager/WooCommerce/woosignal-service.dart';
+import 'package:crafted_manager/services/OneSignal/notification_type.dart';
 import 'package:flutter/foundation.dart';
 
 import '../Contacts/people_db_manager.dart';
@@ -9,7 +10,7 @@ import '../Models/people_model.dart';
 import '../PostresqlConnection/postqresql_connection_manager.dart';
 import '../config.dart';
 import '../services/PostgreApi.dart';
-import '../services/one_signal_api.dart';
+import '../services/OneSignal/one_signal_api.dart';
 
 class FullOrder {
   final Order order;
@@ -21,29 +22,33 @@ class FullOrder {
 
 class OrderProvider extends ChangeNotifier {
   bool isLoading = true;
+
   List<Order> _orders = [];
-  List<OrderedItem> _filteredOrderedItems = [];
-  Future<void> fetchOpenOrders() async {
-    // Fetch orders from your database
-    final List<Order> fetchedOrders = []; // Result from your database
-
-    _orders = fetchedOrders
-        .where((order) =>
-            order.isPaid == false && order.paidAmount < order.totalAmount)
-        .toList();
-    notifyListeners();
-  }
-
   List<Order> get orders => _orders;
   List<Order> get openOrders =>
       List.of(_orders.where((o) => o.orderStatus != 'Archived' && o.orderStatus != 'Cancelled'));
+
+  List<OrderedItem> _filteredOrderedItems = [];
   List<OrderedItem> get filteredOrderedItems => _filteredOrderedItems;
+
 
 
   void updateLoadingStatus(bool newStatus){
     isLoading = newStatus;
     notifyListeners();
   }
+
+  Future<void> fetchOpenOrders() async {
+    // Fetch orders from your database
+    final List<Order> fetchedOrders = []; // Result from your database
+
+    _orders = fetchedOrders
+        .where((order) =>
+    order.isPaid == false && order.paidAmount < order.totalAmount)
+        .toList();
+    notifyListeners();
+  }
+
   // Define the filterOrderedItems method
   void filterOrderedItems(String itemSource) {
     // Assuming that your Order object has an 'itemSource' property
@@ -111,8 +116,6 @@ class OrderProvider extends ChangeNotifier {
     fetchOrders();
     return result;
   }
-
-
 
   //TODO: if order deleted from one device should refresh orders on others devices
   void deleteOrder(Order order) async {
@@ -201,7 +204,7 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> _sendPushNotification(String payload) async {
-    await OneSignalAPI.sendNotification(payload);
+    await OneSignalAPI.sendNotification(message: payload, type: OrdersEvent());
   }
 }
 

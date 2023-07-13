@@ -33,4 +33,5 @@ class AppConfig {
     'Archived',
     'Cancelled'
   ];
+  static const PUSH_NOTIFICATION_EVENTS = ['orders', 'customers', 'products', 'employees', 'unknown'];
 }

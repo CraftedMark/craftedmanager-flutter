@@ -4,6 +4,7 @@ import 'package:crafted_manager/Providers/order_provider.dart';
 import 'package:crafted_manager/Providers/product_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/main.dart';
+import 'package:crafted_manager/services/OneSignal/notification_type.dart';
 import 'package:crafted_manager/widgets/alert.dart';
 import 'package:crafted_manager/widgets/big_button.dart';
 import 'package:crafted_manager/widgets/search_field_for_appbar.dart';
@@ -16,7 +17,7 @@ import 'package:provider/provider.dart';
 
 import '../Models/order_model.dart';
 import '../config.dart';
-import '../services/one_signal_api.dart';
+import '../services/OneSignal/one_signal_api.dart';
 import '../widgets/tile.dart';
 
 class ProductionList extends StatefulWidget {
@@ -178,14 +179,6 @@ class _ProductionListState extends State<ProductionList> {
               'Production List',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            actions: [
-              TextButton(
-                child: Text('test'),
-                onPressed: (){
-                  OneSignalAPI.sendNotificationWithData();
-                },
-              )
-            ],
             bottom: searchField(
               context,
               (query)=>search(provider, query),

@@ -1,10 +1,11 @@
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
+import 'package:crafted_manager/services/OneSignal/notification_type.dart';
 import 'package:flutter/foundation.dart';
 
 import '../config.dart';
 import '../services/PostgreApi.dart';
-import '../services/one_signal_api.dart';
+import '../services/OneSignal/one_signal_api.dart';
 
 class PeopleProvider with ChangeNotifier {
   List<People> _people = [];
@@ -39,7 +40,7 @@ class PeopleProvider with ChangeNotifier {
     _people.add(person);
     notifyListeners();
     final nameSurname = '${person.firstName} ${person.lastName}';
-    OneSignalAPI.sendNotification('Added new customer: $nameSurname');
+    OneSignalAPI.sendNotification(message:'Added new customer: $nameSurname', type: CustomersEvent());
   }
 
   Future<void> updatePerson(People person) async {
