@@ -1,10 +1,14 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:crafted_manager/Contacts/people_db_manager.dart';
 import 'package:crafted_manager/Models/people_model.dart';
+import 'package:crafted_manager/Providers/people_provider.dart';
 import 'package:crafted_manager/assets/ui.dart';
 import 'package:crafted_manager/config.dart';
 import 'package:crafted_manager/widgets/divider.dart';
+import 'package:crafted_manager/widgets/edit_button.dart';
+import 'package:crafted_manager/widgets/save_button.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../WooCommerce/woosignal-service.dart';
 import '../widgets/big_button.dart';
@@ -14,10 +18,9 @@ import 'syscontact_list.dart';
 
 class ContactDetailWidget extends StatefulWidget {
   final People contact;
-  final Function() refresh;
 
   const ContactDetailWidget(
-      {Key? key, required this.contact, required this.refresh})
+      {Key? key, required this.contact})
       : super(key: key);
 
   @override
@@ -53,6 +56,53 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     }
   }
 
+  Future<void> onSaveButtonPressed() async {
+    setState(() => isEditMode = false);
+    final provider = Provider.of<PeopleProvider>(context, listen: false);
+
+    if (newCustomer.id.isEmpty) {
+      print('try to create a customer name: ${newCustomer.firstName}');
+
+      if (AppConfig.ENABLE_WOOSIGNAL) {
+        // newId = await WooSignalService.createCustomer(newCustomer);
+      } else {
+        try{
+          await provider.createPerson(newCustomer);
+        }
+        catch(e){
+          print('error while creating people: $e');
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              title: const Text('Error'),
+              content: const Text('Incorrect info'),
+              actions: [
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          );
+        }
+
+      }
+    } else {
+      print('try to update a customer id: ${newCustomer.id}');
+
+      if (AppConfig.ENABLE_WOOSIGNAL) {
+        await WooSignalService.updateCustomer(newCustomer);
+      } else {
+        await provider.updatePerson(newCustomer);
+        newCustomer = provider.peoples.firstWhere((p) => p.email == newCustomer.email);
+      }
+    }
+  }
+
+  Future<void> onEditButtonPressed() async {
+    setState(() => isEditMode = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,10 +110,9 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
         centerTitle: false,
         title: Text('${newCustomer.firstName} ${newCustomer.lastName}'),
         actions: [
-          TextButton(
-            onPressed: onSaveEditButtonClick,
-            child: Text(isEditMode ? 'Save' : 'Edit'),
-          ),
+          isEditMode
+            ?SaveButton(onPressed: onSaveButtonPressed)
+            :EditButton(onPressed: onEditButtonPressed)
         ],
       ),
       body: SafeArea(
@@ -236,46 +285,8 @@ class _ContactDetailWidgetState extends State<ContactDetailWidget> {
     }
   }
 
-  Future<void> onSaveEditButtonClick() async {
-    setState(() => isEditMode = !isEditMode);
 
-    if (newCustomer.id.isEmpty) {
-      print('try to create a customer name: ${newCustomer.firstName}');
 
-      String newId = '';
-      if (AppConfig.ENABLE_WOOSIGNAL) {
-        // newId = await WooSignalService.createCustomer(newCustomer);
-      } else {
-        newId = await PeoplePostgres.createCustomer(newCustomer);
-      }
-
-      if (newId == '-1') {
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: const Text('Error'),
-            content: const Text('Incorrect info'),
-            actions: [
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        );
-      }
-      newCustomer = newCustomer.copyWith(id: newId);
-    } else {
-      print('try to update a customer id: ${newCustomer.id}');
-
-      if (AppConfig.ENABLE_WOOSIGNAL) {
-        await WooSignalService.updateCustomer(newCustomer);
-      } else {
-        await PeoplePostgres.updateCustomer(newCustomer);
-      }
-    }
-    widget.refresh();
-  }
 
   Widget _buildTextField(
     String label,

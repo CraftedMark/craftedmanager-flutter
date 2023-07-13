@@ -3,52 +3,70 @@ import 'package:crafted_manager/Models/people_model.dart';
 import 'package:crafted_manager/services/OneSignal/notification_type.dart';
 import 'package:flutter/foundation.dart';
 
+import '../WooCommerce/woosignal-service.dart';
 import '../config.dart';
 import '../services/PostgreApi.dart';
 import '../services/OneSignal/one_signal_api.dart';
 
 class PeopleProvider with ChangeNotifier {
-  List<People> _people = [];
-  People? _activePerson;
+  List<People> _peoples = [];
+  List<People> get peoples => _peoples;
 
-  List<People> get people => _people;
+  List<People> _filteredPeoples = [];
+  List<People> get filteredPeoples => _filteredPeoples;
 
-  People? get activePerson => _activePerson;
+  // People? _activePerson;
 
-  void setActivePerson(People person) {
-    _activePerson = person;
-    notifyListeners();
-  }
+  // People? get activePerson => _activePerson;
 
-  Future<void> fetchPeople() async {
-    _people = await PeoplePostgres.refreshCustomerList();
-    notifyListeners();
-  }
+  // void setActivePerson(People person) {
+  //   _activePerson = person;
+  //   notifyListeners();
+  // }
 
-  Future<void> fetchPersonByCustomerId(String customerId) async {
+  Future<void> fetchPeoples() async {
     if (AppConfig.ENABLE_WOOSIGNAL) {
-      // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
+      _peoples = await WooSignalService.getCustomers();
     } else {
-      _activePerson = await PeoplePostgres.fetchCustomer(customerId);
+      _peoples = await PeoplePostgres.refreshCustomerList();
     }
     notifyListeners();
   }
 
-  Future<void> addPerson(People person) async {
+  void filterPeoples(String query) {
+    _filteredPeoples = _peoples
+        .where((contact) =>
+            contact.firstName.toLowerCase().contains(query.toLowerCase()) ||
+            contact.lastName.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    notifyListeners();
+  }
+
+  // Future<void> fetchPersonByCustomerId(String customerId) async {
+  //   if (AppConfig.ENABLE_WOOSIGNAL) {
+  //     // newUser = await WooSignalService.getCustomerById(customerId) ?? newUser   ;
+  //   } else {
+  //     _activePerson = await PeoplePostgres.fetchCustomer(customerId);
+  //   }
+  //   notifyListeners();
+  // }
+
+  Future<void> createPerson(People person) async {
     String id = await PeoplePostgres.createCustomer(person);
     person = person.copyWith(id: id);
-    _people.add(person);
+    _peoples.add(person);
     notifyListeners();
     final nameSurname = '${person.firstName} ${person.lastName}';
-    OneSignalAPI.sendNotification(message:'Added new customer: $nameSurname', type: CustomersEvent());
+    OneSignalAPI.sendNotification(
+        message: 'Added new customer: $nameSurname', type: CustomersEvent());
   }
 
   Future<void> updatePerson(People person) async {
     People? updatedPerson = await PeoplePostgres.updateCustomer(person);
     if (updatedPerson != null) {
-      int index = _people.indexWhere((p) => p.id == updatedPerson.id);
+      int index = _peoples.indexWhere((p) => p.id == updatedPerson.id);
       if (index != -1) {
-        _people[index] = updatedPerson;
+        _peoples[index] = updatedPerson;
       }
     }
     notifyListeners();
@@ -56,11 +74,11 @@ class PeopleProvider with ChangeNotifier {
 
   Future<void> deletePerson(String id) async {
     await PeoplePostgres.deleteCustomer(id);
-    _people.removeWhere((p) => p.id == id);
+    _peoples.removeWhere((p) => p.id == id);
     notifyListeners();
   }
 
-  Future<Map<String, dynamic>?>getUserAddressById(String id) async {
+  Future<Map<String, dynamic>?> getUserAddressById(String id) async {
     return PostgreCustomersAPI.getAddressForUserById(id);
   }
 }
