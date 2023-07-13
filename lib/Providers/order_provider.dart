@@ -115,7 +115,6 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<Order?> getOrderByIdFromDB(String id) async {
     Order? result = await PostgresOrdersAPI.getOrderById(id);
     return result;
@@ -131,8 +130,7 @@ class OrderProvider extends ChangeNotifier {
     }
 
     var customerFullName = "${customer.firstName} ${customer.lastName}";
-    var payload = "New order from: $customerFullName";
-    _sendPushNotification(payload);
+    _sendPushNotification('New order from: $customerFullName');
   }
 
   Future<bool> updateOrder(Order updatedOrder,
@@ -146,19 +144,18 @@ class OrderProvider extends ChangeNotifier {
     } else {
       result = await PostgresOrdersAPI.updateOrder(updatedOrder);
     }
-    fetchOrders();
+    _sendPushNotification('Order with id:${updatedOrder.id} has been updated');
     return result;
   }
 
-  //TODO: if order deleted from one device should refresh orders on others devices
-  void deleteOrder(Order order) async {
+  Future<void> deleteOrder(Order order) async {
     if (AppConfig.ENABLE_WOOSIGNAL) {
       await WooSignalService.deleteOrder(order.wooSignalId ?? 0); //TODO:FIX
     } else {
       await PostgresOrdersAPI.deleteOrder(order.id);
     }
     _orders.removeWhere((o) => o.id == order.id);
-    notifyListeners();
+    _sendPushNotification('Order with id:${order.id} has been deleted');
   }
 
   // void addOrderedItemToOrderForUpdateUI(
@@ -168,10 +165,10 @@ class OrderProvider extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> updateOrderedItemStatus(int orderedItemId, String status) async {
+  Future<void> updateOrderedItemStatus(OrderedItem item, String status) async {
     updateLoadingStatus(true);
-    await PostgresOrderedItemAPI.updateOrderedItemStatus(orderedItemId, status);
-    fetchOrders();
+    await PostgresOrderedItemAPI.updateOrderedItemStatus(item.orderedItemId, status);
+    _sendPushNotification('In order with id:${item.orderId} OrderedItem status has been updated to: $status');
   }
 
 
